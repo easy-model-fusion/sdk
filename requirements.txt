@@ -27,7 +27,6 @@ requests==2.31.0
 safetensors==0.4.2
 sympy==1.12
 tokenizers==0.15.1
-torch==2.1.2+cu121
 torchaudio==2.1.2
 torchdata==0.7.1
 torchtext==0.16.2
