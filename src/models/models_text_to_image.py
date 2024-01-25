@@ -72,4 +72,5 @@ class ModelsTextToImage(Models):
         return self.pipeline(
             prompt=options.prompt,
             width=options.image_width,
-            height=options.image_height).images[0]
+            height=options.image_height
+        ).images[0]
