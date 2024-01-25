@@ -1,7 +1,7 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from models import Models
-from ..options.options_text_to_image import OptionsTextToImage
+from src.models.models import Models
+from src.options.options_text_to_image import OptionsTextToImage
 
 
 class ModelsTextToImage(Models):
@@ -9,8 +9,8 @@ class ModelsTextToImage(Models):
     model_name: str
     loaded: bool
 
-    def __init__(self, model_mame: str):
-        super().__init__(model_mame)
+    def __init__(self, model_name: str):
+        super().__init__(model_name)
         self.loaded = False
         self.create_pipeline()
 

@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
-from ..options.options import Options
+from src.options.options import Options
 
 
 class Models(ABC):
-    model_mame: str
+    model_name: str
+
+    def __init__(self, model_name: str):
+        self.model_name = model_name
 
     @abstractmethod
     def load_model(self, option: Options):

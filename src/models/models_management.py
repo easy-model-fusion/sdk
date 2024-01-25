@@ -1,6 +1,6 @@
 from typing import Optional, Dict
-from models import Models
-from ..options.options import Options
+from src.models.models import Models
+from src.options.options import Options
 
 
 class ModelsManagement:
@@ -11,12 +11,12 @@ class ModelsManagement:
         self.options_models: Dict[str, Options] = {}
 
     def add_model(self, new_model: Models, model_options: Options):
-        if new_model.model_mame in self.loaded_models_cache:
-            print(f"Model '{new_model.model_mame}' is already in the cache.")
+        if new_model.model_name in self.loaded_models_cache:
+            print(f"Model '{new_model.model_name}' is already in the cache.")
             return
 
-        self.loaded_models_cache[new_model.model_mame] = new_model
-        self.options_models[new_model.model_mame] = model_options
+        self.loaded_models_cache[new_model.model_name] = new_model
+        self.options_models[new_model.model_name] = model_options
 
     def load_model(self, model_name: str):
         if self.loaded_model:
@@ -49,7 +49,7 @@ class ModelsManagement:
             print("No model loaded. Load a model before generating prompts.")
             return
 
-        return self.loaded_model.generate_prompt(self.options_models[self.loaded_model.model_mame])
+        return self.loaded_model.generate_prompt(self.options_models[self.loaded_model.model_name])
 
     def print_models(self):
         print("Models in cache:")

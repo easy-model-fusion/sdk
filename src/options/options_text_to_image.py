@@ -1,4 +1,4 @@
-from options import Options
+from src.options.options import Options
 
 
 class OptionsTextToImage(Options):
