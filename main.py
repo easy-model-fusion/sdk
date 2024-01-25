@@ -1,12 +1,12 @@
 from src.models.models_management import ModelsManagement
 from src.models.models_text_to_image import ModelsTextToImage
-from src.options.options_text_to_image import OptionsTextToImage
+from src.options.options_text_to_image import OptionsTextToImage, Devices
 
 
 if __name__ == '__main__':
     options = OptionsTextToImage(
         prompt="Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
-        device="cuda",
+        device=Devices.GPU,
         image_width=256,
         image_height=256
     )
