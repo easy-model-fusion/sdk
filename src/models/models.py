@@ -16,11 +16,11 @@ class Models(ABC):
         self.model_name = model_name
 
     @abstractmethod
-    def load_model(self, option: Options):
+    def load_model(self, option: Options) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def unload_model(self):
+    def unload_model(self) -> bool:
         raise NotImplementedError
 
     @abstractmethod
