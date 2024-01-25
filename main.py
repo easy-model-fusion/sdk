@@ -1,16 +1,23 @@
-from sdk import Models
+from src.models.models_management import ModelsManagement
+from src.models.models_text_to_image import ModelsTextToImage
+from src.options.options_text_to_image import OptionsTextToImage
+
 
 if __name__ == '__main__':
-    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-    width = 256
-    height = 256
+    options = OptionsTextToImage(
+        prompt="Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
+        device="cuda",
+        image_width=256,
+        image_height=256
+    )
 
-    models = Models()
-    models.add_model("stabilityai/sdxl-turbo")
+    model_stabilityai_name = "stabilityai/sdxl-turbo"
+    model_management = ModelsManagement()
+    model_stabilityai = ModelsTextToImage(model_stabilityai_name)
 
-    models.load_model("stabilityai/sdxl-turbo")
-    image = models.generate_prompt(prompt, width, height)
+    model_management.add_model(new_model=model_stabilityai, model_options=options)
+    model_management.load_model(model_stabilityai_name)
+
+    image = model_management.generate_prompt()
     image.show()
-
-
 
