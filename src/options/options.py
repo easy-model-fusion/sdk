@@ -1,10 +1,26 @@
+import enum
 from abc import ABC
+from enum import StrEnum
+
+
+class Devices(StrEnum):
+    """
+    Enumeration of devices supported
+    """
+    GPU = "cuda"
+    CPU = "cpu"
+    RESET = "meta"
 
 
 class Options(ABC):
-    prompt: str
-    device: str
+    """
+    Abstract class defining the options used for models
+    """
+    device: Devices
 
-    def __init__(self, prompt: str, device: str):
-        self.prompt = prompt
+    def __init__(self, device: Devices):
+        """
+        Initializes the options class with the given device
+        :param device: The device to use generate prompt
+        """
         self.device = device
