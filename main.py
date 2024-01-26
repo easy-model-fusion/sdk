@@ -9,7 +9,7 @@ if __name__ == '__main__':
         prompt="Astronaut in a Fur suit in an anime convention, disgust",
         max_length=200,
         temperature=0.2,
-        device=Devices.CPU
+        device=Devices.GPU
     )
 
     model_stabilityai_name = "stabilityai/stable-code-3b"

@@ -1,6 +1,6 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from src.models.models import Models
 from src.options.options import Devices
 from src.options.options_text_generation import OptionsTextGeneration
@@ -8,6 +8,7 @@ from src.options.options_text_generation import OptionsTextGeneration
 
 class ModelsTextGeneration(Models):
     pipeline: AutoModelForCausalLM
+    tokenizer: AutoTokenizer
     model_name: str
     loaded: bool
 
@@ -27,6 +28,8 @@ class ModelsTextGeneration(Models):
             trust_remote_code=True
         )
 
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
+
     def load_model(self, option: OptionsTextGeneration) -> bool:
         """
         Load this model on the given device
@@ -44,10 +47,12 @@ class ModelsTextGeneration(Models):
     def unload_model(self):
         if not self.loaded:
             return
-        self.pipeline.to(device="cpu")
+        self.pipeline.to(device="meta")
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
         self.loaded = False
 
     def generate_prompt(self, option: OptionsTextGeneration):
-        return self.pipeline(prompt=option.prompt)
+        inputs = self.tokenizer(option.prompt, return_tensors="pt").to(option.device.value)
+        
+        return self.pipeline(**inputs)
