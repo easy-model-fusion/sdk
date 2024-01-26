@@ -1,9 +1,8 @@
-import enum
 from abc import ABC
-from enum import StrEnum
+from enum import Enum
 
 
-class Devices(StrEnum):
+class Devices(Enum):
     """
     Enumeration of devices supported
     """
