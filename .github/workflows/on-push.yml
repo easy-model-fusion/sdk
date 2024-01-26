@@ -3,7 +3,7 @@ name: sdk workflow
 on:
   push:
     branches:
-      - 18-sdk-create-cicd # main
+      - main
   pull_request:
     branches:
       - main
