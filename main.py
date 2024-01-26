@@ -7,8 +7,8 @@ if __name__ == '__main__':
     options = OptionsTextToImage(
         prompt="Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
         device=Devices.GPU,
-        image_width=256,
-        image_height=256
+        image_width=1024,
+        image_height=1024
     )
 
     model_stabilityai_name = "stabilityai/sdxl-turbo"
