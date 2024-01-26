@@ -17,7 +17,7 @@ jobs:
         os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
-    - name: Checkout du code
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Configurer Python
@@ -41,7 +41,7 @@ jobs:
         os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
-    - name: Checkout du code
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Configurer Python
@@ -67,44 +67,44 @@ jobs:
         os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
-  - name: Checkout code
-    uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-  - name: Setup Python
-    uses: actions/setup-python@v2
-    with:
-      python-version: 3.11.0
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11.0
 
-  - name: Install dependencies
-    run: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-  - name: Run tests
-    run: python -m unittest discover -s tests -p '*.py'
+    - name: Run tests
+      run: python -m unittest discover -s tests -p '*.py'
 
-  - name: Generate coverage report
-    run: coverage run --source=. -m unittest discover -s tests -p '*.py'
+    - name: Generate coverage report
+      run: coverage run --source=. -m unittest discover -s tests -p '*.py'
 
-  - name: Upload coverage report
-    if: github.event_name == 'push'
-    uses: actions/upload-artifact@v2
-    with:
-      name: coverage
-      path: .coverage
+    - name: Upload coverage report
+      if: github.event_name == 'push'
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: .coverage
 
-  - name: Download coverage artifact
-    if: github.event_name == 'push'
-    uses: actions/download-artifact@v2
-    with:
-      name: coverage
-      path: .
+    - name: Download coverage artifact
+      if: github.event_name == 'push'
+      uses: actions/download-artifact@v2
+      with:
+        name: coverage
+        path: .
 
-  - name: Upload coverage reports to Codecov
-    if: github.event_name == 'push'
-    uses: codecov/codecov-action@v3
-    env:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload coverage reports to Codecov
+      if: github.event_name == 'push'
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  - name: View code coverage report
-    run: coverage report -m
+    - name: View code coverage report
+      run: coverage report -m
