@@ -1,0 +1,113 @@
+name: sdk workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.11.0]
+
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v2
+
+    - name: Configurer Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Installing flake8
+      run: python -m pip install flake8
+
+    - name: Run flake8
+      run: flake8
+    
+
+  build:
+    runs-on: ${{ matrix.os }}
+    needs: lint
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.11.0]
+
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v2
+
+    - name: Configurer Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Python compilation
+      run: python setup.py build
+
+
+  coverage:
+    runs-on: ${{ matrix.os }}
+    needs: build
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.11.0]
+
+    steps:
+  - name: Checkout code
+    uses: actions/checkout@v2
+
+  - name: Setup Python
+    uses: actions/setup-python@v2
+    with:
+      python-version: ${{ matrix.python-version }}
+
+  - name: Install dependencies
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+
+  - name: Run tests
+    run: python -m unittest discover -s tests -p '*.py'
+
+  - name: Generate coverage report
+    run: coverage run --source=. -m unittest discover -s tests -p '*.py'
+
+  - name: Upload coverage report
+    if: github.event_name == 'push'
+    uses: actions/upload-artifact@v2
+    with:
+      name: coverage
+      path: .coverage
+
+  - name: Download coverage artifact
+    if: github.event_name == 'push'
+    uses: actions/download-artifact@v2
+    with:
+      name: coverage
+      path: .
+
+  - name: Upload coverage reports to Codecov
+    if: github.event_name == 'push'
+    uses: codecov/codecov-action@v3
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  - name: View code coverage report
+    run: coverage report -m
