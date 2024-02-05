@@ -57,6 +57,30 @@ jobs:
     - name: Run Python compilation
       run: python setup.py build
 
+    - name: Create Release
+      if: github.event_name == 'push'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Changes in this release:
+
+    - name: Upload Release Artifact
+      if: github.event_name == 'push'
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./myapp
+        asset_name: myapp
+        asset_content_type: application/octet-stream
+
 
   coverage:
     runs-on: ${{ matrix.os }}
@@ -80,13 +104,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run tests
+    - name: Run tests with unittest
       run: python -m unittest discover -s tests -p '*.py'
 
     - name: Generate coverage report
       run: coverage run --source=. -m unittest discover -s tests -p '*.py'
 
-    - name: Upload coverage report
+    - name: Upload coverage artifact
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v2
       with:
