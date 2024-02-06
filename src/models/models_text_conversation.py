@@ -60,9 +60,6 @@ class ModelsTextConversation(Models):
         self.loaded = False
         return True
 
-    # def add_message(self, message: str):
-    #     self.chat_bot.add_message({"role": "user", "content": message})
-
     def generate_prompt(self, option: OptionsTextConversation):
 
         return Conversation(option.prompt)
