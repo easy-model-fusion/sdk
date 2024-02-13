@@ -1,10 +1,11 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from src.models.models import Models
+from src.models.model import Model
 from src.options.options_text_to_image import OptionsTextToImage, Devices
+from typing import Optional
 
 
-class ModelsTextToImage(Models):
+class ModelTextToImage(Model):
     """
     This class implements methods to generate images with a text prompt
     """
@@ -63,14 +64,15 @@ class ModelsTextToImage(Models):
         self.loaded = False
         return True
 
-    def generate_prompt(self, options: OptionsTextToImage):
+    def generate_prompt(self, prompt: Optional[str], options: OptionsTextToImage):
         """
         Generates the prompt with the given option
+        :param prompt: The optional prompt (if the prompt is empty, the options.prompt will be used)
         :param options: The options of text to image model
         :return: An object image resulting from the model
         """
         return self.pipeline(
-            prompt=options.prompt,
+            prompt=prompt if prompt else options.prompt,
             prompt_2=options.prompt_2,
             width=options.image_width,
             height=options.image_height,
