@@ -33,38 +33,20 @@ def exit_error(message, error=1):
     Args:
         message (str): The error message to be printed.
         error (int, optional): The error code to exit the script with. Defaults to 1.
-
-    Example:
-        >>> exit_error("An error occurred.", 2)
-        An error occurred.
-        Script exits with status code 2.
     """
     print(message, file=sys.stderr)
     sys.exit(error)
 
 
-# TODO : use object as arg?
-# TODO : extract into smaller functions?
-def download(downloads_path, model_name, module_name, model_class, model_options, tokenizer_class, tokenizer_options, overwrite):
+def validate(model_name, module_name):
     """
-    Downloads the model given data.
-
-    Notes:
-        Tokenizer arguments will only be used if the module name is transformers.
+    Validate the model.
 
     Args:
-        downloads_path (str): Path to the download's directory.
-        model_name (str): The name of the model to download.
-        module_name (str): The name of the module to use for downloading.
-        model_class (str): The class within the module to use for downloading.
-        model_options (list): List of options used for downloading the model.
-        tokenizer_class (str): The class used for downloading the tokenizer.
-        tokenizer_options (list): List of options used for downloading the tokenizer.
-        overwrite (bool): Whether to overwrite the downloaded model if it exists.
+        model_name (str): The name of the model.
+        module_name (str): The name of the module.
     """
 
-
-    # TODO : validate function?
     # Check if the model name is not empty
     if model_name is None or model_name.strip() == '':
         exit_error(f"ERROR: Model '{model_name}' is invalid.")
@@ -73,10 +55,20 @@ def download(downloads_path, model_name, module_name, model_class, model_options
     if module_name not in AUTHORIZED_MODULE_NAMES:
         exit_error(f"Module '{module_name}' is not authorized. Must be one of {AUTHORIZED_MODULE_NAMES}")
 
-    # Local path where the model will be downloaded
-    model_path = os.path.join(downloads_path, model_name)
 
-    # TODO : download model function?
+def download_model(model_path, model_name, model_module, model_class, model_options, overwrite):
+    """
+    Download the model.
+
+    Args:
+        model_path (str): Path to the directory where the model will be downloaded.
+        model_name (str): The name of the model to download.
+        model_module (str): The name of the module to use for downloading.
+        model_class (str): The class within the module to use for downloading.
+        model_options (list): List of options used for downloading the model.
+        overwrite (bool): Whether to overwrite the downloaded model if it exists.
+    """
+
     # Check if the model_path already exists
     if not overwrite and os.path.exists(model_path):
         exit_error(f"Directory '{model_path}' already exists.")
@@ -84,14 +76,14 @@ def download(downloads_path, model_name, module_name, model_class, model_options
     # Model class is not provided, trying the default one
     if model_class is None or model_class.strip() == '':
         logging.warning("Module class not provided, using default but might fail.")
-        model_class = model_config_default_class_for_module.get(module_name)
+        model_class = model_config_default_class_for_module.get(model_module)
 
     # Processing options
     model_options_dict = process_options(model_options or [])
 
     try:
         # Transforming from strings to actual objects
-        module_obj = globals()[module_name]
+        module_obj = globals()[model_module]
         model_class_obj = getattr(module_obj, model_class)
 
         # Downloading the model
@@ -101,9 +93,21 @@ def download(downloads_path, model_name, module_name, model_class, model_options
     except Exception as e:
         exit_error(f"Error while downloading model {model_name}: {e}", 2)
 
-    # TODO : download tokenizer function?
+
+def download_tokenizer(model_path, model_name, model_module, tokenizer_class, tokenizer_options):
+    """
+    Download a tokenizer for the model.
+
+    Args:
+        model_path (str): Path to the directory where the model is downloaded.
+        model_name (str): The name of the model.
+        model_module (str): The name of the module to use for downloading the tokenizer.
+        tokenizer_class (str): The class used for downloading the tokenizer.
+        tokenizer_options (list): List of options used for downloading the tokenizer.
+    """
+
     # Checking for tokenizer
-    if module_name == TRANSFORMERS:
+    if model_module == TRANSFORMERS:
 
         # Tokenizer is not provided, trying the default one
         tokenizer_name = tokenizer_class or TRANSFORMERS_DEFAULT_TOKENIZER_NAME
@@ -128,6 +132,35 @@ def download(downloads_path, model_name, module_name, model_class, model_options
 
         except Exception as e:
             exit_error(f"Error while downloading tokenizer {tokenizer_name}: {e}", 3)
+
+
+# TODO : use object as arg?
+def download(downloads_path, model_name, model_module, model_class, model_options, tokenizer_class, tokenizer_options, overwrite):
+    """
+    Downloads the model and tokenizer (if applicable).
+
+    Args:
+        downloads_path (str): Path to the downloads' directory.
+        model_name (str): The name of the model to download.
+        model_module (str): The name of the module to use for downloading the model.
+        model_class (str): The class within the module to use for downloading the model.
+        model_options (list): List of options used for downloading the model.
+        tokenizer_class (str): The class used for downloading the tokenizer.
+        tokenizer_options (list): List of options used for downloading the tokenizer.
+        overwrite (bool): Whether to overwrite the downloaded model if it exists.
+    """
+
+    # Validate mandatory arguments
+    validate(model_name, model_module)
+
+    # Local path where the model will be downloaded
+    model_path = os.path.join(downloads_path, model_name)
+
+    # Download the model
+    download_model(model_path, model_name, model_module, model_class, model_options, overwrite)
+
+    # Download a tokenizer for the model
+    download_tokenizer(model_path, model_name, model_module, tokenizer_class, tokenizer_options)
 
 
 def process_options(options_list):
@@ -207,7 +240,7 @@ def parse_arguments():
     # TODO : --tokenizer tag to only add a tokenizer ?
     parser.add_argument("downloads_path", type=str, help="Path to the downloads directory")
     parser.add_argument("model_name", type=str, help="Model name")
-    parser.add_argument("module_name", type=str, help=f"Module name", choices=AUTHORIZED_MODULE_NAMES)
+    parser.add_argument("model_module", type=str, help=f"Module name", choices=AUTHORIZED_MODULE_NAMES)
     parser.add_argument("--model-class", type=str, help="Class name within the module")
     parser.add_argument("--model-options", nargs="+", help="List of options")
     parser.add_argument("--tokenizer-class", type=str, help="Tokenizer class name (only for transformers)")
@@ -226,7 +259,7 @@ def main():
     args = parse_arguments()
 
     # Run download with specified arguments
-    download(args.downloads_path, args.model_name, args.module_name, args.model_class, args.model_options,
+    download(args.downloads_path, args.model_name, args.model_module, args.model_class, args.model_options,
              args.tokenizer_class, args.tokenizer_options, args.overwrite)
 
 
