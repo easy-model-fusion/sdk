@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import os
 import sys
@@ -20,9 +21,9 @@ model_config_default_class_for_module = {
 
 # Transformers defaults
 TRANSFORMERS_DEFAULT_MODEL_DIRECTORY = "model"
-TRANSFORMERS_DEFAULT_TOKENIZER_NAME = "AutoTokenizer"
+TRANSFORMERS_DEFAULT_TOKENIZER_CLASS = "AutoTokenizer"
 
-# Download
+# Download possibilities
 DOWNLOAD_MODEL = "model"
 DOWNLOAD_TOKENIZER = "tokenizer"
 
@@ -56,12 +57,14 @@ class Tokenizer:
     A class representing a Tokenizer.
 
     Attributes:
-        name (str): The name of the tokenizer.
+        download_path (str): Path to where the tokenizer will be downloaded.
+        class_name (str): The class name of the tokenizer.
         options (list): List of options for the tokenizer.
     """
 
-    def __init__(self, name: str = None, options: list = None):
-        self.name = name or TRANSFORMERS_DEFAULT_TOKENIZER_NAME
+    def __init__(self, class_name: str = None, options: list = None):
+        self.download_path = None
+        self.class_name = class_name or TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
         self.options = options or []
 
 
@@ -74,17 +77,17 @@ class Model:
         download_path (str): Path to where the model will be downloaded.
         name (str): The name of the model to download.
         module (str): The name of the module to use for downloading the model.
-        module_class (str, optional): The class within the module to use for downloading the model. Defaults to None.
+        class_name (str, optional): The class name within the module to use for downloading the model. Defaults to None.
         options (list, optional): List of options used for downloading the model. Defaults to None.
         tokenizer (Tokenizer, optional): Tokenizer object for the model. Defaults to None.
     """
 
-    def __init__(self, name: str, module: str, module_class: str = None, options: str = None, tokenizer: Tokenizer = None):
+    def __init__(self, name: str, module: str, class_name: str = None, options: list = None, tokenizer: Tokenizer = None):
         self.base_path = None
         self.download_path = None
         self.name = name
         self.module = module
-        self.module_class = module_class
+        self.class_name = class_name
         self.options = options or []
         self.tokenizer = tokenizer
 
@@ -164,9 +167,9 @@ def download_model(model: Model, overwrite: bool):
                    f"Add '{SKIP_TAG} {DOWNLOAD_MODEL}' to skip the model download process.")
 
     # Model class is not provided, trying the default one
-    if model.module_class is None or model.module_class.strip() == '':
+    if model.class_name is None or model.class_name.strip() == '':
         logging.warning("Module class not provided, using default but might fail.")
-        model.module_class = model_config_default_class_for_module.get(model.module)
+        model.class_name = model_config_default_class_for_module.get(model.module)
 
     # Processing options
     options = process_options(model.options or [])
@@ -174,7 +177,7 @@ def download_model(model: Model, overwrite: bool):
     try:
         # Transforming from strings to actual objects
         module_obj = globals()[model.module]
-        model_class_obj = getattr(module_obj, model.module_class)
+        model_class_obj = getattr(module_obj, model.class_name)
 
         # Downloading the model
         model_downloaded = model_class_obj.from_pretrained(model.name, **options)
@@ -196,14 +199,14 @@ def download_transformers_tokenizer(model: Model, overwrite: bool):
     try:
 
         # Retrieving tokenizer class from module
-        tokenizer_class_obj = getattr(transformers, model.tokenizer.name)
+        tokenizer_class_obj = getattr(transformers, model.tokenizer.class_name)
 
         # Local path where the tokenizer will be downloaded
-        tokenizer_path = os.path.join(model.base_path, model.tokenizer.name)
+        model.tokenizer.download_path = os.path.join(model.base_path, model.tokenizer.class_name)
 
         # Check if the tokenizer_path already exists
-        if is_path_valid_for_download(tokenizer_path, overwrite):
-            exit_error(f"Tokenizer '{tokenizer_path}' already exists.\n"
+        if is_path_valid_for_download(model.tokenizer.download_path, overwrite):
+            exit_error(f"Tokenizer '{model.tokenizer.download_path}' already exists.\n"
                        f"Add '{SKIP_TAG} {DOWNLOAD_TOKENIZER}' to skip the tokenizer download process.")
 
         # Processing options
@@ -211,10 +214,10 @@ def download_transformers_tokenizer(model: Model, overwrite: bool):
 
         # Downloading the tokenizer
         tokenizer_downloaded = tokenizer_class_obj.from_pretrained(model.name, **options)
-        tokenizer_downloaded.save_pretrained(tokenizer_path)
+        tokenizer_downloaded.save_pretrained(model.tokenizer.download_path)
 
     except Exception as e:
-        exit_error(f"Error while downloading tokenizer {model.tokenizer.name}: {e}", ERROR_EXIT_TOKENIZER)
+        exit_error(f"Error while downloading tokenizer {model.tokenizer.class_name}: {e}", ERROR_EXIT_TOKENIZER)
 
 
 def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
