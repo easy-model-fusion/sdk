@@ -22,11 +22,16 @@ model_config_default_class_for_module = {
 # Transformers default tokenizer
 TRANSFORMERS_DEFAULT_TOKENIZER_NAME = "AutoTokenizer"
 
+# Error exit codes
+ERROR_EXIT_DEFAULT = 1
+ERROR_EXIT_MODEL = 2
+ERROR_EXIT_TOKENIZER = 3
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
 
-def exit_error(message, error=1):
+def exit_error(message, error=ERROR_EXIT_DEFAULT):
     """
     Print an error message to the standard error stream and exit the script with a specified error code.
 
@@ -103,7 +108,7 @@ class Model:
         # Checking for tokenizer
         if self.module == TRANSFORMERS and self.tokenizer:
             # Download a tokenizer for the model
-            download_tokenizer(self)
+            download_tokenizer(self, overwrite)
 
 
 def download_model(model, overwrite=False):
@@ -137,15 +142,16 @@ def download_model(model, overwrite=False):
         model_downloaded.save_pretrained(model.path)
 
     except Exception as e:
-        exit_error(f"Error while downloading model {model.name}: {e}", 2)
+        exit_error(f"Error while downloading model {model.name}: {e}", ERROR_EXIT_MODEL)
 
 
-def download_tokenizer(model):
+def download_tokenizer(model, overwrite=False):
     """
     Download a tokenizer for the model.
 
     Args:
         model (Model): Model to be downloaded.
+        overwrite (bool): Whether to overwrite the downloaded model if it exists.
     """
 
     try:
@@ -156,7 +162,10 @@ def download_tokenizer(model):
         # Local path where the tokenizer will be downloaded
         tokenizer_path = os.path.join(model.path, model.tokenizer.name)
 
-        # TODO : check existence
+        # Check if the model_path already exists
+        if not overwrite and os.path.exists(tokenizer_path):
+            exit_error(f"Directory '{tokenizer_path}' already exists.")
+
         # TODO : if --tokenizer then check that model exists
 
         # Processing options
@@ -167,7 +176,7 @@ def download_tokenizer(model):
         tokenizer_downloaded.save_pretrained(tokenizer_path)
 
     except Exception as e:
-        exit_error(f"Error while downloading tokenizer {model.tokenizer.name}: {e}", 3)
+        exit_error(f"Error while downloading tokenizer {model.tokenizer.name}: {e}", ERROR_EXIT_TOKENIZER)
 
 
 def process_options(options_list):
