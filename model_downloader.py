@@ -7,10 +7,9 @@ import importlib
 import diffusers
 import transformers
 
+# Authorized module names for download
 DIFFUSERS = 'diffusers'
 TRANSFORMERS = 'transformers'
-
-# Authorized library names for download
 AUTHORIZED_MODULE_NAMES = {DIFFUSERS, TRANSFORMERS}
 
 # Map module name to a default class name
@@ -22,6 +21,14 @@ model_config_default_class_for_module = {
 # Transformers defaults
 TRANSFORMERS_DEFAULT_MODEL_DIRECTORY = "model"
 TRANSFORMERS_DEFAULT_TOKENIZER_NAME = "AutoTokenizer"
+
+# Download
+DOWNLOAD_MODEL = "model"
+DOWNLOAD_TOKENIZER = "tokenizer"
+
+# Skip arguments
+SKIP_TAG = "--skip"
+SKIP_ARGUMENTS = {DOWNLOAD_MODEL, DOWNLOAD_TOKENIZER}
 
 # Error exit codes
 ERROR_EXIT_DEFAULT = 1
@@ -121,7 +128,7 @@ class Model:
         if self.is_transformers():
             self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def download(self, base_path: str, overwrite=False):
+    def download(self, base_path: str, skip: str, overwrite=False):
         """
         Download the model.
         """
@@ -133,10 +140,11 @@ class Model:
         self.build_paths(base_path)
 
         # Download the model
-        download_model(self, overwrite)
+        if skip != DOWNLOAD_MODEL:
+            download_model(self, overwrite)
 
         # Checking for tokenizer
-        if self.is_transformers():
+        if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
@@ -150,10 +158,10 @@ def download_model(model: Model, overwrite: bool):
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
     """
 
-    # TODO : indicate the tag to use to only download the tokenizer
     # Check if the model already exists at path
     if is_path_valid_for_download(model.download_path, overwrite):
-        exit_error(f"Model '{model.download_path}' already exists.")
+        exit_error(f"Model '{model.download_path}' already exists.\n"
+                   f"Add '{SKIP_TAG} {DOWNLOAD_MODEL}' to skip the model download process.")
 
     # Model class is not provided, trying the default one
     if model.module_class is None or model.module_class.strip() == '':
@@ -187,8 +195,6 @@ def download_transformers_tokenizer(model: Model, overwrite: bool):
 
     try:
 
-        # TODO : if --tokenizer then check that model exists
-
         # Retrieving tokenizer class from module
         tokenizer_class_obj = getattr(transformers, model.tokenizer.name)
 
@@ -197,7 +203,8 @@ def download_transformers_tokenizer(model: Model, overwrite: bool):
 
         # Check if the tokenizer_path already exists
         if is_path_valid_for_download(tokenizer_path, overwrite):
-            exit_error(f"Tokenizer '{tokenizer_path}' already exists.")
+            exit_error(f"Tokenizer '{tokenizer_path}' already exists.\n"
+                       f"Add '{SKIP_TAG} {DOWNLOAD_TOKENIZER}' to skip the tokenizer download process.")
 
         # Processing options
         options = process_options(model.tokenizer.options or [])
@@ -315,8 +322,6 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description="Script to download a specific model.")
 
-    # TODO : model part, tokenizer part and combination ?
-    # TODO : --tokenizer tag to only add a tokenizer ?
     parser.add_argument("path", type=str, help="Path to the downloads directory")
     parser.add_argument("model_name", type=str, help="Model name")
     parser.add_argument("model_module", type=str, help=f"Module name", choices=AUTHORIZED_MODULE_NAMES)
@@ -325,6 +330,7 @@ def parse_arguments():
     parser.add_argument("--tokenizer-class", type=str, help="Tokenizer class name (only for transformers)")
     parser.add_argument("--tokenizer-options", nargs="+", help="List of tokenizer options (only for transformers)")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing directories")
+    parser.add_argument("--skip", type=str, help="Skip the download item", choices=SKIP_ARGUMENTS)
 
     return parser.parse_args()
 
@@ -341,7 +347,7 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    model.download(args.path, args.overwrite)
+    model.download(args.path, args.skip, args.overwrite)
 
 
 if __name__ == "__main__":
