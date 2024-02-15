@@ -19,7 +19,8 @@ model_config_default_class_for_module = {
     TRANSFORMERS: "AutoModel",
 }
 
-# Transformers default tokenizer
+# Transformers defaults
+TRANSFORMERS_DEFAULT_MODEL_DIRECTORY = "model"
 TRANSFORMERS_DEFAULT_TOKENIZER_NAME = "AutoTokenizer"
 
 # Error exit codes
@@ -52,7 +53,7 @@ class Tokenizer:
         options (list): List of options for the tokenizer.
     """
 
-    def __init__(self, name=None, options=None):
+    def __init__(self, name: str = None, options: list = None):
         self.name = name or TRANSFORMERS_DEFAULT_TOKENIZER_NAME
         self.options = options or []
 
@@ -62,7 +63,8 @@ class Model:
     A class representing a Model.
 
     Attributes:
-        path (str): Path to the directory where the model will be downloaded.
+        base_path (str): Path to the model directory.
+        download_path (str): Path to where the model will be downloaded.
         name (str): The name of the model to download.
         module (str): The name of the module to use for downloading the model.
         module_class (str, optional): The class within the module to use for downloading the model. Defaults to None.
@@ -70,8 +72,9 @@ class Model:
         tokenizer (Tokenizer, optional): Tokenizer object for the model. Defaults to None.
     """
 
-    def __init__(self, path, name, module, module_class=None, options=None, tokenizer=None):
-        self.path = path
+    def __init__(self, name: str, module: str, module_class: str = None, options: str = None, tokenizer: Tokenizer = None):
+        self.base_path = None
+        self.download_path = None
         self.name = name
         self.module = module
         self.module_class = module_class
@@ -91,7 +94,34 @@ class Model:
         if self.module not in AUTHORIZED_MODULE_NAMES:
             exit_error(f"Module '{self.module}' is not authorized. Must be one of {AUTHORIZED_MODULE_NAMES}")
 
-    def download(self, overwrite=False):
+    def is_transformers(self) -> bool:
+        """
+        Check if the model belongs to the Transformers module.
+
+        Returns:
+            bool: True if the model belongs to Transformers, False otherwise.
+        """
+        return self.module == TRANSFORMERS
+
+    def build_paths(self, base_path: str):
+        """
+        Build paths for the model.
+
+        Args:
+            base_path (str): The base path where all the models are located.
+        """
+
+        # Local path to the model directory
+        self.base_path = os.path.join(base_path, self.name)
+
+        # Local path where the model will be downloaded
+        self.download_path = self.base_path
+
+        # Improved repartition required when using transformers
+        if self.is_transformers():
+            self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
+
+    def download(self, base_path: str, overwrite=False):
         """
         Download the model.
         """
@@ -99,19 +129,19 @@ class Model:
         # Validate mandatory arguments
         self.validate()
 
-        # Local path where the model will be downloaded
-        self.path = os.path.join(self.path, self.name)
+        # Build paths
+        self.build_paths(base_path)
 
         # Download the model
         download_model(self, overwrite)
 
         # Checking for tokenizer
-        if self.module == TRANSFORMERS and self.tokenizer:
+        if self.is_transformers():
             # Download a tokenizer for the model
-            download_tokenizer(self, overwrite)
+            download_transformers_tokenizer(self, overwrite)
 
 
-def download_model(model, overwrite=False):
+def download_model(model: Model, overwrite: bool):
     """
     Download the model.
 
@@ -120,9 +150,10 @@ def download_model(model, overwrite=False):
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
     """
 
-    # Check if the model_path already exists
-    if not overwrite and os.path.exists(model.path):
-        exit_error(f"Directory '{model.path}' already exists.")
+    # TODO : indicate the tag to use to only download the tokenizer
+    # Check if the model already exists at path
+    if is_path_valid_for_download(model.download_path, overwrite):
+        exit_error(f"Model '{model.download_path}' already exists.")
 
     # Model class is not provided, trying the default one
     if model.module_class is None or model.module_class.strip() == '':
@@ -139,15 +170,15 @@ def download_model(model, overwrite=False):
 
         # Downloading the model
         model_downloaded = model_class_obj.from_pretrained(model.name, **options)
-        model_downloaded.save_pretrained(model.path)
+        model_downloaded.save_pretrained(model.download_path)
 
     except Exception as e:
         exit_error(f"Error while downloading model {model.name}: {e}", ERROR_EXIT_MODEL)
 
 
-def download_tokenizer(model, overwrite=False):
+def download_transformers_tokenizer(model: Model, overwrite: bool):
     """
-    Download a tokenizer for the model.
+    Download a transformers tokenizer for the model.
 
     Args:
         model (Model): Model to be downloaded.
@@ -156,30 +187,44 @@ def download_tokenizer(model, overwrite=False):
 
     try:
 
+        # TODO : if --tokenizer then check that model exists
+
         # Retrieving tokenizer class from module
-        tokenizer_class = getattr(transformers, model.tokenizer.name)
+        tokenizer_class_obj = getattr(transformers, model.tokenizer.name)
 
         # Local path where the tokenizer will be downloaded
-        tokenizer_path = os.path.join(model.path, model.tokenizer.name)
+        tokenizer_path = os.path.join(model.base_path, model.tokenizer.name)
 
-        # Check if the model_path already exists
-        if not overwrite and os.path.exists(tokenizer_path):
-            exit_error(f"Directory '{tokenizer_path}' already exists.")
-
-        # TODO : if --tokenizer then check that model exists
+        # Check if the tokenizer_path already exists
+        if is_path_valid_for_download(tokenizer_path, overwrite):
+            exit_error(f"Tokenizer '{tokenizer_path}' already exists.")
 
         # Processing options
         options = process_options(model.tokenizer.options or [])
 
         # Downloading the tokenizer
-        tokenizer_downloaded = tokenizer_class.from_pretrained(model.name, **options)
+        tokenizer_downloaded = tokenizer_class_obj.from_pretrained(model.name, **options)
         tokenizer_downloaded.save_pretrained(tokenizer_path)
 
     except Exception as e:
         exit_error(f"Error while downloading tokenizer {model.tokenizer.name}: {e}", ERROR_EXIT_TOKENIZER)
 
 
-def process_options(options_list):
+def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
+    """
+    Check if the path is valid for downloading.
+
+    Args:
+        path (str): The path to check.
+        overwrite (bool): Whether to overwrite existing files.
+
+    Returns:
+        bool: True if the path is valid for download, False otherwise.
+    """
+    return not overwrite and os.path.exists(path) and os.listdir(path)
+
+
+def process_options(options_list: list) -> dict:
     """
     Process the options provided as a list of strings and convert them into a dictionary.
 
@@ -257,7 +302,7 @@ def map_args_to_model(args):
     tokenizer = Tokenizer(args.tokenizer_class, args.tokenizer_options)
 
     # Mapping to model
-    return Model(args.path, args.model_name, args.model_module, args.model_class, args.model_options, tokenizer)
+    return Model(args.model_name, args.model_module, args.model_class, args.model_options, tokenizer)
 
 
 def parse_arguments():
@@ -296,7 +341,7 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    model.download(args.overwrite)
+    model.download(args.path, args.overwrite)
 
 
 if __name__ == "__main__":
