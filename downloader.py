@@ -96,10 +96,6 @@ class Model:
         if not self.name.strip():
             exit_error(f"Model '{self.name}' is invalid.")
 
-        # Check if the module is authorized
-        if self.module not in AUTHORIZED_MODULE_NAMES:
-            exit_error(f"Module '{self.module}' is not authorized. Must be one of {AUTHORIZED_MODULE_NAMES}")
-
     def is_transformers(self) -> bool:
         """
         Check if the model belongs to the Transformers module.
