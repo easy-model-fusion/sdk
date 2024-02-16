@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 import os
 import sys
 import importlib
@@ -35,9 +34,6 @@ SKIP_ARGUMENTS = {DOWNLOAD_MODEL, DOWNLOAD_TOKENIZER}
 ERROR_EXIT_DEFAULT = 1
 ERROR_EXIT_MODEL = 2
 ERROR_EXIT_TOKENIZER = 3
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 
 
 def exit_error(message, error=ERROR_EXIT_DEFAULT):
@@ -142,14 +138,34 @@ class Model:
         # Build paths
         self.build_paths(base_path)
 
-        # Download the model
+        # Output result
+        result_dict = {}
+
+        # Checking for model download
         if skip != DOWNLOAD_MODEL:
+
+            # Downloading the model
             download_model(self, overwrite)
 
-        # Checking for tokenizer
+            # Adding properties to result
+            result_dict["path"] = self.download_path
+            result_dict["module"] = self.module
+            result_dict["class"] = self.class_name
+
+        # Checking for tokenizer download
         if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
+
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
+
+            # Adding properties to result
+            result_dict["tokenizer"] = {
+                "path": self.tokenizer.download_path,
+                "class": self.tokenizer.class_name,
+            }
+
+        # Convert the dictionary to JSON
+        return json.dumps(result_dict, indent=4)
 
 
 def download_model(model: Model, overwrite: bool):
@@ -168,7 +184,6 @@ def download_model(model: Model, overwrite: bool):
 
     # Model class is not provided, trying the default one
     if model.class_name is None or model.class_name.strip() == '':
-        logging.warning("Module class not provided, using default but might fail.")
         model.class_name = model_config_default_class_for_module.get(model.module)
 
     # Processing options
@@ -325,15 +340,23 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description="Script to download a specific model.")
 
+    # Mandatory arguments related to the model
     parser.add_argument("path", type=str, help="Path to the downloads directory")
     parser.add_argument("model_name", type=str, help="Model name")
     parser.add_argument("model_module", type=str, help=f"Module name", choices=AUTHORIZED_MODULE_NAMES)
+
+    # Optional arguments regarding the model
     parser.add_argument("--model-class", type=str, help="Class name within the module")
     parser.add_argument("--model-options", nargs="+", help="List of options")
+
+    # Optional arguments regarding the model's tokenizer
     parser.add_argument("--tokenizer-class", type=str, help="Tokenizer class name (only for transformers)")
     parser.add_argument("--tokenizer-options", nargs="+", help="List of tokenizer options (only for transformers)")
+
+    # Global tags for the script
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing directories")
     parser.add_argument("--skip", type=str, help="Skip the download item", choices=SKIP_ARGUMENTS)
+    parser.add_argument("--emf-client", action="store_true", help="If running from the emf-client")
 
     return parser.parse_args()
 
@@ -350,7 +373,13 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    model.download(args.path, args.skip, args.overwrite)
+    properties = model.download(args.path, args.skip, args.overwrite)
+
+    # Running from emf-client:
+    if args.emf_client:
+
+        # Write model properties to stdout: the emf-client needs to get it back to update the config file
+        print(properties)
 
 
 if __name__ == "__main__":
