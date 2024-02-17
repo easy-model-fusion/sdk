@@ -99,6 +99,7 @@ class ModelTextToImage(Model):
             crops_coords_top_left=options.crops_coords_top_left,
             target_size=options.target_size,
             negative_original_size=options.negative_original_size,
+            negative_crops_coords_top_left=options.negative_crops_coords_top_left,
             negative_target_size=options.negative_target_size,
             clip_skip=options.clip_skip,
             callback_on_step_end=options.callback_on_step_end,
