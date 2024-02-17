@@ -14,74 +14,56 @@ class OptionsTextConversation(Options):
     """
     """
     Args:
-       model (str or PreTrainedModel or TFPreTrainedModel, optional):
-           The model that will be used by the pipeline to make predictions. This can be a model identifier or an
-           actual instance of a pretrained model inheriting from `PreTrainedModel` (for PyTorch) or
-           `TFPreTrainedModel` (for TensorFlow).
-    
-           If not provided, the default for the `task` will be loaded.
-       config (str or PretrainedConfig, optional):
-           The configuration that will be used by the pipeline to instantiate the model. This can be a model
-           identifier or an actual pretrained model configuration inheriting from `PretrainedConfig`.
-    
-           If not provided, the default configuration file for the requested model will be used. That means that if
-           `model` is given, its default configuration will be used. However, if `model` is not supplied, this
-           `task`'s default model's config is used instead.
-       tokenizer (str or PreTrainedTokenizer, optional):
-           The tokenizer that will be used by the pipeline to encode data for the model. This can be a model
-           identifier or an actual pretrained tokenizer inheriting from `PreTrainedTokenizer`.
-    
-           If not provided, the default tokenizer for the given `model` will be loaded (if it is a string). If `model`
-           is not specified or not a string, then the default tokenizer for `config` is loaded (if it is a string).
-           However, if `config` is also not given or not a string, then the default tokenizer for the given `task`
-           will be loaded.
-       feature_extractor (str or PreTrainedFeatureExtractor, optional):
-           The feature extractor that will be used by the pipeline to encode data for the model. This can be a model
-           identifier or an actual pretrained feature extractor inheriting from `PreTrainedFeatureExtractor`.
-    
-           Feature extractors are used for non-NLP models, such as Speech or Vision models as well as multi-modal
-           models. Multi-modal models will also require a tokenizer to be passed.
-    
-           If not provided, the default feature extractor for the given `model` will be loaded (if it is a string). If
-           `model` is not specified or not a string, then the default feature extractor for `config` is loaded (if it
-           is a string). However, if `config` is also not given or not a string, then the default feature extractor
-           for the given `task` will be loaded.
-       framework (str, optional):
-           The framework to use, either "pt" for PyTorch or "tf" for TensorFlow. The specified framework must be
-           installed.
-    
-           If no framework is specified, will default to the one currently installed. If no framework is specified and
-           both frameworks are installed, will default to the framework of the `model`, or to PyTorch if no model is
-           provided.
-       revision (str, optional, defaults to "main"):
-           When passing a task name or a string model identifier: The specific model version to use. It can be a
-           branch name, a tag name, or a commit id, since we use a git-based system for storing models and other
-           artifacts on huggingface.co, so `revision` can be any identifier allowed by git.
-       use_fast (bool, optional, defaults to True):
-           Whether or not to use a Fast tokenizer if possible (a `PreTrainedTokenizerFast`).
-       use_auth_token (str or bool, optional):
-           The token to use as HTTP bearer authorization for remote files. If `True`, will use the token generated
-           when running `huggingface-cli login` (stored in `~/.huggingface`).
-       device (int or str or torch.device, optional):
-           Defines the device (*e.g.*, "cpu", "cuda:1", "mps", or a GPU ordinal rank like 1) on which this
-           pipeline will be allocated.
-       device_map (str or Dict[str, Union[int, str, torch.device]], optional):
-           Sent directly as `model_kwargs` (just a simpler shortcut). When `accelerate` library is present, set
-           `device_map="auto"` to compute the most optimized `device_map` automatically.
-    
-           Do not use `device_map` AND `device` at the same time as they will conflict.
-       torch_dtype (str or torch.dtype, optional):
-           Sent directly as `model_kwargs` (just a simpler shortcut) to use the available precision for this model
-           (`torch.float16`, `torch.bfloat16`, ... or "auto").
-       trust_remote_code (bool, optional, defaults to False):
-           Whether or not to allow for custom code defined on the Hub in their own modeling, configuration,
-           tokenization or even pipeline files. This option should only be set to `True` for repositories you trust
-           and in which you have read the code, as it will execute code present on the Hub on your local machine.
-       model_kwargs (Dict[str, Any], optional):
-           Additional dictionary of keyword arguments passed along to the model's `from_pretrained(...,
-           **model_kwargs)` function.
-       kwargs (Dict[str, Any], optional):
-           Additional keyword arguments passed along to the specific pipeline init.
+        device (Devices):
+            The device to use for inference, specified from the `Devices` enum.
+        
+        prompt (str, optional):
+            The prompt or starting text for text generation. Default is an empty string.
+        
+        model (Union[str, PreTrainedModel, "TFPreTrainedModel"], optional):
+            The model to use for text generation. This can be a model identifier, a pre-trained model instance
+            inheriting from `PreTrainedModel` for PyTorch, or `"TFPreTrainedModel"` for TensorFlow.
+        
+        tokenizer (Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"], optional):
+            The tokenizer to use for tokenizing input text. This can be a model identifier, a pre-trained tokenizer
+            instance inheriting from `PreTrainedTokenizer`, or `"PreTrainedTokenizerFast"`.
+        
+        model_card (Optional[Union[str, ModelCard]], optional):
+            The model card providing details about the model, such as usage guidelines and citations.
+        
+        framework (Optional[str], optional):
+            The deep learning framework used for the model, such as 'torch' or 'tf'.
+        
+        task (str, optional):
+            The task for which the model is being used. Default is an empty string.
+        
+        num_workers (Optional[int], optional):
+            The number of worker processes for data loading. Default is 8.
+        
+        batch_size (Optional[int], optional):
+            The batch size for inference. Default is 1.
+        
+        device (Optional[Union[int, str, "torch.device"]], optional):
+            The device index or name for computation. Set to -1 for CPU. Default is -1.
+        
+        arg_parser (Optional[Dict[str, Any]], optional):
+            Optional additional arguments for the model.
+        
+        torch_dtype (Optional[Union[str, torch.dtype]], optional):
+            The data type for PyTorch tensors, such as 'float32' or 'float64'.
+        
+        binary_output (Optional[bool], optional):
+            Whether the output should be binary or text. Default is False.
+        
+        min_length_for_response (Optional[int], optional):
+            The minimum length of response generated by the model. Default is 32.
+        
+        minimum_tokens (Optional[int], optional):
+            The minimum number of tokens required for a valid response. Default is 10.
+        
+        max_steps (Optional[int], optional):
+            The maximum number of steps for generating text. Default is 50.
+
         """
     device : Devices
     prompt: str = ""
@@ -98,6 +80,7 @@ class OptionsTextConversation(Options):
     binary_output: Optional[bool] = False
     min_length_for_response: Optional[int] = 32
     minimum_tokens: Optional[int] = 10
+    max_steps : Optional[int] = 50
 
     def __init__(self,
                  device: Devices,
@@ -114,26 +97,10 @@ class OptionsTextConversation(Options):
                  binary_output: Optional[bool] = False,
                  min_length_for_response: Optional[int] = 32,
                  minimum_tokens: Optional[int] = 10,
+                 max_steps: Optional[int] = 50
                  ):
         """
         Initializes the OptionsTextGeneration.
-
-        Args:
-            device (Devices): The device to use to generate the prompt.
-            prompt (str, optional): The prompt to give to the model.
-            model (str or PreTrainedModel or TFPreTrainedModel, optional): The model to use for text generation.
-            tokenizer (str or PreTrainedTokenizer or PreTrainedTokenizerFast, optional): The tokenizer to use for
-                encoding the prompt and decoding the generated text.
-            model_card (str or ModelCard, optional): The model card to provide additional information about the model.
-            framework (str, optional): The framework to use for the model (e.g., "pt" for PyTorch, "tf" for TensorFlow).
-            task (str, optional): The task for which the model is being used.
-            num_workers (int, optional): The number of worker processes for data loading.
-            batch_size (int, optional): The batch size for inference.
-            arg_parser (Dict[str, Any], optional): Additional arguments to parse.
-            torch_dtype (str or torch.dtype, optional): The data type to use for PyTorch tensors.
-            binary_output (bool, optional): Whether the output should be binary.
-            min_length_for_response (int, optional): The minimum length of the generated response.
-            minimum_tokens (int, optional): The minimum number of tokens required for the generated response.
         """
         super().__init__(device)
         # Initialize additional attributes
@@ -162,3 +129,5 @@ class OptionsTextConversation(Options):
             self.min_length_for_response = min_length_for_response
         if minimum_tokens:
             self.minimum_tokens = minimum_tokens
+        if max_steps:
+            self.max_steps = max_steps

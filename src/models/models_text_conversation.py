@@ -12,6 +12,8 @@ class ModelsTextConversation(Models):
     model_name: str
     loaded: bool
     chat_bot: Conversation
+    conversation_step: int = 0
+    chat_history_token_ids = []
 
     def __init__(self, model_name: str):
         """
@@ -29,7 +31,7 @@ class ModelsTextConversation(Models):
         if self.loaded:
             return
 
-        self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_name )
+        self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True, padding_side='left')
 
     def load_model(self, option: OptionsTextConversation) -> bool:
@@ -60,6 +62,19 @@ class ModelsTextConversation(Models):
         self.loaded = False
         return True
 
-    def generate_prompt(self, option: OptionsTextConversation):
+    def add_input(self):
+        new_user_input_ids = self.tokenizer.encode(input(">> User:") + self.tokenizer.eos_token, return_tensors='pt')
+        # append the new user input tokens to the chat history
+        bot_input_ids = torch.cat([self.chat_history_ids, new_user_input_ids],
+                                  dim=-1) if self.conversation_step > 0 else new_user_input_ids
+        # generated a response while limiting the total chat history to 1000 tokens,
+        chat_history_ids = self.pipeline.generate(bot_input_ids, max_length=1000,
+                                                  pad_token_id=self.tokenizer.eos_token_id)
+        print("Chatbot: {}".format(
+            self.tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
+        self.conversation_step += 1
 
-        return Conversation(option.prompt)
+    def generate_prompt(self, option: OptionsTextConversation):
+        Conversation(option.prompt)
+        for step in range(option.max_steps):
+            self.add_input()
