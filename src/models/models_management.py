@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from src.models.models import Models
+from src.models.model import Model
 from src.options.options import Options
 
 
@@ -13,11 +13,11 @@ class ModelsManagement:
         """
         Initializes the ModelsManagement
         """
-        self.loaded_model: Optional[Models] = None
-        self.loaded_models_cache: Dict[str, Models] = {}
+        self.loaded_model: Optional[Model] = None
+        self.loaded_models_cache: Dict[str, Model] = {}
         self.options_models: Dict[str, Options] = {}
 
-    def add_model(self, new_model: Models, model_options: Options) -> bool:
+    def add_model(self, new_model: Model, model_options: Options) -> bool:
         """
         Adds a new model and his options to the management.
         :param new_model: The new model to add
@@ -85,16 +85,17 @@ class ModelsManagement:
         """
         self.options_models[model_name] = options
 
-    def generate_prompt(self):
+    def generate_prompt(self, prompt: Optional[str] = None):
         """
         Generates the prompt for the loaded model with his stored options
+        :param prompt: The prompt to generate (if the prompt is empty, the options.prompt will be used)
         :return: The object of type link with the model category
         """
         if not self.loaded_model:
             print("No model loaded. Load a model before generating prompts.")
             return
 
-        return self.loaded_model.generate_prompt(self.options_models[self.loaded_model.model_name])
+        return self.loaded_model.generate_prompt(prompt, self.options_models[self.loaded_model.model_name])
 
     def print_models(self):
         """

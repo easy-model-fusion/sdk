@@ -1,10 +1,11 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from src.models.models import Models
+from src.models.model import Model
 from src.options.options_text_to_image import OptionsTextToImage, Devices
+from typing import Optional
 
 
-class ModelsTextToImage(Models):
+class ModelTextToImage(Model):
     """
     This class implements methods to generate images with a text prompt
     """
@@ -63,14 +64,44 @@ class ModelsTextToImage(Models):
         self.loaded = False
         return True
 
-    def generate_prompt(self, options: OptionsTextToImage):
+    def generate_prompt(self, prompt: Optional[str], options: OptionsTextToImage):
         """
         Generates the prompt with the given option
+        :param prompt: The optional prompt (if the prompt is empty, the options.prompt will be used)
         :param options: The options of text to image model
         :return: An object image resulting from the model
         """
         return self.pipeline(
-            prompt=options.prompt,
+            prompt=prompt if prompt else options.prompt,
+            prompt_2=options.prompt_2,
             width=options.image_width,
-            height=options.image_height
+            height=options.image_height,
+            num_inference_steps=options.num_inference_steps,
+            timesteps=options.timesteps,
+            denoising_end=options.denoising_end,
+            guidance_scale=options.guidance_scale,
+            negative_prompt=options.negative_prompt,
+            negative_prompt_2=options.negative_prompt_2,
+            num_images_per_prompt=options.num_images_per_prompt,
+            eta=options.eta,
+            generator=options.generator,
+            latents=options.latents,
+            prompt_embeds=options.prompt_embeds,
+            negative_prompt_embeds=options.negative_prompt_embeds,
+            pooled_prompt_embeds=options.pooled_prompt_embeds,
+            negative_pooled_prompt_embeds=options.negative_pooled_prompt_embeds,
+            ip_adapter_image=options.ip_adapter_image,
+            output_type=options.output_type,
+            return_dict=options.return_dict,
+            cross_attention_kwargs=options.cross_attention_kwargs,
+            guidance_rescale=options.guidance_rescale,
+            original_size=options.original_size,
+            crops_coords_top_left=options.crops_coords_top_left,
+            target_size=options.target_size,
+            negative_original_size=options.negative_original_size,
+            negative_crops_coords_top_left=options.negative_crops_coords_top_left,
+            negative_target_size=options.negative_target_size,
+            clip_skip=options.clip_skip,
+            callback_on_step_end=options.callback_on_step_end,
+            callback_on_step_end_tensor_inputs=options.callback_on_step_end_tensor_inputs
         ).images[0]

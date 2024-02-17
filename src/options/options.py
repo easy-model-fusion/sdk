@@ -1,5 +1,6 @@
 from abc import ABC
 from enum import Enum
+from typing import Union
 
 
 class Devices(Enum):
@@ -15,7 +16,7 @@ class Options(ABC):
     """
     Abstract class defining the options used for models
     """
-    device: Devices
+    device: Union[str, Devices]
 
     def __init__(self, device: Devices):
         """
