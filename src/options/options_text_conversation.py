@@ -98,6 +98,7 @@ class OptionsTextConversation(Options):
     binary_output: Optional[bool] = False
     min_length_for_response: Optional[int] = 32
     minimum_tokens: Optional[int] = 10
+    max_steps : Optional[int] = 50
 
     def __init__(self,
                  device: Devices,
@@ -114,6 +115,7 @@ class OptionsTextConversation(Options):
                  binary_output: Optional[bool] = False,
                  min_length_for_response: Optional[int] = 32,
                  minimum_tokens: Optional[int] = 10,
+                 max_steps: Optional[int] = 50
                  ):
         """
         Initializes the OptionsTextGeneration.
@@ -162,3 +164,5 @@ class OptionsTextConversation(Options):
             self.min_length_for_response = min_length_for_response
         if minimum_tokens:
             self.minimum_tokens = minimum_tokens
+        if max_steps:
+            self.max_steps = max_steps
