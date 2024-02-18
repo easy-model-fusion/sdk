@@ -1,8 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from src.options.options import Options
+from typing import Optional
 
 
-class Models(ABC):
+class Model:
     """
     Abstract base class for all models
     """
@@ -24,5 +25,5 @@ class Models(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def generate_prompt(self, option: Options):
+    def generate_prompt(self, prompt: Optional[str], option: Options):
         raise NotImplementedError
