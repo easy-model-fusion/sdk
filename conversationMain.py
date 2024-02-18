@@ -1,6 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
-from options.options_text_conversation import OptionsTextConversation
+from src.options.options_text_conversation import OptionsTextConversation
 from src.models.models_management import ModelsManagement
 from src.models.models_text_conversation import ModelsTextConversation
 from src.options.options import Devices

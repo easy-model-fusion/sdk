@@ -1,12 +1,14 @@
+from typing import Optional
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipeline, Conversation
-from src.models.models import Models
+from src.models.model import Model
 from src.options.options import Devices
 from src.options.options_text_conversation import OptionsTextConversation
 from transformers import pipeline
 
 
-class ModelsTextConversation(Models):
+class ModelsTextConversation(Model):
     pipeline: ConversationalPipeline
     tokenizer: AutoTokenizer
     model_name: str
@@ -74,7 +76,8 @@ class ModelsTextConversation(Models):
             self.tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
         self.conversation_step += 1
 
-    def generate_prompt(self, option: OptionsTextConversation):
-        Conversation(option.prompt)
+    def generate_prompt(self,prompt: Optional[str], option: OptionsTextConversation):
+        prompt=prompt if prompt else option.prompt
+        Conversation(prompt)
         for step in range(option.max_steps):
             self.add_input()

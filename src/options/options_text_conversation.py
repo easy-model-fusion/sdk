@@ -14,7 +14,7 @@ class OptionsTextConversation(Options):
     """
     """
     Args:
-        device (Devices):
+        device Union[str, Devices]:
             The device to use for inference, specified from the `Devices` enum.
         
         prompt (str, optional):
@@ -42,10 +42,7 @@ class OptionsTextConversation(Options):
         
         batch_size (Optional[int], optional):
             The batch size for inference. Default is 1.
-        
-        device (Optional[Union[int, str, "torch.device"]], optional):
-            The device index or name for computation. Set to -1 for CPU. Default is -1.
-        
+
         arg_parser (Optional[Dict[str, Any]], optional):
             Optional additional arguments for the model.
         
@@ -65,39 +62,39 @@ class OptionsTextConversation(Options):
             The maximum number of steps for generating text. Default is 50.
 
         """
-    device : Devices
+
     prompt: str = ""
     model: Union[str, PreTrainedModel, "TFPreTrainedModel"] = None
     tokenizer: Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"] = None
     model_card: Optional[Union[str, ModelCard]] = None
     framework: Optional[str] = None
     task: str = ""
-    num_workers: Optional[int] = 8
-    batch_size: Optional[int] = 1
-    device: Optional[Union[int, str, "torch.device"]] = -1
+    num_workers: int = 8
+    batch_size: int = 1
+    device: Union[str, Devices] = -1
     arg_parser: Optional[Dict[str, Any]] = None
     torch_dtype: Optional[Union[str, torch.dtype]] = None
-    binary_output: Optional[bool] = False
-    min_length_for_response: Optional[int] = 32
-    minimum_tokens: Optional[int] = 10
-    max_steps : Optional[int] = 50
+    binary_output: bool = False
+    min_length_for_response: int = 32
+    minimum_tokens: int = 10
+    max_steps: int = 50
 
     def __init__(self,
-                 device: Devices,
-                 prompt : str = "",
+                 prompt: str = "",
                  model: Union[str, PreTrainedModel, "TFPreTrainedModel"] = None,
                  tokenizer: Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"] = None,
                  model_card: Optional[Union[str, ModelCard]] = None,
                  framework: Optional[str] = None,
                  task: str = "",
-                 num_workers: Optional[int] = 8,
-                 batch_size: Optional[int] = 1,
+                 num_workers: int = 8,
+                 batch_size: int = 1,
+                 device: Union[str, Devices] = -1,
                  arg_parser: Optional[Dict[str, Any]] = None,
                  torch_dtype: Optional[Union[str, torch.dtype]] = None,
-                 binary_output: Optional[bool] = False,
-                 min_length_for_response: Optional[int] = 32,
-                 minimum_tokens: Optional[int] = 10,
-                 max_steps: Optional[int] = 50
+                 binary_output: bool = False,
+                 min_length_for_response: int = 32,
+                 minimum_tokens: int = 10,
+                 max_steps: int = 50
                  ):
         """
         Initializes the OptionsTextGeneration.
@@ -106,16 +103,12 @@ class OptionsTextConversation(Options):
         # Initialize additional attributes
         self.prompt = prompt
         self.task = task
-        if model:
-            self.model = model
-        if tokenizer:
-            self.tokenizer = tokenizer
+        self.model = model
+        self.tokenizer = tokenizer
         if model_card:
             self.model_card = model_card
-        if num_workers:
-            self.num_workers = num_workers
-        if batch_size:
-            self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.batch_size = batch_size
         if framework:
             self.framework = framework
         if arg_parser:
@@ -123,11 +116,7 @@ class OptionsTextConversation(Options):
         if torch_dtype:
             self.torch_dtype = torch_dtype
         self.torch_dtype = torch_dtype
-        if binary_output:
-            self.binary_output = binary_output
-        if min_length_for_response:
-            self.min_length_for_response = min_length_for_response
-        if minimum_tokens:
-            self.minimum_tokens = minimum_tokens
-        if max_steps:
-            self.max_steps = max_steps
+        self.binary_output = binary_output
+        self.min_length_for_response = min_length_for_response
+        self.minimum_tokens = minimum_tokens
+        self.max_steps = max_steps
