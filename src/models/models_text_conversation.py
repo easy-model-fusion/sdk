@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipeline, Conversation
 from src.models.model import Model
@@ -11,12 +13,14 @@ class ModelsTextConversation(Model):
     tokenizer: AutoTokenizer
     model_name: str
     loaded: bool
+    chat_bot: Conversation
+    conversation_step: int = 0
+    chat_history_token_ids = []
 
     def __init__(self, model_name: str):
         """
         Initializes the ModelsTextToImage class
-        :param model_name: The name of    chat_bot: Conversation
- the model
+        :param model_name: The name of the model
         """
         super().__init__(model_name)
         self.loaded = False
@@ -60,5 +64,6 @@ class ModelsTextConversation(Model):
         self.loaded = False
         return True
 
-    def generate_prompt(self, option: OptionsTextConversation):
-        Conversation(option.prompt)
+    def generate_prompt(self, prompt: Optional[str], option: OptionsTextConversation):
+        prompt = prompt if prompt else option.prompt
+        return Conversation(prompt)
