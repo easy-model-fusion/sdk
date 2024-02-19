@@ -64,20 +64,6 @@ class ModelsTextConversation(Model):
         self.loaded = False
         return True
 
-    def add_input(self):
-        new_user_input_ids = self.tokenizer.encode(input(">> User:") + self.tokenizer.eos_token, return_tensors='pt')
-        # append the new user input tokens to the chat history
-        bot_input_ids = torch.cat([self.chat_history_ids, new_user_input_ids],
-                                  dim=-1) if self.conversation_step > 0 else new_user_input_ids
-        # generated a response while limiting the total chat history to 1000 tokens,
-        chat_history_ids = self.pipeline.generate(bot_input_ids, max_length=1000,
-                                                  pad_token_id=self.tokenizer.eos_token_id)
-        print("Chatbot: {}".format(
-            self.tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)))
-        self.conversation_step += 1
-
-    def generate_prompt(self,prompt: Optional[str], option: OptionsTextConversation):
-        prompt=prompt if prompt else option.prompt
-        Conversation(prompt)
-        for step in range(option.max_steps):
-            self.add_input()
+    def generate_prompt(self, prompt: Optional[str], option: OptionsTextConversation):
+        prompt = prompt if prompt else option.prompt
+        return Conversation(prompt)
