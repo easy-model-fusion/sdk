@@ -63,7 +63,7 @@ class OptionsTextConversation(Options):
 
         """
 
-    prompt: str = ""
+    prompt: str = "Hello"
     model: Union[str, PreTrainedModel, "TFPreTrainedModel"] = None
     tokenizer: Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"] = None
     model_card: Optional[Union[str, ModelCard]] = None
@@ -80,7 +80,7 @@ class OptionsTextConversation(Options):
     max_steps: int = 50
 
     def __init__(self,
-                 prompt: str = "",
+                 prompt: str = "Hello",
                  model: Union[str, PreTrainedModel, "TFPreTrainedModel"] = None,
                  tokenizer: Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"] = None,
                  model_card: Optional[Union[str, ModelCard]] = None,
