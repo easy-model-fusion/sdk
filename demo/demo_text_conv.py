@@ -28,6 +28,7 @@ class DemoTextConv:
         self.demo(model_management.loaded_model)
 
     def demo(self, model: ModelsTextConversation):
+        print("Model name : ", model.model_name)
         print("User : Hello")
 
         if model :
