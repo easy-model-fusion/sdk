@@ -90,6 +90,9 @@ class Model:
     def validate(self):
         """
         Validate the model.
+
+        Returns:
+            Program exits if invalid
         """
 
         # Check if the model name is not empty
@@ -105,16 +108,19 @@ class Model:
         """
         return self.module == TRANSFORMERS
 
-    def build_paths(self, base_path: str):
+    def build_paths(self, models_path: str) -> None:
         """
         Build paths for the model.
 
         Args:
-            base_path (str): The base path where all the models are located.
+            models_path (str): The base path where all the models are located.
+
+        Returns:
+            None
         """
 
         # Local path to the model directory
-        self.base_path = os.path.join(base_path, self.name)
+        self.base_path = os.path.join(models_path, self.name)
 
         # Local path where the model will be downloaded
         self.download_path = self.base_path
@@ -123,16 +129,25 @@ class Model:
         if self.is_transformers():
             self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def download(self, base_path: str, skip: str, overwrite=False):
+    def download(self, models_path: str, skip: str = "", overwrite=False) -> str:
         """
         Download the model.
+
+        Args:
+            models_path (str): The base path where all the models are located.
+            skip (str): Optional. Skips the download process of either the model or the tokenizer.
+            overwrite (bool): Optional. Whether to overwrite the downloaded model if it exists.
+
+        Returns:
+            Program exits with error if the download fails.
+            If it succeeds, it returns the JSON props used for downloading the model.
         """
 
         # Validate mandatory arguments
         self.validate()
 
         # Build paths
-        self.build_paths(base_path)
+        self.build_paths(models_path)
 
         # Output result
         result_dict = {}
@@ -164,19 +179,21 @@ class Model:
         return json.dumps(result_dict, indent=4)
 
 
-def download_model(model: Model, overwrite: bool):
+def download_model(model: Model, overwrite: bool) -> None:
     """
     Download the model.
 
     Args:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
+
+    Returns:
+        None. Exit with error if anything goes wrong.
     """
 
     # Check if the model already exists at path
     if is_path_valid_for_download(model.download_path, overwrite):
-        exit_error(f"Model '{model.download_path}' already exists.\n"
-                   f"Add '{SKIP_TAG} {DOWNLOAD_MODEL}' to skip the model download process.")
+        exit_error(f"Model '{model.download_path}' already exists.")
 
     # Model class is not provided, trying the default one
     if model.class_name is None or model.class_name.strip() == '':
@@ -198,13 +215,16 @@ def download_model(model: Model, overwrite: bool):
         exit_error(f"Error while downloading model {model.name}: {e}", ERROR_EXIT_MODEL)
 
 
-def download_transformers_tokenizer(model: Model, overwrite: bool):
+def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     """
     Download a transformers tokenizer for the model.
 
     Args:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
+
+    Returns:
+        None. Exit with error if anything goes wrong.
     """
 
     try:
@@ -217,8 +237,7 @@ def download_transformers_tokenizer(model: Model, overwrite: bool):
 
         # Check if the tokenizer_path already exists
         if is_path_valid_for_download(model.tokenizer.download_path, overwrite):
-            exit_error(f"Tokenizer '{model.tokenizer.download_path}' already exists.\n"
-                       f"Add '{SKIP_TAG} {DOWNLOAD_TOKENIZER}' to skip the tokenizer download process.")
+            exit_error(f"Tokenizer '{model.tokenizer.download_path}' already exists.")
 
         # Processing options
         options = process_options(model.tokenizer.options or [])
@@ -308,7 +327,7 @@ def process_options(options_list: list) -> dict:
     return options_dict
 
 
-def map_args_to_model(args):
+def map_args_to_model(args) -> Model:
     """
     Maps command-line arguments to a Model object.
 
@@ -337,7 +356,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Script to download a specific model.")
 
     # Mandatory arguments related to the model
-    parser.add_argument("path", type=str, help="Path to the downloads directory")
+    parser.add_argument("models_path", type=str, help="Path to the downloads directory")
     parser.add_argument("model_name", type=str, help="Model name")
     parser.add_argument("model_module", type=str, help=f"Module name", choices=AUTHORIZED_MODULE_NAMES)
 
@@ -369,7 +388,7 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    properties = model.download(args.path, args.skip, args.overwrite)
+    properties = model.download(args.models_path, args.skip, args.overwrite)
 
     # Running from emf-client:
     if args.emf_client:
