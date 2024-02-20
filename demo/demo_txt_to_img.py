@@ -9,7 +9,8 @@ class DemoMainTxtToImg():
 
     def __init__(self):
         options = OptionsTextToImage(
-            prompt="Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
+            prompt="Astronaut in a jungle, cold color palette, "
+                   "muted colors, detailed, 8k",
             device=Devices.GPU,
             image_width=512,
             image_height=512
@@ -19,7 +20,8 @@ class DemoMainTxtToImg():
         model_management = ModelsManagement()
         model_stabilityai = ModelTextToImage(model_stabilityai_name)
 
-        model_management.add_model(new_model=model_stabilityai, model_options=options)
+        model_management.add_model(new_model=model_stabilityai,
+                                   model_options=options)
         model_management.load_model(model_stabilityai_name)
 
         image = model_management.generate_prompt()

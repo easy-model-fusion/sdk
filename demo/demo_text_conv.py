@@ -43,7 +43,8 @@ class DemoTextConv:
                 dim=-1) if model.conversation_step > 0 else (
                 new_user_input_ids)
 
-            # generated a response while limiting the total chat history to 1000 tokens,
+            # generated a response while limiting the total
+            # chat history to 1000 tokens,
             chat_history_ids = model.pipeline.generate(
                 bot_input_ids, max_length=1000,
                 pad_token_id=model.tokenizer.eos_token_id)
@@ -55,12 +56,9 @@ class DemoTextConv:
             new_user_input_ids = model.tokenizer.encode(
                 "How are you ? " + model.tokenizer.eos_token,
                 return_tensors='pt')
-
-            # append the new user input tokens to the chat history
             bot_input_ids = torch.cat(
                 [model.chat_history_ids, new_user_input_ids],
                 dim=-1) if model.conversation_step > 0 else new_user_input_ids
-            # generated a response while limiting the total chat history to 1000 tokens,
             chat_history_ids = model.pipeline.generate(
                 bot_input_ids,
                 max_length=1000,
