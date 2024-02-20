@@ -5,7 +5,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipe
 from models.model import Model
 from options.options import Devices
 from options.options_text_conversation import OptionsTextConversation
-from transformers import pipeline
 
 
 class ModelsTextConversation(Model):
@@ -34,7 +33,10 @@ class ModelsTextConversation(Model):
             return
 
         self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True, padding_side='left')
+        self.tokenizer = AutoTokenizer.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                padding_side='left')
 
     def load_model(self, option: OptionsTextConversation) -> bool:
         """
@@ -64,6 +66,8 @@ class ModelsTextConversation(Model):
         self.loaded = False
         return True
 
-    def generate_prompt(self, prompt: Optional[str], option: OptionsTextConversation):
+    def generate_prompt(
+            self, prompt: Optional[str],
+            option: OptionsTextConversation):
         prompt = prompt if prompt else option.prompt
         return Conversation(prompt)
