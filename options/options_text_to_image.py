@@ -84,7 +84,8 @@ class OptionsTextToImage(Options):
         :param device: The device to use generate prompt
         :param prompt: The prompt to give to the model
         :param image_width: The width of the resulting image (1024 by default)
-        :param image_height: The height of the resulting image (1024 by default)
+        :param image_height: The height of the resulting image
+            (1024 by default)
         :param num_inference_steps (`int`, *optional*, defaults to 50):
             The number of denoising steps. More denoising steps usually lead to
              a higher quality image at the expense of slower inference.
@@ -101,14 +102,14 @@ class OptionsTextToImage(Options):
             As a result, the returned sample will still retain a substantial
             amount of noise as determined by the discrete timesteps selected by
             the scheduler. The denoising_end parameter should ideally be
-            utilized when this pipeline forms a part of a "Mixture of Denoisers"
-             multi-pipeline setup.
+            utilized when this pipeline forms a part of a
+            "Mixture of Denoisers" multi-pipeline setup.
         :param guidance_scale (`float`, *optional*, defaults to 5.0):
             Guidance scale as defined in Classifier-Free Diffusion Guidance.
             `guidance_scale` is defined as `w` of equation 2. of the Imagen
             Paper. Guidance scale is enabled by setting `guidance_scale > 1`.
             Higher guidance scale encourages generating images closely linked
-            to the text `prompt`, usually at the expense of lower image quality.
+            to the text `prompt`, usually at the expense of lower image quality
         :param negative_prompt (`str` or `List[str]`, *optional*):
             The prompt or prompts not to guide the image generation. If not
             defined, one has to pass `negative_prompt_embeds` instead.
@@ -146,10 +147,10 @@ class OptionsTextToImage(Options):
             text inputs, *e.g.* prompt weighting. If not provided, pooled text
             embeddings will be generated from `prompt` input argument.
         :param negative_pooled_prompt_embeds (`torch.FloatTensor`, *optional*):
-            Pre-generated negative pooled text embeddings. Can be used to easily
-            tweak text inputs, *e.g.* prompt weighting. If not provided, pooled
-             negative_prompt_embeds will be generated from `negative_prompt`
-            input argument.
+            Pre-generated negative pooled text embeddings.
+            Can be used to easily tweak text inputs, *e.g.* prompt weighting.
+            If not provided, pooled negative_prompt_embeds will be generated
+            from `negative_prompt` input argument.
         :param ip_adapter_image: (`PipelineImageInput`, *optional*):
             Optional image input to work with IP Adapters.
         :param output_type (`str`, *optional*, defaults to `"pil"`):
@@ -163,29 +164,30 @@ class OptionsTextToImage(Options):
             `AttentionProcessor` as defined under `self.processor` in
             diffusers.models.attention_processor.
         :param guidance_rescale (`float`, *optional*, defaults to 0.0):
-            Guidance rescale factor proposed by Common Diffusion Noise Schedules
-             and Sample Steps are Flawed. `guidance_scale` is defined as `φ` in
-             equation 16. of Common Diffusion Noise Schedules and Sample Steps
-            are Flawed. Guidance rescale factor should fix overexposure when
-            using zero terminal SNR.
+            Guidance rescale factor proposed by Common Diffusion Noise
+            Schedules and Sample Steps are Flawed. `guidance_scale` is defined
+            as `φ` in equation 16. of Common Diffusion Noise Schedules and
+            Sample Steps are Flawed. Guidance rescale factor should fix
+            overexposure when using zero terminal SNR.
         :param original_size
             (`Tuple[int]`, *optional*, defaults to (1024, 1024)):
             If `original_size` is not the same as `target_size` the image will
             appear to be down- or upsampled. `original_size` defaults to
             `(height, width)` if not specified. Part of SDXL's
-            micro-conditioning as explained in section 2.2 of the documentation.
+            micro-conditioning as explained in section 2.2 of the documentation
         :param crops_coords_top_left
             (`Tuple[int]`, *optional*, defaults to (0, 0)):
             `crops_coords_top_left` can be used to generate an image that
             appears to be "cropped" from the position `crops_coords_top_left`
             downwards. Favorable, well-centered images are usually achieved by
             setting `crops_coords_top_left` to (0, 0). Part of SDXL's
-            micro-conditioning as explained in section 2.2 of the documentation.
-        :param target_size (`Tuple[int]`, *optional*, defaults to (1024, 1024)):
+            micro-conditioning as explained in section 2.2 of the documentation
+        :param target_size
+            (`Tuple[int]`, *optional*, defaults to (1024, 1024)):
             For most cases, `target_size` should be set to the desired height
             and width of the generated image. If not specified it will default
-            to `(height, width)`. Part of SDXL's micro-conditioning as explained
-            in section 2.2 of the documentation.
+            to `(height, width)`. Part of SDXL's micro-conditioning as
+            explained in section 2.2 of the documentation.
         :param negative_original_size
             (`Tuple[int]`, *optional*, defaults to (1024, 1024)):
             To negatively condition the generation process based on a specific
@@ -199,20 +201,21 @@ class OptionsTextToImage(Options):
         :param negative_target_size
             (`Tuple[int]`, *optional*, defaults to (1024, 1024)):
             To negatively condition the generation process based on a target
-            image resolution. It should be as same as the `target_size` for most
-             cases. Part of SDXL's micro-conditioning as explained in section
-             2.2 of the documentation.
+            image resolution. It should be as same as the `target_size` for
+            most cases. Part of SDXL's micro-conditioning as explained in
+            section 2.2 of the documentation.
         :param callback_on_step_end (`Callable`, *optional*):
             A function that calls at the end of each denoising step during the
             inference. The function is called with the following arguments:
             `callback_on_step_end(self: DiffusionPipeline, step: int, timestep:
             int, callback_kwargs: Dict)`. `callback_kwargs` will include a list
-            of all tensors as specified by `callback_on_step_end_tensor_inputs`.
+            of all tensors as specified by `callback_on_step_end_tensor_inputs`
         :param callback_on_step_end_tensor_inputs (`List`, *optional*):
             The list of tensor inputs for the `callback_on_step_end` function.
-            The tensors specified in the list will be passed as `callback_kwargs
-            ` argument. You will only be able to include variables listed in the
-            `._callback_tensor_inputs` attribute of your pipeline class.
+            The tensors specified in the list will be passed as
+            `callback_kwargs` argument. You will only be able to include
+            variables listed in the `._callback_tensor_inputs` attribute of
+            your pipeline class.
         """
         super().__init__(device)
         self.prompt = prompt
@@ -251,7 +254,8 @@ class OptionsTextToImage(Options):
         self.target_size = target_size
         self.negative_original_size = negative_original_size
         if negative_crops_coords_top_left:
-            self.negative_crops_coords_top_left = negative_crops_coords_top_left
+            self.negative_crops_coords_top_left = (
+                                                negative_crops_coords_top_left)
         self.negative_target_size = negative_target_size
         self.clip_skip = clip_skip
         self.callback_on_step_end = callback_on_step_end

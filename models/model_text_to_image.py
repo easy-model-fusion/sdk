@@ -91,7 +91,8 @@ class ModelTextToImage(Model):
             prompt_embeds=options.prompt_embeds,
             negative_prompt_embeds=options.negative_prompt_embeds,
             pooled_prompt_embeds=options.pooled_prompt_embeds,
-            negative_pooled_prompt_embeds=options.negative_pooled_prompt_embeds,
+            negative_pooled_prompt_embeds=(
+                                        options.negative_pooled_prompt_embeds),
             ip_adapter_image=options.ip_adapter_image,
             output_type=options.output_type,
             return_dict=options.return_dict,

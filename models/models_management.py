@@ -40,7 +40,8 @@ class ModelsManagement:
         :return: True if the model is successfully loaded
         """
         if self.loaded_model:
-            print("Unload the currently loaded model before loading a new one.")
+            print(
+                "Unload the currently loaded model before loading a new one.")
             return False
 
         if model_name not in self.loaded_models_cache:
@@ -101,7 +102,8 @@ class ModelsManagement:
         return (
             self.loaded_model.generate_prompt(prompt,
                                               self.options_models[
-                                                  self.loaded_model.model_name])
+                                                  self.loaded_model.model_name]
+                                              )
         )
 
     def print_models(self):
