@@ -2,9 +2,9 @@ from typing import Optional
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipeline, Conversation
-from src.models.model import Model
-from src.options.options import Devices
-from src.options.options_text_conversation import OptionsTextConversation
+from models.model import Model
+from options.options import Devices
+from options.options_text_conversation import OptionsTextConversation
 from transformers import pipeline
 
 

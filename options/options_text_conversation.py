@@ -1,7 +1,7 @@
 from transformers.feature_extraction_utils import PreTrainedFeatureExtractor
 from transformers.image_processing_utils import BaseImageProcessor
 
-from src.options.options import Options, Devices
+from options.options import Options, Devices
 import torch
 from typing import Optional, Union, List, Dict, Tuple, Any, Callable
 from transformers import pipeline, PreTrainedModel, TFPreTrainedModel, PretrainedConfig, PreTrainedTokenizer, \
