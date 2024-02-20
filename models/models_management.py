@@ -6,7 +6,8 @@ from options.options import Options
 class ModelsManagement:
     """
     The ModelsManagement class controls all instantiated models.
-    It is with this class that you can deploy a model on a device and generate a prompt.
+    It is with this class that you can deploy a model on a device and
+    generate a prompt.
     """
 
     def __init__(self):
@@ -39,7 +40,8 @@ class ModelsManagement:
         :return: True if the model is successfully loaded
         """
         if self.loaded_model:
-            print("Unload the currently loaded model before loading a new one.")
+            print(
+                "Unload the currently loaded model before loading a new one.")
             return False
 
         if model_name not in self.loaded_models_cache:
@@ -47,7 +49,8 @@ class ModelsManagement:
             return False
 
         self.loaded_model = self.loaded_models_cache[model_name]
-        if not self.loaded_model.load_model(option=self.options_models[model_name]):
+        if not self.loaded_model.load_model(option=(
+                self.options_models[model_name])):
             print("Something went wrong while unloading the model.")
             self.loaded_model = None
             return False
@@ -88,14 +91,20 @@ class ModelsManagement:
     def generate_prompt(self, prompt: Optional[str] = None):
         """
         Generates the prompt for the loaded model with his stored options
-        :param prompt: The prompt to generate (if the prompt is empty, the options.prompt will be used)
+        :param prompt: The prompt to generate (if the prompt is empty, the
+            options.prompt will be used)
         :return: The object of type link with the model category
         """
         if not self.loaded_model:
             print("No model loaded. Load a model before generating prompts.")
             return
 
-        return self.loaded_model.generate_prompt(prompt, self.options_models[self.loaded_model.model_name])
+        return (
+            self.loaded_model.generate_prompt(prompt,
+                                              self.options_models[
+                                                  self.loaded_model.model_name]
+                                              )
+        )
 
     def print_models(self):
         """
@@ -103,5 +112,6 @@ class ModelsManagement:
         """
         print("Models in cache:")
         for model_name, model_instance in self.loaded_models_cache.items():
-            selected_indicator = "(selected)" if model_instance == self.loaded_model else ""
+            selected_indicator = (
+                "(selected)" if model_instance == self.loaded_model else "")
             print(f"- {model_name} {selected_indicator}")
