@@ -1,4 +1,4 @@
-from src.options.options import Options, Devices
+from options.options import Options, Devices
 
 
 class OptionsTextGeneration(Options):

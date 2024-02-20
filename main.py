@@ -1,6 +1,6 @@
-from src.models.models_management import ModelsManagement
-from src.models.model_text_to_image import ModelTextToImage
-from src.options.options_text_to_image import OptionsTextToImage, Devices
+from models.models_management import ModelsManagement
+from models.model_text_to_image import ModelTextToImage
+from options.options_text_to_image import OptionsTextToImage, Devices
 
 
 if __name__ == '__main__':

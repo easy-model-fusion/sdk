@@ -1,7 +1,7 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from src.models.model import Model
-from src.options.options_text_to_image import OptionsTextToImage, Devices
+from models.model import Model
+from options.options_text_to_image import OptionsTextToImage, Devices
 from typing import Optional
 
 
