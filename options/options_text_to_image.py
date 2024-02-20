@@ -1,6 +1,6 @@
 from typing import Optional, Union, List, Dict, Tuple, Any, Callable
 from diffusers.image_processor import PipelineImageInput
-from src.options.options import Options, Devices
+from options.options import Options, Devices
 import torch
 
 
