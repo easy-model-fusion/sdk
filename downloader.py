@@ -90,6 +90,9 @@ class Model:
     def validate(self):
         """
         Validate the model.
+
+        Returns:
+            Program exits if invalid
         """
 
         # Check if the model name is not empty
@@ -105,12 +108,15 @@ class Model:
         """
         return self.module == TRANSFORMERS
 
-    def build_paths(self, models_path: str):
+    def build_paths(self, models_path: str) -> None:
         """
         Build paths for the model.
 
         Args:
             models_path (str): The base path where all the models are located.
+
+        Returns:
+            None
         """
 
         # Local path to the model directory
@@ -123,9 +129,18 @@ class Model:
         if self.is_transformers():
             self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def download(self, models_path: str, skip: str, overwrite=False):
+    def download(self, models_path: str, skip: str = "", overwrite=False) -> str:
         """
         Download the model.
+
+        Args:
+            models_path (str): The base path where all the models are located.
+            skip (str): Optional. Skips the download process of either the model or the tokenizer.
+            overwrite (bool): Optional. Whether to overwrite the downloaded model if it exists.
+
+        Returns:
+            Program exits with error if the download fails.
+            If it succeeds, it returns the JSON props used for downloading the model.
         """
 
         # Validate mandatory arguments
@@ -164,13 +179,16 @@ class Model:
         return json.dumps(result_dict, indent=4)
 
 
-def download_model(model: Model, overwrite: bool):
+def download_model(model: Model, overwrite: bool) -> None:
     """
     Download the model.
 
     Args:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
+
+    Returns:
+        None. Exit with error if anything goes wrong.
     """
 
     # Check if the model already exists at path
@@ -197,13 +215,16 @@ def download_model(model: Model, overwrite: bool):
         exit_error(f"Error while downloading model {model.name}: {e}", ERROR_EXIT_MODEL)
 
 
-def download_transformers_tokenizer(model: Model, overwrite: bool):
+def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     """
     Download a transformers tokenizer for the model.
 
     Args:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if it exists.
+
+    Returns:
+        None. Exit with error if anything goes wrong.
     """
 
     try:
@@ -306,7 +327,7 @@ def process_options(options_list: list) -> dict:
     return options_dict
 
 
-def map_args_to_model(args):
+def map_args_to_model(args) -> Model:
     """
     Maps command-line arguments to a Model object.
 
