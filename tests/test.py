@@ -1,7 +1,9 @@
 import unittest
 
+
 def add(a, b):
     return a + b
+
 
 class TestAddFunction(unittest.TestCase):
 
@@ -16,6 +18,7 @@ class TestAddFunction(unittest.TestCase):
     def test_add_mixed_numbers(self):
         result = add(10, -7)
         self.assertEqual(result, 3)
+
 
 if __name__ == '__main__':
     unittest.main()
