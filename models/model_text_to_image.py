@@ -1,7 +1,7 @@
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from src.models.model import Model
-from src.options.options_text_to_image import OptionsTextToImage, Devices
+from models.model import Model
+from options.options_text_to_image import OptionsTextToImage, Devices
 from typing import Optional
 
 
@@ -64,10 +64,12 @@ class ModelTextToImage(Model):
         self.loaded = False
         return True
 
-    def generate_prompt(self, prompt: Optional[str], options: OptionsTextToImage):
+    def generate_prompt(self, prompt: Optional[str],
+                        options: OptionsTextToImage):
         """
         Generates the prompt with the given option
-        :param prompt: The optional prompt (if the prompt is empty, the options.prompt will be used)
+        :param prompt: The optional prompt
+            (if the prompt is empty, the options.prompt will be used)
         :param options: The options of text to image model
         :return: An object image resulting from the model
         """
@@ -89,7 +91,8 @@ class ModelTextToImage(Model):
             prompt_embeds=options.prompt_embeds,
             negative_prompt_embeds=options.negative_prompt_embeds,
             pooled_prompt_embeds=options.pooled_prompt_embeds,
-            negative_pooled_prompt_embeds=options.negative_pooled_prompt_embeds,
+            negative_pooled_prompt_embeds=(
+                                        options.negative_pooled_prompt_embeds),
             ip_adapter_image=options.ip_adapter_image,
             output_type=options.output_type,
             return_dict=options.return_dict,
@@ -99,9 +102,11 @@ class ModelTextToImage(Model):
             crops_coords_top_left=options.crops_coords_top_left,
             target_size=options.target_size,
             negative_original_size=options.negative_original_size,
-            negative_crops_coords_top_left=options.negative_crops_coords_top_left,
+            negative_crops_coords_top_left=(
+                options.negative_crops_coords_top_left),
             negative_target_size=options.negative_target_size,
             clip_skip=options.clip_skip,
             callback_on_step_end=options.callback_on_step_end,
-            callback_on_step_end_tensor_inputs=options.callback_on_step_end_tensor_inputs
+            callback_on_step_end_tensor_inputs=(
+                options.callback_on_step_end_tensor_inputs)
         ).images[0]
