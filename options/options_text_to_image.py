@@ -43,7 +43,7 @@ class OptionsTextToImage(Options):
 
     def __init__(
             self,
-            device: Devices,
+            device: Union[str, Devices],
             prompt: Union[str, List[str]],
             prompt_2: Optional[Union[str, List[str]]] = None,
             image_width: Optional[int] = None,
