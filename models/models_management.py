@@ -88,7 +88,7 @@ class ModelsManagement:
         """
         self.options_models[model_name] = options
 
-    def generate_prompt(self, prompt: Optional[str] = None):
+    def generate_prompt(self, prompt: Optional[str] = None, **kwargs):
         """
         Generates the prompt for the loaded model with his stored options
         :param prompt: The prompt to generate (if the prompt is empty, the
@@ -100,10 +100,12 @@ class ModelsManagement:
             return
 
         return (
-            self.loaded_model.generate_prompt(prompt,
-                                              self.options_models[
-                                                  self.loaded_model.model_name]
-                                              )
+            self.loaded_model.generate_prompt(
+                prompt,
+                self.options_models[
+                    self.loaded_model.model_name],
+                **kwargs
+            )
         )
 
     def print_models(self):
