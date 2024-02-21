@@ -2,7 +2,7 @@ import torch
 from typing import Optional
 from transformers import (AutoModel, AutoTokenizer,
                           ConversationalPipeline, Conversation)
-from models import Model
+from .model import Model
 from options import Devices, OptionsTextConversation
 
 

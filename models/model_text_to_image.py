@@ -1,8 +1,8 @@
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
-from models import Model
 from options import OptionsTextToImage, Devices
 from typing import Optional
+from .model import Model
 
 
 class ModelTextToImage(Model):

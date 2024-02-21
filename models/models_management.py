@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from models import Model
+from .model import Model
 from options import Options
 
 

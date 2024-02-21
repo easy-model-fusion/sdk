@@ -1,5 +1,5 @@
 import torch
-from options import Options, Devices
+from .options import Options, Devices
 from typing import Optional, Union, Dict, Any
 from transformers import (PreTrainedModel, TFPreTrainedModel,
                           PreTrainedTokenizer,
