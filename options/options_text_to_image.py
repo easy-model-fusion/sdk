@@ -1,6 +1,6 @@
 from typing import Optional, Union, List, Dict, Tuple, Any, Callable
 from diffusers.image_processor import PipelineImageInput
-from options.options import Options, Devices
+from .options import Options, Devices
 import torch
 
 
@@ -43,7 +43,7 @@ class OptionsTextToImage(Options):
 
     def __init__(
             self,
-            device: Devices,
+            device: Union[str, Devices],
             prompt: Union[str, List[str]],
             prompt_2: Optional[Union[str, List[str]]] = None,
             image_width: Optional[int] = None,
