@@ -1,11 +1,9 @@
-from typing import Optional
-
 import torch
+from typing import Optional
 from transformers import (AutoModel, AutoTokenizer,
                           ConversationalPipeline, Conversation)
-from models.model import Model
-from options.options import Devices
-from options.options_text_conversation import OptionsTextConversation
+from models import Model
+from options import Devices, OptionsTextConversation
 
 
 class ModelsTextConversation(Model):

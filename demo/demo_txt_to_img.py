@@ -1,8 +1,5 @@
-from models.model_text_to_image import ModelTextToImage
-from models.models_management import ModelsManagement
-
-from options.options import Devices
-from options.options_text_to_image import OptionsTextToImage
+from models import ModelTextToImage, ModelsManagement
+from options import Devices, OptionsTextToImage
 
 
 class DemoTxtToImg:

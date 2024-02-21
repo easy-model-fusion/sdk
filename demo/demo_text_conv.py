@@ -1,8 +1,6 @@
 import torch
-from models.models_management import ModelsManagement
-from models.model_text_conversation import ModelsTextConversation
-from options.options import Devices
-from options.options_text_conversation import OptionsTextConversation
+from models import ModelsManagement, ModelsTextConversation
+from options import Devices, OptionsTextConversation
 
 
 class DemoTextConv:

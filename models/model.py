@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from options.options import Options
+from options import Options
 from typing import Optional
 
 
