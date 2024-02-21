@@ -1,28 +1,26 @@
-from typing import Optional
-
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
+from typing import Optional
+from transformers import (AutoModel, AutoTokenizer,
                           ConversationalPipeline, Conversation)
-from models.model import Model
-from options.options import Devices
-from options.options_text_conversation import OptionsTextConversation
+from .model import Model
+from options import Devices, OptionsTextConversation
 
 
 class ModelsTextConversation(Model):
     pipeline: ConversationalPipeline
     tokenizer: AutoTokenizer
-    model_name: str
     loaded: bool
     chat_bot: Conversation
     conversation_step: int = 0
     chat_history_token_ids = []
 
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, model_path: str):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
+        :param model_path: The path of the model
         """
-        super().__init__(model_name)
+        super().__init__(model_name, model_path)
         self.loaded = False
         self.create_pipeline()
 
@@ -33,9 +31,9 @@ class ModelsTextConversation(Model):
         if self.loaded:
             return
 
-        self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_name)
+        self.pipeline = AutoModel.from_pretrained(self.model_path)
         self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
+                self.model_path,
                 trust_remote_code=True,
                 padding_side='left')
 
@@ -69,6 +67,7 @@ class ModelsTextConversation(Model):
 
     def generate_prompt(
             self, prompt: Optional[str],
-            option: OptionsTextConversation):
+            option: OptionsTextConversation,
+            **kwargs):
         prompt = prompt if prompt else option.prompt
-        return Conversation(prompt)
+        return Conversation(prompt, **kwargs)

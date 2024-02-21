@@ -1,11 +1,8 @@
-from models.model_text_to_image import ModelTextToImage
-from models.models_management import ModelsManagement
-
-from options.options import Devices
-from options.options_text_to_image import OptionsTextToImage
+from models import ModelTextToImage, ModelsManagement
+from options import Devices, OptionsTextToImage
 
 
-class DemoMainTxtToImg():
+class DemoTxtToImg:
 
     def __init__(self):
         options = OptionsTextToImage(
@@ -13,12 +10,14 @@ class DemoMainTxtToImg():
                    "muted colors, detailed, 8k",
             device=Devices.GPU,
             image_width=512,
-            image_height=512
+            image_height=512,
         )
 
         model_stabilityai_name = "stabilityai/sdxl-turbo"
+        model_stabilityai_path = "stabilityai/sdxl-turbo"
         model_management = ModelsManagement()
-        model_stabilityai = ModelTextToImage(model_stabilityai_name)
+        model_stabilityai = ModelTextToImage(model_stabilityai_name,
+                                             model_stabilityai_path)
 
         model_management.add_model(new_model=model_stabilityai,
                                    model_options=options)
