@@ -1,16 +1,21 @@
-from sdk import Models
+import argparse
+from demo.demo_text_conv import DemoTextConv
+from demo.demo_txt_to_img import DemoMainTxtToImg
 
 if __name__ == '__main__':
-    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-    width = 256
-    height = 256
 
-    models = Models()
-    models.add_model("stabilityai/sdxl-turbo")
+    parser = argparse.ArgumentParser(description='Choose a Model type :'
+                                                 ' TextConv or TxtToImg')
+    subparser = parser.add_subparsers(dest='option')
 
-    models.load_model("stabilityai/sdxl-turbo")
-    image = models.generate_prompt(prompt, width, height)
-    image.show()
+    conv = subparser.add_parser('TextConv')
+    img = subparser.add_parser('TxtToImg')
+    args = parser.parse_args()
 
-
-
+    match args.option:
+        case 'TextConv':
+            DemoTextConv()
+        case ('TxtToImg'):
+            DemoMainTxtToImg()
+        case _:
+            DemoMainTxtToImg()
