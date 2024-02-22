@@ -1,5 +1,5 @@
-from models import ModelTextToImage, ModelsManagement
-from options import Devices, OptionsTextToImage
+from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.options import Devices, OptionsTextToImage
 
 
 class DemoTxtToImg:
