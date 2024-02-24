@@ -1,7 +1,7 @@
 from typing import Optional
 
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
+from transformers import (AutoModel, AutoModelForCausalLM, AutoTokenizer,
                           ConversationalPipeline, Conversation)
 from models.model import Model
 from options.options import Devices
@@ -9,7 +9,7 @@ from options.options_text_conversation import OptionsTextConversation
 
 
 class ModelsTextConversation(Model):
-    pipeline: ConversationalPipeline
+    pipeline: AutoModel
     tokenizer: AutoTokenizer
     model_name: str
     loaded: bool
@@ -38,6 +38,7 @@ class ModelsTextConversation(Model):
                 self.model_name,
                 trust_remote_code=True,
                 padding_side='left')
+
 
     def load_model(self, option: OptionsTextConversation) -> bool:
         """
