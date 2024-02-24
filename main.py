@@ -1,6 +1,6 @@
 import argparse
-from demo.demo_text_conv import DemoTextConv
-from demo.demo_txt_to_img import DemoMainTxtToImg
+from demo import DemoTextConv, DemoTxtToImg
+
 
 if __name__ == '__main__':
 
@@ -16,6 +16,6 @@ if __name__ == '__main__':
         case 'TextConv':
             DemoTextConv()
         case ('TxtToImg'):
-            DemoMainTxtToImg()
+            DemoTxtToImg()
         case _:
-            DemoMainTxtToImg()
+            DemoTxtToImg()

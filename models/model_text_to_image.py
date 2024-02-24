@@ -1,8 +1,8 @@
-from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 import torch
-from models.model import Model
-from options.options_text_to_image import OptionsTextToImage, Devices
+from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
+from sdk.options import OptionsTextToImage, Devices
 from typing import Optional
+from sdk.models import Model
 
 
 class ModelTextToImage(Model):
@@ -10,15 +10,15 @@ class ModelTextToImage(Model):
     This class implements methods to generate images with a text prompt
     """
     pipeline: StableDiffusionXLPipeline
-    model_name: str
     loaded: bool
 
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, model_path: str):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
+        :param model_path: The path of the model
         """
-        super().__init__(model_name)
+        super().__init__(model_name, model_path)
         self.loaded = False
         self.create_pipeline()
 
@@ -30,7 +30,7 @@ class ModelTextToImage(Model):
             return
 
         self.pipeline = DiffusionPipeline.from_pretrained(
-            self.model_name,
+            self.model_path,
             torch_dtype=torch.float16,
             use_safetensors=True,
             add_watermarker=False,
@@ -65,7 +65,8 @@ class ModelTextToImage(Model):
         return True
 
     def generate_prompt(self, prompt: Optional[str],
-                        options: OptionsTextToImage):
+                        options: OptionsTextToImage,
+                        **kwargs):
         """
         Generates the prompt with the given option
         :param prompt: The optional prompt
@@ -108,5 +109,6 @@ class ModelTextToImage(Model):
             clip_skip=options.clip_skip,
             callback_on_step_end=options.callback_on_step_end,
             callback_on_step_end_tensor_inputs=(
-                options.callback_on_step_end_tensor_inputs)
+                options.callback_on_step_end_tensor_inputs),
+            **kwargs
         ).images[0]
