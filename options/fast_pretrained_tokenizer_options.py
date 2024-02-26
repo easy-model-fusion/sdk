@@ -1,21 +1,15 @@
 import tokenizers
-import torch
 from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
-
-from sdk.options import Options, Devices
 from typing import Optional, Union, Dict, Any, List
-from transformers import (PreTrainedModel, TFPreTrainedModel,
-                          PreTrainedTokenizer,
-                          PreTrainedTokenizerFast, ModelCard)
 
 from sdk.options.tokenizer_options import TokenizerOptions
 
 
 class FastPreTrainedTokenizerOptions(TokenizerOptions):
-    """
-    Options for Fast PreTrainedTokenizers
-    """
 
+    """
+    Options for Fast PreTrained Tokenizers
+    """
     model_max_length : int = VERY_LARGE_INTEGER,
     padding_side : Optional[str] = None,
     truncation_side : Optional[str] = None,
@@ -53,8 +47,9 @@ class FastPreTrainedTokenizerOptions(TokenizerOptions):
                  tokenizer_object: tokenizers.Tokenizer = None,
                  tokenizer_file: str = None,
                  ):
+
         # Initialize additional attributes
-        self.model_max_length = model_max_length
+        super().__init__(model_max_length)
         if padding_side :
             self.padding_side = padding_side
         if truncation_side:

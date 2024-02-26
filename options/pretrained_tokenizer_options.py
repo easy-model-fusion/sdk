@@ -1,19 +1,12 @@
 import tokenizers
-import torch
 from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
-
-from sdk.options import Options, Devices
 from typing import Optional, Union, Dict, Any, List
-from transformers import (PreTrainedModel, TFPreTrainedModel,
-                          PreTrainedTokenizer,
-                          PreTrainedTokenizerFast, ModelCard)
-
 from sdk.options.tokenizer_options import TokenizerOptions
 
 
 class PreTrainedTokenizerOptions(TokenizerOptions):
     """
-    Options for text-Generation models
+    Options for PreTrained Tokenizers
     """
     model_max_length: int = VERY_LARGE_INTEGER,
     padding_side: Optional[str] = None,
@@ -48,32 +41,31 @@ class PreTrainedTokenizerOptions(TokenizerOptions):
                  clean_up_tokenization_spaces: bool = True,
                  split_special_tokens: bool = False,
                  ):
-         # Initialize additional attributes
-        self.model_max_length = model_max_length
-        if padding_side :
+        # Initialize additional attributes
+        super().__init__(model_max_length)
+        if padding_side:
             self.padding_side = padding_side
         if truncation_side:
             self.truncation_side = truncation_side
-        if chat_template :
+        if chat_template:
             self.chat_template = chat_template
-        if model_input_names :
+        if model_input_names:
             self.model_input_names = model_input_names
-        if bos_token :
+        if bos_token:
             self.bos_token = bos_token
-        if eos_token :
+        if eos_token:
             self.eos_token = eos_token
-        if unk_token :
+        if unk_token:
             self.unk_token = unk_token
-        if sep_token :
+        if sep_token:
             self.sep_token = sep_token
-        if pad_token :
+        if pad_token:
             self.pad_token = pad_token
-        if cls_token :
+        if cls_token:
             self.cls_token = cls_token
-        if mask_token :
+        if mask_token:
             self.mask_token = mask_token
-        if additional_special_tokens :
+        if additional_special_tokens:
             self.additional_special_tokens = additional_special_tokens
         self.clean_up_tokenization_spaces = clean_up_tokenization_spaces
         self.split_special_tokens = split_special_tokens
-

@@ -1,15 +1,15 @@
+from abc import abstractmethod
 from typing import Optional
+
+from sdk.options.tokenizer_options import TokenizerOptions
 
 
 class Tokenizer:
     """
     Abstract base class for all tokenizers
     """
-    model_name: str
+    model_max_length: int
 
-    def __init__(self, model_name: str):
-        """
-        Initializes the Tokenizer with the given name
-        :param model_name: The name of the model
-        """
-        self.model_name = model_name
+    def __init__(self, model_max_length):
+        self.model_max_length = model_max_length
+
