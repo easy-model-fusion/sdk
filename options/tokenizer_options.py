@@ -1,17 +1,26 @@
 from abc import ABC
-from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
+from typing import Union
+from enum import Enum
+
+
+class Devices(Enum):
+    """
+    Enumeration of devices supported
+    """
+    GPU = "cuda"
+    CPU = "cpu"
+    RESET = "meta"
 
 
 class TokenizerOptions(ABC):
     """
-    Abstract class defining the options used for tokenizers
+    Abstract class defining the options used for models
     """
+    device: Union[str, Devices]
 
-    model_max_length: int = VERY_LARGE_INTEGER,
-
-    def __init__(self, model_max_length: int):
+    def __init__(self, device: Devices):
         """
         Initializes the options class with the given device
-        :param model_max_length: The max length of the model
+             :param device:  used for generation
         """
-        self.model_max_length = model_max_length
+        self.device = device

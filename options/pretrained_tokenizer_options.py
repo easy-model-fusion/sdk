@@ -1,6 +1,8 @@
 import tokenizers
 from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 from typing import Optional, Union, Dict, Any, List
+
+from sdk import Devices
 from sdk.options.tokenizer_options import TokenizerOptions
 
 
@@ -8,6 +10,7 @@ class PreTrainedTokenizerOptions(TokenizerOptions):
     """
     Options for PreTrained Tokenizers
     """
+    device: Union[str, Devices] = -1,
     model_max_length: int = VERY_LARGE_INTEGER,
     padding_side: Optional[str] = None,
     truncation_side: Optional[str] = None,
@@ -25,6 +28,7 @@ class PreTrainedTokenizerOptions(TokenizerOptions):
     split_special_tokens: bool = False,
 
     def __init__(self,
+                 device: Union[str, Devices] = -1,
                  model_max_length: int = VERY_LARGE_INTEGER,
                  padding_side: Optional[str] = None,
                  truncation_side: Optional[str] = None,
@@ -42,7 +46,8 @@ class PreTrainedTokenizerOptions(TokenizerOptions):
                  split_special_tokens: bool = False,
                  ):
         # Initialize additional attributes
-        super().__init__(model_max_length)
+        super().__init__(device)
+        self.model_max_length = model_max_length
         if padding_side:
             self.padding_side = padding_side
         if truncation_side:

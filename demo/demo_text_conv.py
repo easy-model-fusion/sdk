@@ -1,6 +1,8 @@
 import torch
 from sdk.models import ModelsManagement, ModelsTextConversation
 from sdk.options import Devices, OptionsTextConversation
+from sdk.options.fast_pretrained_tokenizer_options import FastPreTrainedTokenizerOptions
+from sdk.tokenizers.pre_trained_fast import PreTrainedFast
 
 
 class DemoTextConv:
@@ -11,15 +13,23 @@ class DemoTextConv:
 
         options = OptionsTextConversation(
             prompt="Hello",
-            device=Devices.CPU,
+            device=Devices.GPU,
             model=model_name,
             batch_size=3,
             minimum_tokens=50
         )
+        tokenizer_options = FastPreTrainedTokenizerOptions(
+            device=Devices.GPU
+        )
 
         model_management = ModelsManagement()
         model = ModelsTextConversation(model_name, model_path)
-
+        model.tokenizer_options = tokenizer_options
+        model.tokenizer = PreTrainedFast(
+            model_name="facebook/blenderbot-400M-distill",
+            model_path="facebook/blenderbot-400M-distill",
+            tokenizer_options=tokenizer_options
+        )
         model_management.add_model(new_model=model, model_options=options)
         model_management.load_model(model_name)
 
@@ -39,6 +49,7 @@ class DemoTextConv:
         bot_input_ids = torch.cat(
             [model.chat_history_ids,
              new_user_input_ids],
+            device="GPU",
             dim=-1) if model.conversation_step > 0 else (
             new_user_input_ids)
 
