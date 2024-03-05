@@ -36,7 +36,7 @@ class TestDownloader(unittest.TestCase):
 
     def test_build_paths(self):
         model = Model(name="test_model", module="some_module")
-        models_path = "/path/to/models"
+        models_path = "/models"
         model.build_paths(models_path)
         self.assertEqual(model.base_path, os.path.join(models_path,
                                                        "test_model"))
@@ -60,9 +60,9 @@ class TestDownloader(unittest.TestCase):
     def test_is_path_valid_for_download(self, mock_exists, mock_listdir):
         mock_exists.return_value = True
         mock_listdir.return_value = ["file1", "file2"]
-        self.assertTrue(is_path_valid_for_download("/path/to/models", False))
-        mock_exists.assert_called_once_with("/path/to/models")
-        mock_listdir.assert_called_once_with("/path/to/models")
+        self.assertTrue(is_path_valid_for_download("/models", False))
+        mock_exists.assert_called_once_with("/models")
+        mock_listdir.assert_called_once_with("/models")
 
     def test_process_options(self):
         options_list = ["key1='value1'", "key2='value2'", "key3=3"]
@@ -127,7 +127,7 @@ class TestDownloader(unittest.TestCase):
 
     def test_map_args_to_model(self):
         args = argparse.Namespace(
-            models_path="/path/to/models",
+            models_path="/models",
             model_name="test_model",
             model_module="some_module",
             model_class="TestClass",
@@ -151,7 +151,7 @@ class TestDownloader(unittest.TestCase):
     @patch('builtins.print')
     def test_main(self, mock_print, mock_model_download):
         args = argparse.Namespace(
-            models_path="/path/to/models",
+            models_path="/models",
             model_name="test_model",
             model_module="some_module",
             model_class="TestClass",
@@ -166,7 +166,7 @@ class TestDownloader(unittest.TestCase):
             with patch('argparse.ArgumentParser.parse_args',
                        return_value=args):
                 main()
-                mock_model_download.assert_called_once_with("/path/to/models",
+                mock_model_download.assert_called_once_with("/models",
                                                             "tokenizer", False)
                 mock_print.assert_not_called()
 
@@ -174,7 +174,7 @@ class TestDownloader(unittest.TestCase):
     @patch('builtins.print')
     def test_main_emf_client(self, mock_print, mock_model_download):
         args = argparse.Namespace(
-            models_path="/path/to/models",
+            models_path="/models",
             model_name="test_model",
             model_module="some_module",
             model_class="TestClass",
@@ -189,7 +189,7 @@ class TestDownloader(unittest.TestCase):
             with patch('argparse.ArgumentParser.parse_args',
                        return_value=args):
                 main()
-                mock_model_download.assert_called_once_with("/path/to/models",
+                mock_model_download.assert_called_once_with("/models",
                                                             "tokenizer", False)
                 mock_print.assert_called_once()
 
@@ -207,7 +207,7 @@ class TestDownloader(unittest.TestCase):
                     download_model(model, overwrite=False)
 
         with patch('json.dumps', return_value='{}'):
-            result = model.download("/path/to/models", skip="model",
+            result = model.download("/models", skip="model",
                                     overwrite=False)
 
         model.validate.assert_called_once()
@@ -244,7 +244,7 @@ class TestDownloader(unittest.TestCase):
     def test_download_transformers_tokenizer_exists(self):
         model = Model(name="TestModel", module="transformers",
                       tokenizer=Tokenizer(class_name="AutoTokenizer"))
-        model.tokenizer.download_path = "/path/to/models/AutoTokenizer"
+        model.tokenizer.download_path = "/AutoTokenizer"
 
         with self.assertRaises(SystemExit) as context:
             download_transformers_tokenizer(model, overwrite=False)
@@ -255,9 +255,9 @@ class TestDownloader(unittest.TestCase):
     def test_download(self, mock_download_model):
         self.model_object = Model(name="example_model", module="diffusers")
         result = self.model_object.download( # noqa: F841
-            models_path="/path/to/models", overwrite=True)
+            models_path="/models", overwrite=True)
         mock_download_model.assert_called_once_with(self.model_object, True)
-        result = self.model_object.download(models_path="/path/to/models",
+        result = self.model_object.download(models_path="/models",
                                             overwrite=True, skip="")
 
         expected_result = {
@@ -267,6 +267,21 @@ class TestDownloader(unittest.TestCase):
         }
         self.assertEqual(json.loads(result), expected_result)
 
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    def test_download_transformers_tokenizer_exception(self, mock_listdir, mock_exists):
+        mock_exists.return_value = False
+        mock_listdir.return_value = []
+        model = Model(name="TestModel", module="transformers",
+                      tokenizer=Tokenizer(class_name="PreTrainedTokenizerFast"))
+        model.tokenizer.download_path = "/tokenizer_path"
+        model.base_path = "/model_path"
+
+        with self.assertRaises(SystemExit) as context:
+            download_transformers_tokenizer(model, overwrite=False)
+
+        self.assertEqual(context.exception.code, 3)
+
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main() # pragma: no cover
