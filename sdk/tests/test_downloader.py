@@ -2,13 +2,14 @@ import unittest
 import os
 import sys
 import argparse
+import json
 from unittest.mock import patch, MagicMock
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                "..")))
 from downloader import (Model, Tokenizer, download_model,
-                          download_transformers_tokenizer,
-                          is_path_valid_for_download, process_options,
-                          map_args_to_model, parse_arguments, main, exit_error)
+                        download_transformers_tokenizer,
+                        is_path_valid_for_download, process_options,
+                        map_args_to_model, parse_arguments, main, exit_error)
 
 
 class TestDownloader(unittest.TestCase):
@@ -82,7 +83,8 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(options_dict, {"key": "evaluated_value"})
 
     @patch('builtins.eval', side_effect=Exception("Evaluation failed"))
-    def test_process_options_evaluated_value_error(self, mock_eval):
+    def test_process_options_evaluated_value_error(
+            self, mock_eval):  # noqa: F841
         options_list = ["key=expression"]
         with self.assertRaises(SystemExit) as context:
             process_options(options_list)
@@ -95,7 +97,8 @@ class TestDownloader(unittest.TestCase):
         self.assertIsInstance(options_dict["key"], MagicMock)
 
     @patch('importlib.import_module', side_effect=ImportError("Import failed"))
-    def test_process_options_import_module_error(self, mock_import_module):
+    def test_process_options_import_module_error(
+            self, mock_import_module):  # noqa: F841
         options_list = ["key=module.attribute"]
         with self.assertRaises(SystemExit) as context:
             process_options(options_list)
@@ -214,7 +217,8 @@ class TestDownloader(unittest.TestCase):
     @patch('os.path.exists', return_value=True)
     @patch('os.listdir', return_value=['file1', 'file2'])
     @patch('sys.exit', side_effect=SystemExit)
-    def test_download_model_path(self, mock_exit, mock_listdir, mock_exists):
+    def test_download_model_path(
+            self, mock_exit, mock_listdir, mock_exists):  # noqa: F841
         model = Model(name='TestModel', module='transformers',
                       class_name='CustomClass')
         overwrite = False
@@ -225,7 +229,7 @@ class TestDownloader(unittest.TestCase):
 
     def test_download_with_skip_model_two(self):
         model = Model(name="TestModel", module="transformers",
-                      class_name="AutoModel", options=["key1=value1"])
+                      class_name=None, options=["key1=value1"])
         model.validate = MagicMock()
         model.path = "/model"
         model.build_paths = MagicMock()
@@ -246,6 +250,22 @@ class TestDownloader(unittest.TestCase):
             download_transformers_tokenizer(model, overwrite=False)
 
         self.assertEqual(context.exception.code, 3)
+
+    @patch('downloader.download_model')
+    def test_download(self, mock_download_model):
+        self.model_object = Model(name="example_model", module="diffusers")
+        result = self.model_object.download( # noqa: F841
+            models_path="/path/to/models", overwrite=True)
+        mock_download_model.assert_called_once_with(self.model_object, True)
+        result = self.model_object.download(models_path="/path/to/models",
+                                            overwrite=True, skip="")
+
+        expected_result = {
+            "path": self.model_object.download_path,
+            "module": self.model_object.module,
+            "class": self.model_object.class_name
+        }
+        self.assertEqual(json.loads(result), expected_result)
 
 
 if __name__ == '__main__':
