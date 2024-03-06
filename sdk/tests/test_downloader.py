@@ -7,10 +7,10 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                 "..")))
-from downloader import (Model, Tokenizer, download_model, # noqa: E402
-                          download_transformers_tokenizer,
-                          is_path_valid_for_download, process_options,
-                          map_args_to_model, main, exit_error)
+from downloader import (Model, Tokenizer, download_model,  # noqa: E402
+                        download_transformers_tokenizer,
+                        is_path_valid_for_download, process_options,
+                        map_args_to_model, main, exit_error)
 
 
 class TestDownloader(unittest.TestCase):
@@ -255,7 +255,7 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.download_model')
     def test_download(self, mock_download_model):
         self.model_object = Model(name="example_model", module="diffusers")
-        result = self.model_object.download( # noqa: F841
+        result = self.model_object.download(  # noqa: F841
             models_path="/models", overwrite=True)
         mock_download_model.assert_called_once_with(self.model_object, True)
         result = self.model_object.download(models_path="/models",
