@@ -4,7 +4,6 @@ import os
 import sys
 import importlib
 
-import diffusers
 import transformers
 
 # Authorized module names for download
@@ -396,7 +395,7 @@ def parse_arguments():
                         help="Path to the downloads directory")
     parser.add_argument("model_name", type=str,
                         help="Model name")
-    parser.add_argument("model_module", type=str, help=f"Module name",
+    parser.add_argument("model_module", type=str, help="Module name",
                         choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
