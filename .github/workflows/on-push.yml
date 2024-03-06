@@ -59,7 +59,7 @@ jobs:
       run: python -m unittest discover -s tests -p '*.py'
 
     - name: Generate coverage report
-      run: coverage run --source=. -m unittest discover -s tests -p '*.py'
+      run: coverage run --source=. -m unittest discover -s sdk/tests -p '*.py'
 
     - name: Upload coverage artifact
       if: github.event_name == 'push'
