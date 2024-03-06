@@ -47,13 +47,13 @@ class TestDownloader(unittest.TestCase):
     def test_build_paths_transformers(self):
         model = Model(name="TestModel", module="transformers")
         model.build_paths("/models")
-        expected_download_path = "/models\\TestModel\\model"
+        expected_download_path = "/models/TestModel/model"
         self.assertEqual(model.download_path, expected_download_path)
 
     def test_build_paths_non_transformers(self):
         model = Model(name="TestModel", module="non_transformers")
         model.build_paths("/models")
-        expected_download_path = "/models\\TestModel"
+        expected_download_path = "/models/TestModel"
         self.assertEqual(model.download_path, expected_download_path)
 
     @patch('os.path.exists')
