@@ -56,7 +56,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run tests with unittest
-      run: python -m unittest discover -s tests -p '*.py'
+      run: python -m unittest discover -s sdk/tests -p '*.py'
 
     - name: Generate coverage report
       run: coverage run --source=. -m unittest discover -s sdk/tests -p '*.py'
