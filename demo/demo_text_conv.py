@@ -17,7 +17,7 @@ class DemoTextConv:
             minimum_tokens=50
         )
         tokenizer_options = TokenizerOptions(
-            device=Devices.GPU,
+            device='cuda',
             padding_side='left'
         )
 

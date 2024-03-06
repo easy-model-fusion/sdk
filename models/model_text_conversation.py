@@ -48,7 +48,7 @@ class ModelsTextConversation(Model):
         if self.loaded:
             return
         self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_path)
-        self.tokenizer_object = TokenizerObject(self.model_name, self.model_path)
+
 
     def load_model(self, option: OptionsTextConversation) -> bool:
         """
@@ -61,6 +61,9 @@ class ModelsTextConversation(Model):
         if option.device == Devices.RESET:
             return False
         self.pipeline.to(option.device.value)
+        self.tokenizer_object = TokenizerObject(self.model_name,
+                                                self.model_path,
+                                                self.tokenizer_options)
         self.loaded = True
         return True
 

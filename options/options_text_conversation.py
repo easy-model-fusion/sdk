@@ -79,7 +79,6 @@ class OptionsTextConversation(Options):
     binary_output: bool = False
     min_length_for_response: int = 32
     minimum_tokens: int = 10
-    max_steps: int = 50
 
     def __init__(self,
                  prompt: str,
@@ -100,7 +99,6 @@ class OptionsTextConversation(Options):
                  binary_output: bool = False,
                  min_length_for_response: int = 32,
                  minimum_tokens: int = 10,
-                 max_steps: int = 50
                  ):
         """
         Initializes the OptionsTextGeneration.
@@ -125,4 +123,3 @@ class OptionsTextConversation(Options):
         self.binary_output = binary_output
         self.min_length_for_response = min_length_for_response
         self.minimum_tokens = minimum_tokens
-        self.max_steps = max_steps
