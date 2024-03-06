@@ -1,9 +1,6 @@
 from abc import abstractmethod
-from typing import Optional
+import torch
 from transformers import AutoTokenizer
-from sdk import ModelsTextConversation
-from sdk.options.tokenizer_options import TokenizerOptions
-
 
 class TokenizerObject:
     """
@@ -24,10 +21,22 @@ class TokenizerObject:
         """
         self.model_name = model_name
         self.model_path = model_path
+        self.create_tokenizer()
 
-    @abstractmethod
-    def start_conversation(self, prompt: Optional[str],
-                           user_input: str,
-                           model: ModelsTextConversation,
-                           option: TokenizerOptions) -> bool:
-        raise NotImplementedError
+    def create_tokenizer(self):
+        """
+        Creates the tokenizer to use
+        """
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.model_path,
+            trust_remote_code=True,
+            padding_side='left'
+            # model_max_length=tokenizer_options.model_max_length,
+            # Add more arguments ?
+        )
+
+    def prepare_input(self, prompt: str, ):
+        return self.tokenizer.encode(prompt, return_tensors="pt").to('cuda')
+
+    def decode_model_output(self, outputs: torch.Tensor):
+        return self.tokenizer.decode(outputs[0])
