@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import importlib
+from typing import Any
 
 import transformers
 
@@ -167,7 +168,6 @@ class Model:
 
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
-
             # Downloading the model
             download_model(self, overwrite)
 
@@ -178,7 +178,6 @@ class Model:
 
         # Checking for tokenizer download
         if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
-
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
@@ -217,6 +216,9 @@ def download_model(model: Model, overwrite: bool) -> None:
     # Processing options
     options = process_options(model.options or [])
 
+    # Processing access token
+    access_token = process_access_token(options, model)
+
     try:
         # Transforming from strings to actual objects
         module_obj = globals()[model.module]
@@ -224,7 +226,7 @@ def download_model(model: Model, overwrite: bool) -> None:
 
         # Downloading the model
         model_downloaded = model_class_obj.from_pretrained(
-            model.name, **options)
+            model.name, **options, token=access_token)
         model_downloaded.save_pretrained(model.download_path)
 
     except Exception as e:
@@ -363,6 +365,39 @@ def process_options(options_list: list) -> dict:
     return options_dict
 
 
+def process_access_token(options: dict, model: Model) -> str | None:
+    """
+    Process the access token since it can be provided through options and flags
+
+    Args:
+        options (dict): A dictionary containing the processed options.
+        model (Model): Model to be downloaded.
+
+    Returns:
+        str: The value of the access token (if provided).
+    """
+
+    # If conflicting access tokens are provided, raise an error
+    options_access_token = options.get('token')
+    if (options_access_token and model.access_token and
+            options_access_token != model.access_token):
+        exit_error("Conflicting access tokens provided. "
+                   "Please provide only one access token.")
+
+    access_token = ""
+
+    # Access token provided through options
+    if options_access_token:
+        options.pop('token')
+        access_token = options_access_token
+
+    # Access token provided through flags
+    elif model.access_token:
+        access_token = model.access_token
+
+    return access_token
+
+
 def map_args_to_model(args) -> Model:
     """
     Maps command-line arguments to a Model object.
@@ -444,7 +479,6 @@ def main():
 
     # Running from emf-client:
     if args.emf_client:
-
         # Write model properties to stdout: the emf-client needs to get it
         # back to update the config file
         print(properties)
