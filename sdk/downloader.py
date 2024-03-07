@@ -1,8 +1,8 @@
 import argparse
+import importlib
 import json
 import os
 import sys
-import importlib
 
 import diffusers
 import transformers
@@ -78,7 +78,8 @@ class Model:
         tokenizer (Tokenizer, optional): Tokenizer object for the model. Defaults to None.
     """
 
-    def __init__(self, name: str, module: str, class_name: str = None, options: list = None, tokenizer: Tokenizer = None):
+    def __init__(self, name: str, module: str, class_name: str = None, options: list = None,
+                 tokenizer: Tokenizer = None):
         self.base_path = None
         self.download_path = None
         self.name = name
@@ -108,6 +109,15 @@ class Model:
         """
         return self.module == TRANSFORMERS
 
+    def is_diffusers(self) -> bool:
+        """
+        Check if the model belongs to the Diffusers module.
+
+        Returns:
+            bool: True if the model belongs to Diffusers, False otherwise.
+        """
+        return self.module == DIFFUSERS
+
     def build_paths(self, models_path: str) -> None:
         """
         Build paths for the model.
@@ -129,20 +139,20 @@ class Model:
         if self.is_transformers():
             self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def download(self, models_path: str, skip: str = "", overwrite=False) -> str:
+    def process(self, models_path: str, skip: str = "", download: bool = True, overwrite: bool = False) -> str:
         """
-        Download the model.
+            Process the model.
 
-        Args:
-            models_path (str): The base path where all the models are located.
-            skip (str): Optional. Skips the download process of either the model or the tokenizer.
-            overwrite (bool): Optional. Whether to overwrite the downloaded model if it exists.
+            Args:
+                models_path (str): The base path where all the models are located.
+                skip (str): Optional. Skips the download process of either the model or the tokenizer.
+                download (bool): Optional. Whether to overwrite the downloaded model if it exists.
+                overwrite (bool): Optional. Whether to overwrite the downloaded model if it exists.
 
-        Returns:
-            Program exits with error if the download fails.
-            If it succeeds, it returns the JSON props used for downloading the model.
+            Returns:
+                Program exits with error if the process fails.
+                If it succeeds, it returns the JSON props used for downloading the model.
         """
-
         # Validate mandatory arguments
         self.validate()
 
@@ -152,20 +162,39 @@ class Model:
         # Output result
         result_dict = {}
 
+        # Get model class name
+        set_model_class(self)
+
+        # Execute download if requested
+        if download:
+            self.download(skip, overwrite, result_dict)
+
+        # Adding properties to result
+        result_dict["module"] = self.module
+        result_dict["class"] = self.class_name
+
+        # Convert the dictionary to JSON
+        return json.dumps(result_dict, indent=4)
+
+    def download(self, skip: str, overwrite: bool, result_dict: dict) -> None:
+        """
+        Download the model.
+
+        Args:
+            skip (str): Skips the download process of either the model or the tokenizer.
+            overwrite (bool): Whether to overwrite the downloaded model if it exists.
+            result_dict (dict): The result dictionary that contains the model details.
+        """
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
-
             # Downloading the model
             download_model(self, overwrite)
 
-            # Adding properties to result
+            # Adding downloaded model path to result
             result_dict["path"] = self.download_path
-            result_dict["module"] = self.module
-            result_dict["class"] = self.class_name
 
         # Checking for tokenizer download
         if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
-
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
@@ -175,8 +204,49 @@ class Model:
                 "class": self.tokenizer.class_name,
             }
 
-        # Convert the dictionary to JSON
-        return json.dumps(result_dict, indent=4)
+
+def set_model_class(model: Model) -> None:
+    """
+        Set the appropriate model class name based on the model's module.
+
+        Args:
+            model (Model): The model object.
+    """
+    if model.is_transformers():
+        set_transformers_model_class(model)
+    elif model.is_diffusers():
+        set_diffusers_model_class(model)
+
+
+def set_transformers_model_class(model: Model) -> None:
+    """
+        Set the appropriate model class for a Transformers module model.
+
+        Args:
+            model (Model): The model object.
+    """
+    # Get the configuration
+    config = transformers.AutoConfig.from_pretrained(model.name)
+
+    # map model class from model type
+    model_mapping = transformers.AutoModel._model_mapping._model_mapping
+
+    # get the mapped model class name
+    model.class_name = model_mapping[config.model_type]
+
+
+def set_diffusers_model_class(model: Model) -> None:
+    """
+        Set the appropriate model class for a Diffusers module model.
+
+        Args:
+            model (Model): The model object.
+    """
+    # Get the configuration
+    config = diffusers.DiffusionPipeline.load_config(model.name)
+
+    # get model class name from the configuration
+    model.class_name = config['_class_name']
 
 
 def download_model(model: Model, overwrite: bool) -> None:
@@ -388,11 +458,11 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    properties = model.download(args.models_path, args.skip, args.overwrite)
+    properties = model.process(args.models_path, args.skip, True, args.overwrite)
+    print(properties)
 
     # Running from emf-client:
     if args.emf_client:
-
         # Write model properties to stdout: the emf-client needs to get it back to update the config file
         print(properties)
 
