@@ -78,18 +78,21 @@ class Model:
             for downloading the model. Defaults to None.
         options (list, optional): List of options used for downloading the
             model. Defaults to None.
+        access_token (str, optional): Access token for downloading the model.
         tokenizer (Tokenizer, optional): Tokenizer object for the model.
             Defaults to None.
     """
 
     def __init__(self, name: str, module: str, class_name: str = None,
-                 options: list = None, tokenizer: Tokenizer = None):
+                 options: list = None, access_token: str = None,
+                 tokenizer: Tokenizer = None):
         self.base_path = None
         self.download_path = None
         self.name = name
         self.module = module
         self.class_name = class_name
         self.options = options or []
+        self.access_token = access_token
         self.tokenizer = tokenizer
 
     def validate(self):
@@ -376,7 +379,7 @@ def map_args_to_model(args) -> Model:
 
     # Mapping to model
     return Model(args.model_name, args.model_module, args.model_class,
-                 args.model_options, tokenizer)
+                 args.model_options, args.access_token, tokenizer)
 
 
 def parse_arguments():
@@ -399,6 +402,8 @@ def parse_arguments():
                         choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
+    parser.add_argument("--access-token", type=str,
+                        help="Access token for downloading the model")
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
     parser.add_argument("--model-options", nargs="+", help="List of options")
