@@ -23,6 +23,7 @@ from downloader import (
     TRANSFORMERS_DEFAULT_MODEL_DIRECTORY,
     DOWNLOAD_MODEL,
     DOWNLOAD_TOKENIZER,
+    KEY_ACCESS_TOKEN,
     ERROR_EXIT_DEFAULT,
     ERROR_EXIT_MODEL,
     ERROR_EXIT_MODEL_IMPORTS,
@@ -244,7 +245,7 @@ class TestDownloader(unittest.TestCase):
     def test_process_access_token_error(self):
         # Init
         access_token = "token"
-        options = {"token": access_token}
+        options = {KEY_ACCESS_TOKEN: access_token}
         model = Model(name="TestModel", module="")
         model.access_token = access_token
 
@@ -256,7 +257,7 @@ class TestDownloader(unittest.TestCase):
     def test_process_access_token_from_options(self):
         # Init
         access_token = "token"
-        options = {"token": access_token}
+        options = {KEY_ACCESS_TOKEN: access_token}
         model = Model(name="TestModel", module="")
 
         # Execute
