@@ -469,7 +469,6 @@ def main():
 
     # Run download with specified arguments
     properties = model.process(args.models_path, args.skip, args.only_configuration, args.overwrite)
-    print(properties)
 
     # Running from emf-client:
     if args.emf_client:
