@@ -60,7 +60,7 @@ class Tokenizer:
 
     def __init__(self, class_name: str = None, options: list = None):
         self.download_path = None
-        self.class_name = class_name or TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
+        self.class_name = class_name
         self.options = options or []
 
 
@@ -162,16 +162,19 @@ class Model:
         # Output result
         result_dict = {}
 
-        # Get model class name
-        set_model_class(self)
-
-        # Execute download if requested
-        if download:
-            self.download(skip, overwrite, result_dict)
+        # Set model class names
+        set_class_names(self)
 
         # Adding properties to result
         result_dict["module"] = self.module
         result_dict["class"] = self.class_name
+        result_dict["tokenizer"] = {
+            "class": self.tokenizer.class_name,
+        }
+
+        # Execute download if requested
+        if download:
+            self.download(skip, overwrite, result_dict)
 
         # Convert the dictionary to JSON
         return json.dumps(result_dict, indent=4)
@@ -198,29 +201,27 @@ class Model:
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
-            # Adding properties to result
-            result_dict["tokenizer"] = {
-                "path": self.tokenizer.download_path,
-                "class": self.tokenizer.class_name,
-            }
+            # Adding downloaded tokenizer path to result
+            result_dict["tokenizer"]["path"] = self.tokenizer.download_path
 
 
-def set_model_class(model: Model) -> None:
+def set_class_names(model: Model) -> None:
     """
         Set the appropriate model class name based on the model's module.
+        And Set the appropriate tokenizer class name if needed.
 
         Args:
             model (Model): The model object.
     """
     if model.is_transformers():
-        set_transformers_model_class(model)
+        set_transformers_class_names(model)
     elif model.is_diffusers():
-        set_diffusers_model_class(model)
+        set_diffusers_class_names(model)
 
 
-def set_transformers_model_class(model: Model) -> None:
+def set_transformers_class_names(model: Model) -> None:
     """
-        Set the appropriate model class for a Transformers module model.
+        Set the appropriate model class for a Transformers module model and tokenizer.
 
         Args:
             model (Model): The model object.
@@ -233,9 +234,10 @@ def set_transformers_model_class(model: Model) -> None:
 
     # get the mapped model class name
     model.class_name = model_mapping[config.model_type]
+    model.tokenizer.class_name = config.tokenizer_class
 
 
-def set_diffusers_model_class(model: Model) -> None:
+def set_diffusers_class_names(model: Model) -> None:
     """
         Set the appropriate model class for a Diffusers module model.
 
@@ -298,6 +300,9 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     """
 
     try:
+        # Model class is not provided, trying the default one
+        if model.tokenizer.class_name is None or model.tokenizer.class_name.strip() == '':
+            model.tokenizer.class_name = TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
 
         # Retrieving tokenizer class from module
         tokenizer_class_obj = getattr(transformers, model.tokenizer.class_name)
