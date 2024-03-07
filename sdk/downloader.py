@@ -29,6 +29,9 @@ DOWNLOAD_TOKENIZER = "tokenizer"
 SKIP_TAG = "--skip"
 SKIP_ARGUMENTS = {DOWNLOAD_MODEL, DOWNLOAD_TOKENIZER}
 
+# Access token
+KEY_ACCESS_TOKEN = "token"
+
 # Error exit codes
 ERROR_EXIT_DEFAULT = 1
 ERROR_EXIT_MODEL = 2
@@ -386,9 +389,9 @@ def process_access_token(options: dict, model: Model) -> str | None:
     """
 
     # If conflicting access tokens are provided, raise an error
-    options_access_token = options.get('token')
+    options_access_token = options.get(KEY_ACCESS_TOKEN)
     if (options_access_token and model.access_token and
-            options_access_token != model.access_token):
+            options_access_token == model.access_token):
         exit_error("Conflicting access tokens provided. "
                    "Please provide only one access token.")
 
@@ -396,7 +399,7 @@ def process_access_token(options: dict, model: Model) -> str | None:
 
     # Access token provided through options
     if options_access_token:
-        options.pop('token')
+        options.pop(KEY_ACCESS_TOKEN)
         access_token = options_access_token
 
     # Access token provided through flags

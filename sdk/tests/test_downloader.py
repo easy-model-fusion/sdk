@@ -93,14 +93,14 @@ class TestDownloader(unittest.TestCase):
         # Init
         transformers_model = Model(name="", module=TRANSFORMERS)
 
-        # Execute
+        # Execute & Assert
         self.assertTrue(transformers_model.is_transformers())
 
     def test_is_transformers_false(self):
         # Init
         non_transformers_model = Model(name="", module=DIFFUSERS)
 
-        # Execute
+        # Execute & Assert
         self.assertFalse(non_transformers_model.is_transformers())
 
     def test_build_paths_default(self):
@@ -241,42 +241,51 @@ class TestDownloader(unittest.TestCase):
             process_options(options_list)
         self.assertEqual(context.exception.code, 1)
 
-    # TODO : process_access_token
-
-    def test_map_args_to_model(self):
+    def test_process_access_token_error(self):
         # Init
-        model_name = "test_model"
-        model_module = "some_module"
-        model_class = "TestClass"
-        model_options = ["key1=value1"]
         access_token = "token"
-        tokenizer_class = "TestTokenizer"
-        tokenizer_options = ["key2=value2"]
+        options = {"token": access_token}
+        model = Model(name="TestModel", module="")
+        model.access_token = access_token
 
-        args = argparse.Namespace(
-            model_name=model_name,
-            model_module=model_module,
-            model_class=model_class,
-            model_options=model_options,
-            access_token=access_token,
-            tokenizer_class=tokenizer_class,
-            tokenizer_options=tokenizer_options,
-        )
+        # Execute : error = success
+        with self.assertRaises(SystemExit) as context:
+            process_access_token(options, model)
+        self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
+
+    def test_process_access_token_from_options(self):
+        # Init
+        access_token = "token"
+        options = {"token": access_token}
+        model = Model(name="TestModel", module="")
 
         # Execute
-        model = map_args_to_model(args)
+        result = process_access_token(options, model)
 
-        # Assert model
-        self.assertEqual(model.name, model_name)
-        self.assertEqual(model.module, model_module)
-        self.assertEqual(model.class_name, model_class)
-        self.assertEqual(model.options, model_options)
-        self.assertEqual(model.access_token, access_token)
+        # Assert
+        self.assertEqual(access_token, result)
 
-        # Assert tokenizer
-        self.assertIsInstance(model.tokenizer, Tokenizer)
-        self.assertEqual(model.tokenizer.class_name, tokenizer_class)
-        self.assertEqual(model.tokenizer.options, tokenizer_options)
+    def test_process_access_token_from_model(self):
+        # Init
+        access_token = "token"
+        model = Model(name="TestModel", module="")
+        model.access_token = access_token
+
+        # Execute
+        result = process_access_token({}, model)
+
+        # Assert
+        self.assertEqual(access_token, result)
+
+    def test_process_access_token_missing(self):
+        # Init
+        model = Model(name="TestModel", module="")
+
+        # Execute
+        result = process_access_token({}, model)
+
+        # Assert
+        self.assertEqual("", result)
 
     @patch('downloader.is_path_valid_for_download', return_value=False)
     def test_download_model_path_invalid(
@@ -463,6 +472,41 @@ class TestDownloader(unittest.TestCase):
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
+
+    def test_map_args_to_model(self):
+        # Init
+        model_name = "test_model"
+        model_module = "some_module"
+        model_class = "TestClass"
+        model_options = ["key1=value1"]
+        access_token = "token"
+        tokenizer_class = "TestTokenizer"
+        tokenizer_options = ["key2=value2"]
+
+        args = argparse.Namespace(
+            model_name=model_name,
+            model_module=model_module,
+            model_class=model_class,
+            model_options=model_options,
+            access_token=access_token,
+            tokenizer_class=tokenizer_class,
+            tokenizer_options=tokenizer_options,
+        )
+
+        # Execute
+        model = map_args_to_model(args)
+
+        # Assert model
+        self.assertEqual(model.name, model_name)
+        self.assertEqual(model.module, model_module)
+        self.assertEqual(model.class_name, model_class)
+        self.assertEqual(model.options, model_options)
+        self.assertEqual(model.access_token, access_token)
+
+        # Assert tokenizer
+        self.assertIsInstance(model.tokenizer, Tokenizer)
+        self.assertEqual(model.tokenizer.class_name, tokenizer_class)
+        self.assertEqual(model.tokenizer.options, tokenizer_options)
 
     @patch('downloader.Model.download', return_value=None)
     @patch('builtins.print')
