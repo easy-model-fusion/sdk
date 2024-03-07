@@ -3,7 +3,6 @@ import json
 import os
 import sys
 import importlib
-from typing import Any
 
 import transformers
 
@@ -33,7 +32,9 @@ SKIP_ARGUMENTS = {DOWNLOAD_MODEL, DOWNLOAD_TOKENIZER}
 # Error exit codes
 ERROR_EXIT_DEFAULT = 1
 ERROR_EXIT_MODEL = 2
-ERROR_EXIT_TOKENIZER = 3
+ERROR_EXIT_MODEL_IMPORTS = 3
+ERROR_EXIT_TOKENIZER = 4
+ERROR_EXIT_TOKENIZER_IMPORTS = 5
 
 
 def exit_error(message, error=ERROR_EXIT_DEFAULT):
@@ -205,7 +206,7 @@ def download_model(model: Model, overwrite: bool) -> None:
     """
 
     # Check if the model already exists at path
-    if is_path_valid_for_download(model.download_path, overwrite):
+    if not is_path_valid_for_download(model.download_path, overwrite):
         exit_error(f"Model '{model.download_path}' already exists.")
 
     # Model class is not provided, trying the default one
@@ -219,19 +220,23 @@ def download_model(model: Model, overwrite: bool) -> None:
     # Processing access token
     access_token = process_access_token(options, model)
 
+    # Transforming from strings to actual objects
+    model_class_obj = None
     try:
-        # Transforming from strings to actual objects
         module_obj = globals()[model.module]
         model_class_obj = getattr(module_obj, model.class_name)
+    except Exception as e:
+        err = f"Error importing modules for model {model.name}: {e}"
+        exit_error(err, ERROR_EXIT_MODEL_IMPORTS)
 
-        # Downloading the model
+    # Downloading the model
+    try:
         model_downloaded = model_class_obj.from_pretrained(
             model.name, **options, token=access_token)
         model_downloaded.save_pretrained(model.download_path)
-
     except Exception as e:
-        exit_error(f"Error while downloading model {model.name}: {e}",
-                   ERROR_EXIT_MODEL)
+        err = f"Error downloading model {model.name}: {e}"
+        exit_error(err, ERROR_EXIT_MODEL)
 
 
 def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
@@ -247,29 +252,32 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
         None. Exit with error if anything goes wrong.
     """
 
+    # Retrieving tokenizer class from module
+    tokenizer_class_obj = None
     try:
-
-        # Retrieving tokenizer class from module
         tokenizer_class_obj = getattr(transformers, model.tokenizer.class_name)
+    except Exception as e:
+        err = f"Error importing tokenizer {model.tokenizer.class_name}: {e}"
+        exit_error(err, ERROR_EXIT_TOKENIZER_IMPORTS)
 
-        # Local path where the tokenizer will be downloaded
-        model.tokenizer.download_path = os.path.join(
-            model.base_path, model.tokenizer.class_name)
+    # Local path where the tokenizer will be downloaded
+    model.tokenizer.download_path = os.path.join(
+        model.base_path, model.tokenizer.class_name)
 
-        # Check if the tokenizer_path already exists
-        if is_path_valid_for_download(model.tokenizer.download_path,
+    # Check if the tokenizer_path already exists
+    if not is_path_valid_for_download(model.tokenizer.download_path,
                                       overwrite):
-            exit_error(
-                f"Tokenizer '{model.tokenizer.download_path}' already exists.")
+        err = f"Tokenizer '{model.tokenizer.download_path}' already exists."
+        exit_error(err)
 
-        # Processing options
-        options = process_options(model.tokenizer.options or [])
+    # Processing options
+    options = process_options(model.tokenizer.options or [])
 
-        # Downloading the tokenizer
+    # Downloading the tokenizer
+    try:
         tokenizer_downloaded = tokenizer_class_obj.from_pretrained(model.name,
                                                                    **options)
         tokenizer_downloaded.save_pretrained(model.tokenizer.download_path)
-
     except Exception as e:
         err = f"Error downloading tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER)
@@ -286,7 +294,7 @@ def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
     Returns:
         bool: True if the path is valid for download, False otherwise.
     """
-    return not overwrite and os.path.exists(path) and os.listdir(path)
+    return overwrite or not os.listdir(path)
 
 
 def process_options(options_list: list) -> dict:
@@ -437,11 +445,11 @@ def parse_arguments():
                         choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
-    parser.add_argument("--access-token", type=str,
-                        help="Access token for downloading the model")
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
     parser.add_argument("--model-options", nargs="+", help="List of options")
+    parser.add_argument("--access-token", type=str,
+                        help="Access token for downloading the model")
 
     # Optional arguments regarding the model's tokenizer
     parser.add_argument("--tokenizer-class", type=str,
