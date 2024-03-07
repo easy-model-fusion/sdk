@@ -139,14 +139,16 @@ class Model:
         if self.is_transformers():
             self.download_path = os.path.join(self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def process(self, models_path: str, skip: str = "", download: bool = True, overwrite: bool = False) -> str:
+    def process(self, models_path: str, skip: str = "", only_configuration: bool = False,
+                overwrite: bool = False) -> str:
         """
             Process the model.
 
             Args:
                 models_path (str): The base path where all the models are located.
                 skip (str): Optional. Skips the download process of either the model or the tokenizer.
-                download (bool): Optional. Whether to overwrite the downloaded model if it exists.
+                only_configuration (bool): Optional. Whether to download the model
+                    or to just get the configuration properties.
                 overwrite (bool): Optional. Whether to overwrite the downloaded model if it exists.
 
             Returns:
@@ -173,7 +175,7 @@ class Model:
         }
 
         # Execute download if requested
-        if download:
+        if not only_configuration:
             self.download(skip, overwrite, result_dict)
 
         # Convert the dictionary to JSON
@@ -441,12 +443,15 @@ def parse_arguments():
 
     # Optional arguments regarding the model's tokenizer
     parser.add_argument("--tokenizer-class", type=str, help="Tokenizer class name (only for transformers)")
-    parser.add_argument("--tokenizer-options", nargs="+", help="List of tokenizer options (only for transformers)")
+    parser.add_argument("--tokenizer-options", nargs="+",
+                        help="List of tokenizer options (only for transformers)")
 
     # Global tags for the script
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing directories")
     parser.add_argument("--skip", type=str, help="Skip the download item", choices=SKIP_ARGUMENTS)
     parser.add_argument("--emf-client", action="store_true", help="If running from the emf-client")
+    parser.add_argument("--only-configuration", action="store_true",
+                        help="Get model configuration only without downloading it.")
 
     return parser.parse_args()
 
@@ -463,7 +468,7 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    properties = model.process(args.models_path, args.skip, True, args.overwrite)
+    properties = model.process(args.models_path, args.skip, args.only_configuration, args.overwrite)
     print(properties)
 
     # Running from emf-client:
