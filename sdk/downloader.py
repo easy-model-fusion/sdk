@@ -271,8 +271,8 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
         model.base_path, model.tokenizer.class_name)
 
     # Check if the tokenizer_path already exists
-    if not is_path_valid_for_download(model.tokenizer.download_path,
-                                      overwrite):
+    if not is_path_valid_for_download(
+            model.tokenizer.download_path, overwrite):
         err = f"Tokenizer '{model.tokenizer.download_path}' already exists."
         exit_error(err)
 
@@ -281,8 +281,8 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
 
     # Downloading the tokenizer
     try:
-        tokenizer_downloaded = tokenizer_class_obj.from_pretrained(model.name,
-                                                                   **options)
+        tokenizer_downloaded = tokenizer_class_obj.from_pretrained(
+            model.name, **options)
         tokenizer_downloaded.save_pretrained(model.tokenizer.download_path)
     except Exception as e:
         err = f"Error downloading tokenizer {model.tokenizer.class_name}: {e}"
