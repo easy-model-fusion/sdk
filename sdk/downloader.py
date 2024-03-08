@@ -297,7 +297,7 @@ def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
     Returns:
         bool: True if the path is valid for download, False otherwise.
     """
-    return overwrite or not os.listdir(path)
+    return overwrite or not os.path.exists(path) or not os.listdir(path)
 
 
 def process_options(options_list: list) -> dict:

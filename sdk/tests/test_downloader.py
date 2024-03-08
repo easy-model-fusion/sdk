@@ -138,8 +138,10 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(model.base_path, expected_base_path)
         self.assertEqual(model.download_path, expected_download_path)
 
+    @patch('os.path.exists')
     @patch('os.listdir')
-    def test_is_path_valid_for_download_valid_overwrite(self, mock_listdir):
+    def test_is_path_valid_for_download_valid_overwrite(
+            self, mock_listdir, mock_exists):
         # Init
         models_path = "path/to/models"
         overwrite = True
@@ -149,10 +151,13 @@ class TestDownloader(unittest.TestCase):
 
         # Assert
         self.assertTrue(valid)
+        mock_exists.assert_not_called()
         mock_listdir.assert_not_called()
 
-    @patch('os.listdir', return_value=[])
-    def test_is_path_valid_for_download_valid_empty(self, mock_listdir):
+    @patch('os.path.exists', return_value=False)
+    @patch('os.listdir')
+    def test_is_path_valid_for_download_valid_not_exist(
+            self, mock_listdir, mock_exists):
         # Init
         models_path = "path/to/models"
         overwrite = False
@@ -162,10 +167,29 @@ class TestDownloader(unittest.TestCase):
 
         # Assert
         self.assertTrue(valid)
-        mock_listdir.assert_called_once_with(models_path)
+        mock_exists.assert_called_once()
+        mock_listdir.assert_not_called()
 
+    @patch('os.path.exists', return_value=True)
+    @patch('os.listdir', return_value=[])
+    def test_is_path_valid_for_download_valid_empty(
+            self, mock_listdir, mock_exists):
+        # Init
+        models_path = "path/to/models"
+        overwrite = False
+
+        # Execute
+        valid = is_path_valid_for_download(models_path, overwrite)
+
+        # Assert
+        self.assertTrue(valid)
+        mock_exists.assert_called_once()
+        mock_listdir.assert_called_once()
+
+    @patch('os.path.exists', return_value=True)
     @patch('os.listdir', return_value=['file 1'])
-    def test_is_path_valid_for_download_invalid(self, mock_listdir):
+    def test_is_path_valid_for_download_invalid(
+            self, mock_listdir, mock_exists):
         # Init
         models_path = "path/to/models"
         overwrite = False
@@ -175,7 +199,8 @@ class TestDownloader(unittest.TestCase):
 
         # Assert
         self.assertFalse(valid)
-        mock_listdir.assert_called_once_with(models_path)
+        mock_exists.assert_called_once()
+        mock_listdir.assert_called_once()
 
     def test_process_options(self):
         # Init
