@@ -226,7 +226,10 @@ def download_model(model: Model, overwrite: bool) -> None:
     # Transforming from strings to actual objects
     model_class_obj = None
     try:
-        module_obj = globals()[model.module]
+        if model.module in sys.modules:
+            module_obj = globals()[model.module]
+        else:
+            module_obj = importlib.import_module(model.module)
         model_class_obj = getattr(module_obj, model.class_name)
     except Exception as e:
         err = f"Error importing modules for model {model.name}: {e}"
