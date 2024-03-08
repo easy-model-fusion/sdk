@@ -251,7 +251,7 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(options_dict, {"key": "evaluated_value"})
 
     @patch('builtins.eval', side_effect=Exception("Evaluation failed"))
-    def test_process_options_evaluated_value_error(self):
+    def test_process_options_evaluated_value_error(self, mock_eval):
 
         # Init
         options_list = ["key=expression"]
@@ -275,7 +275,7 @@ class TestDownloader(unittest.TestCase):
         self.assertIsInstance(options_dict["key"], MagicMock)
 
     @patch('importlib.import_module', side_effect=ImportError("Import failed"))
-    def test_process_options_import_module_error(self):
+    def test_process_options_import_module_error(self, mock_import_module):
 
         # Init
         options_list = ["key=module.attribute"]
