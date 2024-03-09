@@ -3,7 +3,6 @@ import importlib
 import json
 import os
 import sys
-import importlib
 
 import diffusers
 import transformers
@@ -90,8 +89,8 @@ class Model:
             Defaults to None.
     """
 
-    def __init__(self, name: str, module: str, class_name: str = None, options: list = None,
-                access_token: str = None,
+    def __init__(self, name: str, module: str, class_name: str = None,
+                 options: list = None, access_token: str = None,
                  tokenizer: Tokenizer = None):
         self.base_path = None
         self.download_path = None
@@ -157,21 +156,21 @@ class Model:
     def process(self, models_path: str, skip: str = "", only_configuration: bool = False,
                 overwrite: bool = False) -> str:
         """
-            Process the model.
+        Process the model.
 
-            Args:
-                models_path (str): The base path where all the models are located.
-                skip (str): Optional. Skips the download process of either the
-                    model or the tokenizer.
-                only_configuration (bool): Optional. Whether to download the model
-                    or to just get the configuration properties.
-                overwrite (bool): Optional. Whether to overwrite the downloaded
-                model if it exists.
+        Args:
+            models_path (str): The base path where all the models are located.
+            skip (str): Optional. Skips the download process of either the
+                model or the tokenizer.
+            only_configuration (bool): Optional. Whether to download the model
+                or to just get the configuration properties.
+            overwrite (bool): Optional. Whether to overwrite the downloaded
+            model if it exists.
 
-            Returns:
-                Program exits with error if the process fails.
-                If it succeeds, it returns the JSON props used for downloading
-                the model.
+        Returns:
+            Program exits with error if the process fails.
+            If it succeeds, it returns the JSON props used for downloading
+            the model.
         """
 
         # Validate mandatory arguments
@@ -228,11 +227,11 @@ class Model:
 
 def set_class_names(model: Model) -> None:
     """
-        Set the appropriate model class name based on the model's module.
-        And Set the appropriate tokenizer class name if needed.
+    Set the appropriate model class name based on the model's module.
+    And Set the appropriate tokenizer class name if needed.
 
-        Args:
-            model (Model): The model object.
+    Args:
+        model (Model): The model object.
     """
     if model.is_transformers():
         set_transformers_class_names(model)
@@ -242,10 +241,10 @@ def set_class_names(model: Model) -> None:
 
 def set_transformers_class_names(model: Model) -> None:
     """
-        Set the appropriate model class for a Transformers module model and tokenizer.
+    Set the appropriate model class for a Transformers module model and tokenizer.
 
-        Args:
-            model (Model): The model object.
+    Args:
+        model (Model): The model object.
     """
     # Get the configuration
     config = transformers.AutoConfig.from_pretrained(model.name)
@@ -260,10 +259,10 @@ def set_transformers_class_names(model: Model) -> None:
 
 def set_diffusers_class_names(model: Model) -> None:
     """
-        Set the appropriate model class for a Diffusers module model.
+    Set the appropriate model class for a Diffusers module model.
 
-        Args:
-            model (Model): The model object.
+    Args:
+        model (Model): The model object.
     """
     # Get the configuration
     config = diffusers.DiffusionPipeline.load_config(model.name)
