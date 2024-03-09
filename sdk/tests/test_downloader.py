@@ -1,8 +1,7 @@
-import unittest
+import argparse
 import os
 import sys
-import argparse
-import json
+import unittest
 from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -38,7 +37,6 @@ class TestDownloader(unittest.TestCase):
     @patch('builtins.print')
     @patch('sys.exit')
     def test_exit_error(self, mock_exit, mock_print):
-
         # Init
         message = "Test message"
         code = 42
@@ -53,7 +51,6 @@ class TestDownloader(unittest.TestCase):
     @patch('builtins.print')
     @patch('sys.exit')
     def test_exit_error_default_code(self, mock_exit, mock_print):
-
         # Init
         message = "Test message"
 
@@ -67,7 +64,6 @@ class TestDownloader(unittest.TestCase):
     @patch('builtins.print')
     @patch('sys.exit')
     def test_exit_error_default_code_empty(self, mock_exit, mock_print):
-
         # Init
         message = ""
 
@@ -79,7 +75,6 @@ class TestDownloader(unittest.TestCase):
         mock_exit.assert_called_once_with(ERROR_EXIT_DEFAULT)
 
     def test_model_validation_valid(self):
-
         # Init
         valid_model = Model(name="valid_model", module="some_module")
 
@@ -87,7 +82,6 @@ class TestDownloader(unittest.TestCase):
         valid_model.validate()
 
     def test_model_validation_invalid(self):
-
         # Init
         invalid_model = Model(name="", module="some_module")
 
@@ -97,7 +91,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(context.exception.code, 1)
 
     def test_is_transformers_true(self):
-
         # Init
         transformers_model = Model(name="", module=TRANSFORMERS)
 
@@ -105,7 +98,6 @@ class TestDownloader(unittest.TestCase):
         self.assertTrue(transformers_model.is_transformers())
 
     def test_is_transformers_false(self):
-
         # Init
         non_transformers_model = Model(name="", module=DIFFUSERS)
 
@@ -113,7 +105,6 @@ class TestDownloader(unittest.TestCase):
         self.assertFalse(non_transformers_model.is_transformers())
 
     def test_build_paths_default(self):
-
         # Init
         model_name = "TestModel"
         models_path = "path/to/models"
@@ -130,7 +121,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(model.download_path, expected_path)
 
     def test_build_paths_transformers(self):
-
         # Init
         model_name = "TestModel"
         models_path = "path/to/models"
@@ -152,7 +142,6 @@ class TestDownloader(unittest.TestCase):
     @patch('os.listdir')
     def test_is_path_valid_for_download_valid_overwrite(
             self, mock_listdir, mock_exists):
-
         # Init
         models_path = "path/to/models"
         overwrite = True
@@ -169,7 +158,6 @@ class TestDownloader(unittest.TestCase):
     @patch('os.listdir')
     def test_is_path_valid_for_download_valid_not_exist(
             self, mock_listdir, mock_exists):
-
         # Init
         models_path = "path/to/models"
         overwrite = False
@@ -186,7 +174,6 @@ class TestDownloader(unittest.TestCase):
     @patch('os.listdir', return_value=[])
     def test_is_path_valid_for_download_valid_empty(
             self, mock_listdir, mock_exists):
-
         # Init
         models_path = "path/to/models"
         overwrite = False
@@ -203,7 +190,6 @@ class TestDownloader(unittest.TestCase):
     @patch('os.listdir', return_value=['file 1'])
     def test_is_path_valid_for_download_invalid(
             self, mock_listdir, mock_exists):
-
         # Init
         models_path = "path/to/models"
         overwrite = False
@@ -217,7 +203,6 @@ class TestDownloader(unittest.TestCase):
         mock_listdir.assert_called_once()
 
     def test_process_options(self):
-
         # Init
         options_list = ["key1='value1'", "key2='value2'", "key3=3"]
 
@@ -229,7 +214,6 @@ class TestDownloader(unittest.TestCase):
             options_dict, {"key1": "value1", "key2": "value2", "key3": 3})
 
     def test_process_options_invalid_format(self):
-
         # Init
         options_list = ["invalid_option"]
 
@@ -240,7 +224,6 @@ class TestDownloader(unittest.TestCase):
 
     @patch('builtins.eval', MagicMock(return_value="evaluated_value"))
     def test_process_options_evaluated_value(self):
-
         # Init
         options_list = ["key=expression"]
 
@@ -252,7 +235,6 @@ class TestDownloader(unittest.TestCase):
 
     @patch('builtins.eval', side_effect=Exception("Evaluation failed"))
     def test_process_options_evaluated_value_error(self, mock_eval):
-
         # Init
         options_list = ["key=expression"]
 
@@ -263,7 +245,6 @@ class TestDownloader(unittest.TestCase):
 
     @patch('importlib.import_module', MagicMock(return_value=MagicMock()))
     def test_process_options_import_module(self):
-
         # Init
         options_list = ["key=module.attribute"]
 
@@ -276,7 +257,6 @@ class TestDownloader(unittest.TestCase):
 
     @patch('importlib.import_module', side_effect=ImportError("Import failed"))
     def test_process_options_import_module_error(self, mock_import_module):
-
         # Init
         options_list = ["key=module.attribute"]
 
@@ -286,7 +266,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(context.exception.code, 1)
 
     def test_process_access_token_error(self):
-
         # Init
         access_token = "token"
         options = {KEY_ACCESS_TOKEN: access_token}
@@ -299,7 +278,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
     def test_process_access_token_from_options(self):
-
         # Init
         access_token = "token"
         options = {KEY_ACCESS_TOKEN: access_token}
@@ -312,7 +290,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(access_token, result)
 
     def test_process_access_token_from_model(self):
-
         # Init
         access_token = "token"
         model = Model(name="TestModel", module="")
@@ -325,7 +302,6 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(access_token, result)
 
     def test_process_access_token_missing(self):
-
         # Init
         model = Model(name="TestModel", module="")
 
@@ -338,7 +314,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.is_path_valid_for_download', return_value=False)
     def test_download_model_path_invalid(
             self, mock_is_path_valid_for_download):
-
         # Init
         model = Model(name="TestModel", module="")
 
@@ -356,7 +331,6 @@ class TestDownloader(unittest.TestCase):
     def test_download_model_with_objects_error(
             self, mock_is_path_valid_for_download, mock_process_options,
             mock_process_access_token):
-
         # Init
         model = Model(name="TestModel", module="")
 
@@ -376,7 +350,6 @@ class TestDownloader(unittest.TestCase):
     def test_download_model_with_download_error(
             self, mock_is_path_valid_for_download, mock_process_options,
             mock_process_access_token):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
 
@@ -393,7 +366,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.is_path_valid_for_download', return_value=True)
     def test_download_transformers_tokenizer_with_objects_error(
             self, mock_is_path_valid_for_download):
-
         # Init
         model = Model(name="TestModel", module="")
         model.tokenizer = Tokenizer(class_name="error")
@@ -409,7 +381,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.is_path_valid_for_download', return_value=False)
     def test_download_transformers_path_invalid(
             self, mock_is_path_valid_for_download):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
@@ -428,7 +399,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.process_options', return_value=[])
     def test_download_transformers_download_error(
             self, mock_is_path_valid_for_download, mock_process_options):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
@@ -446,7 +416,6 @@ class TestDownloader(unittest.TestCase):
 
     @patch('downloader.download_model', return_value=None)
     def test_download_model_skip_success(self, mock_download_model):
-
         # Init
         model = Model(name="TestModel", module="module")
         model.download_path = "path/to/model"
@@ -461,18 +430,22 @@ class TestDownloader(unittest.TestCase):
             "class": model.class_name
         }
 
+        result_dict = {
+            "module": model.module,
+            "class": model.class_name
+        }
+
         # Execute
-        result = model.download(models_path="path/to/models", overwrite=True,
-                                skip=DOWNLOAD_TOKENIZER)
+        model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
+                       result_dict=result_dict)
 
         # Assert
-        self.assertEqual(json.loads(result), expected_result)
+        self.assertEqual(result_dict, expected_result)
         mock_download_model.assert_called_once()
 
     @patch('downloader.download_transformers_tokenizer', return_value=None)
     def test_download_tokenizer_skip_success(
             self, mock_download_transformers_tokenizer):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         tokenizer = Tokenizer(class_name="AutoTokenizer")
@@ -488,18 +461,19 @@ class TestDownloader(unittest.TestCase):
                 "class": model.tokenizer.class_name,
             }
         }
-
+        result_dict = {"tokenizer": {
+            "class": model.tokenizer.class_name,
+        }}
         # Execute
-        result = model.download(models_path="path/to/models", overwrite=True,
-                                skip=DOWNLOAD_MODEL)
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       result_dict=result_dict)
 
         # Assert
-        self.assertEqual(expected_result, json.loads(result))
+        self.assertEqual(expected_result, result_dict)
         mock_download_transformers_tokenizer.assert_called_once()
 
     @patch('downloader.download_model', side_effect=SystemExit)
     def test_download_model_error(self, mock_download_model):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.validate = MagicMock()
@@ -507,8 +481,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit):
-            model.download(models_path="path/to/models", overwrite=True,
-                           skip=DOWNLOAD_TOKENIZER)
+            model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
+                           result_dict={})
 
         # Assert
         mock_download_model.assert_called_once()
@@ -517,7 +491,6 @@ class TestDownloader(unittest.TestCase):
            side_effect=SystemExit)
     def test_download_tokenizer_error(
             self, mock_download_transformers_tokenizer):
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.validate = MagicMock()
@@ -525,14 +498,13 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit):
-            model.download(models_path="path/to/models", overwrite=True,
-                           skip=DOWNLOAD_MODEL)
+            model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                           result_dict={})
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
 
     def test_map_args_to_model(self):
-
         # Init
         model_name = "test_model"
         model_module = "some_module"
@@ -570,7 +542,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.Model.download', return_value=None)
     @patch('builtins.print')
     def test_main(self, mock_print, mock_model_download):
-
         # Init
         args = argparse.Namespace(
             models_path="path/to/models",
@@ -583,7 +554,8 @@ class TestDownloader(unittest.TestCase):
             tokenizer_options=["key2=value2"],
             overwrite=False,
             skip="tokenizer",
-            emf_client=False
+            emf_client=False,
+            only_configuration=False,
         )
 
         # Execute
@@ -599,7 +571,6 @@ class TestDownloader(unittest.TestCase):
     @patch('downloader.Model.download')
     @patch('builtins.print')
     def test_main_emf_client(self, mock_print, mock_model_download):
-
         # Init
         args = argparse.Namespace(
             models_path="path/to/models",
@@ -612,7 +583,8 @@ class TestDownloader(unittest.TestCase):
             tokenizer_options=["key2=value2"],
             overwrite=False,
             skip="tokenizer",
-            emf_client=True
+            emf_client=True,
+            only_configuration=False
         )
 
         # Execute
