@@ -153,7 +153,8 @@ class Model:
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def process(self, models_path: str, skip: str = "", only_configuration: bool = False,
+    def process(self, models_path: str, skip: str = "",
+                only_configuration: bool = False,
                 overwrite: bool = False) -> str:
         """
         Process the model.
@@ -204,9 +205,12 @@ class Model:
         Download the model.
 
         Args:
-            skip (str): Skips the download process of either the model or the tokenizer.
-            overwrite (bool): Whether to overwrite the downloaded model if it exists.
-            result_dict (dict): The result dictionary that contains the model details.
+            skip (str): Skips the download process of either the model
+                or the tokenizer.
+            overwrite (bool): Whether to overwrite the downloaded model
+                if it exists.
+            result_dict (dict): The result dictionary that contains
+                the model details.
         """
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
@@ -241,7 +245,8 @@ def set_class_names(model: Model) -> None:
 
 def set_transformers_class_names(model: Model) -> None:
     """
-    Set the appropriate model class for a Transformers module model and tokenizer.
+    Set the appropriate model class for a Transformers module model
+        and tokenizer.
 
     Args:
         model (Model): The model object.
@@ -338,7 +343,8 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     tokenizer_class_obj = None
     try:
         # Model class is not provided, trying the default one
-        if model.tokenizer.class_name is None or model.tokenizer.class_name.strip() == '':
+        if (model.tokenizer.class_name is None or
+                model.tokenizer.class_name.strip() == ''):
             model.tokenizer.class_name = TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
 
         # Retrieving tokenizer class from module
@@ -528,13 +534,14 @@ def parse_arguments():
                         help="Path to the downloads directory")
     parser.add_argument("model_name", type=str,
                         help="Model name")
-    parser.add_argument("model_module", type=str, help="Module name",
-                        choices=AUTHORIZED_MODULE_NAMES)
+    parser.add_argument("model_module", type=str,
+                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
-    parser.add_argument("--model-options", nargs="+", help="List of options")
+    parser.add_argument("--model-options", nargs="+",
+                        help="List of options")
     parser.add_argument("--access-token", type=str,
                         help="Access token for downloading the model")
 
@@ -549,12 +556,13 @@ def parse_arguments():
     # Global tags for the script
     parser.add_argument("--overwrite", action="store_true",
                         help="Overwrite existing directories")
-    parser.add_argument("--skip", type=str, help="Skip the download item",
-                        choices=SKIP_ARGUMENTS)
+    parser.add_argument("--skip", type=str,
+                        help="Skip the download item", choices=SKIP_ARGUMENTS)
     parser.add_argument("--emf-client", action="store_true",
                         help="If running from the emf-client")
-    parser.add_argument("--only-configuration", action="store_true",
-                        help="Get model configuration only without downloading it.")
+    parser.add_argument("--only-configuration",
+                        action="store_true",
+                        help="Get model configuration only")
 
     return parser.parse_args()
 
@@ -572,7 +580,8 @@ def main():
     model = map_args_to_model(args)
 
     # Run download with specified arguments
-    properties = model.process(args.models_path, args.skip, args.only_configuration, args.overwrite)
+    properties = model.process(args.models_path, args.skip,
+                               args.only_configuration, args.overwrite)
 
     # Running from emf-client:
     if args.emf_client:
