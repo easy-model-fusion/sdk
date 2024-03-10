@@ -1,9 +1,10 @@
 import argparse
+import importlib
 import json
 import os
 import sys
-import importlib
 
+import diffusers
 import transformers
 
 # Authorized module names for download
@@ -66,7 +67,7 @@ class Tokenizer:
 
     def __init__(self, class_name: str = None, options: list = None):
         self.download_path = None
-        self.class_name = class_name or TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
+        self.class_name = class_name
         self.options = options or []
 
 
@@ -112,14 +113,14 @@ class Model:
         if not self.name.strip():
             exit_error(f"Model '{self.name}' is invalid.")
 
-    def is_transformers(self) -> bool:
+    def belongs_to_module(self, module: str) -> bool:
         """
-        Check if the model belongs to the Transformers module.
+        Check if the model belongs to a given module.
 
         Returns:
-            bool: True if the model belongs to Transformers, False otherwise.
+            bool: True if the model belongs to the module, False otherwise.
         """
-        return self.module == TRANSFORMERS
+        return self.module == module
 
     def build_paths(self, models_path: str) -> None:
         """
@@ -139,26 +140,29 @@ class Model:
         self.download_path = self.base_path
 
         # Improved repartition required when using transformers
-        if self.is_transformers():
+        if self.belongs_to_module(TRANSFORMERS):
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
-    def download(self, models_path: str, skip: str = "",
-                 overwrite=False) -> str:
+    def process(self, models_path: str, skip: str = "",
+                only_configuration: bool = False,
+                overwrite: bool = False) -> str:
         """
-        Download the model.
+        Process the model.
 
         Args:
             models_path (str): The base path where all the models are located.
             skip (str): Optional. Skips the download process of either the
                 model or the tokenizer.
+            only_configuration (bool): Optional. Whether to only get the
+                configuration properties without downloading anything or not.
             overwrite (bool): Optional. Whether to overwrite the downloaded
                 model if it exists.
 
         Returns:
-            Program exits with error if the download fails.
+            Program exits with error if the process fails.
             If it succeeds, it returns the JSON props used for downloading
-                the model.
+            the model.
         """
 
         # Validate mandatory arguments
@@ -170,29 +174,109 @@ class Model:
         # Output result
         result_dict = {}
 
+        # Set model class names
+        set_class_names(self)
+
+        # Adding properties to result
+        result_dict["module"] = self.module
+
+        # Adding model properties to result
+        if skip != DOWNLOAD_MODEL:
+            result_dict["class"] = self.class_name
+
+        # Adding tokenizer properties to result
+        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
+            result_dict["tokenizer"] = {
+                "class": self.tokenizer.class_name,
+            }
+
+        # Execute download if requested
+        if not only_configuration:
+            self.download(skip, overwrite, result_dict)
+
+        # Convert the dictionary to JSON
+        return json.dumps(result_dict, indent=4)
+
+    def download(self, skip: str, overwrite: bool, result_dict: dict) -> None:
+        """
+        Download the model.
+
+        Args:
+            skip (str): Skips the download process of either the model
+                or the tokenizer.
+            overwrite (bool): Whether to overwrite the downloaded model
+                if it exists.
+            result_dict (dict): The result dictionary that contains
+                the model details.
+        """
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
             download_model(self, overwrite)
 
-            # Adding properties to result
+            # Adding downloaded model path to result
             result_dict["path"] = self.download_path
-            result_dict["module"] = self.module
-            result_dict["class"] = self.class_name
 
         # Checking for tokenizer download
-        if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
+        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
-            # Adding properties to result
-            result_dict["tokenizer"] = {
-                "path": self.tokenizer.download_path,
-                "class": self.tokenizer.class_name,
-            }
+            # Adding downloaded tokenizer path to result
+            result_dict["tokenizer"]["path"] = self.tokenizer.download_path
 
-        # Convert the dictionary to JSON
-        return json.dumps(result_dict, indent=4)
+
+def set_class_names(model: Model) -> None:
+    """
+    Set the appropriate model class name based on the model's module.
+    And Set the appropriate tokenizer class name if needed.
+
+    Args:
+        model (Model): The model object.
+    """
+    if model.belongs_to_module(TRANSFORMERS):
+        set_transformers_class_names(model)
+    elif model.belongs_to_module(DIFFUSERS):
+        set_diffusers_class_names(model)
+
+
+def set_transformers_class_names(model: Model) -> None:
+    """
+    Set the appropriate model class for a Transformers module model
+        and tokenizer.
+
+    Args:
+        model (Model): The model object.
+    """
+    # Get the configuration
+    config = transformers.AutoConfig.from_pretrained(model.name)
+
+    # map model class from model type
+    model_mapping = transformers.AutoModel._model_mapping._model_mapping
+
+    # get the mapped model class name
+    if model.class_name is None or model.class_name == "":
+        model.class_name = model_mapping[config.model_type]
+    if (model.tokenizer.class_name is None
+            or model.tokenizer.class_name == ""):
+        model.tokenizer.class_name = config.tokenizer_class
+
+
+def set_diffusers_class_names(model: Model) -> None:
+    """
+    Set the appropriate model class for a Diffusers module model.
+
+    Args:
+        model (Model): The model object.
+    """
+    if model.class_name is not None and model.class_name != "":
+        return
+
+    # Get the configuration
+    config = diffusers.DiffusionPipeline.load_config(model.name)
+
+    # get model class name from the configuration
+    model.class_name = config['_class_name']
 
 
 def download_model(model: Model, overwrite: bool) -> None:
@@ -261,6 +345,12 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     # Retrieving tokenizer class from module
     tokenizer_class_obj = None
     try:
+        # Model class is not provided, trying the default one
+        if (model.tokenizer.class_name is None or
+                model.tokenizer.class_name.strip() == ''):
+            model.tokenizer.class_name = TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
+
+        # Retrieving tokenizer class from module
         tokenizer_class_obj = getattr(transformers, model.tokenizer.class_name)
     except Exception as e:
         err = f"Error importing tokenizer {model.tokenizer.class_name}: {e}"
@@ -447,13 +537,14 @@ def parse_arguments():
                         help="Path to the downloads directory")
     parser.add_argument("model_name", type=str,
                         help="Model name")
-    parser.add_argument("model_module", type=str, help="Module name",
-                        choices=AUTHORIZED_MODULE_NAMES)
+    parser.add_argument("model_module", type=str,
+                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
-    parser.add_argument("--model-options", nargs="+", help="List of options")
+    parser.add_argument("--model-options", nargs="+",
+                        help="List of options")
     parser.add_argument("--access-token", type=str,
                         help="Access token for downloading the model")
 
@@ -468,10 +559,13 @@ def parse_arguments():
     # Global tags for the script
     parser.add_argument("--overwrite", action="store_true",
                         help="Overwrite existing directories")
-    parser.add_argument("--skip", type=str, help="Skip the download item",
-                        choices=SKIP_ARGUMENTS)
+    parser.add_argument("--skip", type=str,
+                        help="Skip the download item", choices=SKIP_ARGUMENTS)
     parser.add_argument("--emf-client", action="store_true",
                         help="If running from the emf-client")
+    parser.add_argument("--only-configuration",
+                        action="store_true",
+                        help="Get model configuration only")
 
     return parser.parse_args()
 
@@ -488,8 +582,9 @@ def main():
     # Map them into a model
     model = map_args_to_model(args)
 
-    # Run download with specified arguments
-    properties = model.download(args.models_path, args.skip, args.overwrite)
+    # Run process with specified arguments
+    properties = model.process(args.models_path, args.skip,
+                               args.only_configuration, args.overwrite)
 
     # Running from emf-client:
     if args.emf_client:
