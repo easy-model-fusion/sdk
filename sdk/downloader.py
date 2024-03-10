@@ -154,10 +154,10 @@ class Model:
             models_path (str): The base path where all the models are located.
             skip (str): Optional. Skips the download process of either the
                 model or the tokenizer.
-            only_configuration (bool): Optional. Whether to download the model
-                or to just get the configuration properties.
+            only_configuration (bool): Optional. Whether to only get
+                the configuration properties without downloading anything or not.
             overwrite (bool): Optional. Whether to overwrite the downloaded
-            model if it exists.
+                model if it exists.
 
         Returns:
             Program exits with error if the process fails.
@@ -179,10 +179,16 @@ class Model:
 
         # Adding properties to result
         result_dict["module"] = self.module
-        result_dict["class"] = self.class_name
-        result_dict["tokenizer"] = {
-            "class": self.tokenizer.class_name,
-        }
+
+        # Adding model properties to result
+        if skip != DOWNLOAD_MODEL:
+            result_dict["class"] = self.class_name
+
+        # Adding tokenizer properties to result
+        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
+            result_dict["tokenizer"] = {
+                "class": self.tokenizer.class_name,
+            }
 
         # Execute download if requested
         if not only_configuration:
@@ -570,7 +576,7 @@ def main():
     # Map them into a model
     model = map_args_to_model(args)
 
-    # Run download with specified arguments
+    # Run process with specified arguments
     properties = model.process(args.models_path, args.skip,
                                args.only_configuration, args.overwrite)
 
