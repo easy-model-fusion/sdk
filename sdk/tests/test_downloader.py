@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import sys
 import unittest
@@ -572,9 +573,9 @@ class TestDownloader(unittest.TestCase):
         mock_model_download.assert_called_once()
         mock_print.assert_not_called()
 
-    @patch('downloader.Model.download')
+    @patch('downloader.Model.process')
     @patch('builtins.print')
-    def test_main_emf_client(self, mock_print, mock_model_download):
+    def test_main_emf_client(self, mock_print, mock_model_process):
         # Init
         args = argparse.Namespace(
             models_path="path/to/models",
@@ -598,7 +599,7 @@ class TestDownloader(unittest.TestCase):
                 main()
 
         # Assert
-        mock_model_download.assert_called_once()
+        mock_model_process.assert_called_once()
         mock_print.assert_called_once()
 
     @patch('diffusers.DiffusionPipeline.load_config',
@@ -659,6 +660,71 @@ class TestDownloader(unittest.TestCase):
         # Assert
         mock_set_diffusers_class_names.assert_called_once()
         mock_transformer_class_names.assert_not_called()
+
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    @patch('downloader.Model.belongs_to_module', return_value=True)
+    def test_process_with_only_configuration(
+            self, mock_belongs_to_module, mock_build_paths,
+            mock_download, mock_set_class_names
+    ):
+        # init
+        model = Model(name="TestModel", module=DIFFUSERS,
+                      class_name="TestClass")
+        model.tokenizer = Tokenizer(class_name="TokenizerClass")
+
+        # Prepare
+        expected_result = {
+            "module": model.module,
+            "class": model.class_name,
+            "tokenizer": {
+                "class": model.tokenizer.class_name
+            }
+        }
+
+        # Execute
+        result = model.process(models_path='path/to/model',
+                               only_configuration=True)
+
+        # Assert
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_belongs_to_module.assert_called_once()
+        mock_download.assert_not_called()
+        self.assertEqual(expected_result, json.loads(result))
+
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    @patch('downloader.Model.belongs_to_module', return_value=True)
+    def test_process_with_download(
+            self, mock_belongs_to_module, mock_build_paths,
+            mock_download, mock_set_class_names
+    ):
+        # init
+        model = Model(name="TestModel", module=DIFFUSERS,
+                      class_name="TestClass")
+        model.tokenizer = Tokenizer(class_name="TokenizerClass")
+
+        # Prepare
+        expected_result = {
+            "module": model.module,
+            "class": model.class_name,
+            "tokenizer": {
+                "class": model.tokenizer.class_name
+            }
+        }
+
+        # Execute
+        result = model.process(models_path='path/to/model')
+
+        # Assert
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_belongs_to_module.assert_called_once()
+        mock_download.assert_called_once()
+        self.assertEqual(expected_result, json.loads(result))
 
 
 if __name__ == '__main__':
