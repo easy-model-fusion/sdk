@@ -154,8 +154,8 @@ class Model:
             models_path (str): The base path where all the models are located.
             skip (str): Optional. Skips the download process of either the
                 model or the tokenizer.
-            only_configuration (bool): Optional. Whether to only get
-                the configuration properties without downloading anything or not.
+            only_configuration (bool): Optional. Whether to only get the
+                configuration properties without downloading anything or not.
             overwrite (bool): Optional. Whether to overwrite the downloaded
                 model if it exists.
 
