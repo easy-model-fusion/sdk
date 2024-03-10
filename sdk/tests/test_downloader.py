@@ -615,13 +615,28 @@ class TestDownloader(unittest.TestCase):
         mock_load_config.assert_called_once()
         self.assertEqual(model.class_name, 'TestPipeline')
 
+    @patch('diffusers.DiffusionPipeline.load_config',
+           return_value={'_class_name': 'TestPipeline'})
+    def test_set_diffusers_class_names_with_configured_model(self,
+                                                             mock_load_config):
+        # Init
+        model = Model(name="TestModel", module=DIFFUSERS,
+                      class_name="TestModel")
+
+        # Execute
+        set_diffusers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_not_called()
+        self.assertEqual(model.class_name, 'TestModel')
+
     @patch('transformers.AutoConfig.from_pretrained',
            return_value=MagicMock(model_type='t5',
                                   tokenizer_class='TokenizerClass'))
     def test_set_transformers_class_names(self, mock_load_config):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS,
-                      tokenizer=Tokenizer(class_name="test"))
+                      tokenizer=Tokenizer())
 
         # Execute
         set_transformers_class_names(model)
@@ -630,6 +645,24 @@ class TestDownloader(unittest.TestCase):
         mock_load_config.assert_called_once()
         self.assertEqual(model.class_name, 'T5Model')
         self.assertEqual(model.tokenizer.class_name, 'TokenizerClass')
+
+    @patch('transformers.AutoConfig.from_pretrained',
+           return_value=MagicMock(model_type='t5',
+                                  tokenizer_class='TokenizerClass'))
+    def test_set_transformers_class_names_with_configured_model(self,
+                                                                mock_load_config):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      class_name='TestModel',
+                      tokenizer=Tokenizer('TestTokenizer'))
+
+        # Execute
+        set_transformers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'TestModel')
+        self.assertEqual(model.tokenizer.class_name, 'TestTokenizer')
 
     @patch('downloader.set_transformers_class_names', return_value=None)
     @patch('downloader.set_diffusers_class_names', return_value=None)

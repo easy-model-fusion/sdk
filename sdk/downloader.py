@@ -255,8 +255,11 @@ def set_transformers_class_names(model: Model) -> None:
     model_mapping = transformers.AutoModel._model_mapping._model_mapping
 
     # get the mapped model class name
-    model.class_name = model_mapping[config.model_type]
-    model.tokenizer.class_name = config.tokenizer_class
+    if model.class_name is None or model.class_name == "":
+        model.class_name = model_mapping[config.model_type]
+    if (model.tokenizer.class_name is None
+            or model.tokenizer.class_name == ""):
+        model.tokenizer.class_name = config.tokenizer_class
 
 
 def set_diffusers_class_names(model: Model) -> None:
@@ -266,6 +269,9 @@ def set_diffusers_class_names(model: Model) -> None:
     Args:
         model (Model): The model object.
     """
+    if model.class_name is not None and model.class_name != "":
+        return
+
     # Get the configuration
     config = diffusers.DiffusionPipeline.load_config(model.name)
 
