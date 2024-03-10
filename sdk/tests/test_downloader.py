@@ -11,6 +11,9 @@ from downloader import (  # noqa: E402
     Model,
     Tokenizer,
     download_model,
+    set_transformers_class_names,
+    set_class_names,
+    set_diffusers_class_names,
     download_transformers_tokenizer,
     is_path_valid_for_download,
     process_options,
@@ -597,6 +600,65 @@ class TestDownloader(unittest.TestCase):
         # Assert
         mock_model_download.assert_called_once()
         mock_print.assert_called_once()
+
+    @patch('diffusers.DiffusionPipeline.load_config',
+           return_value={'_class_name': 'TestPipeline'})
+    def test_set_diffusers_class_names(self, mock_load_config):
+        # Init
+        model = Model(name="TestModel", module=DIFFUSERS)
+
+        # Execute
+        set_diffusers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'TestPipeline')
+
+    @patch('transformers.AutoConfig.from_pretrained',
+           return_value=MagicMock(model_type='t5',
+                                  tokenizer_class='TokenizerClass'))
+    def test_set_transformers_class_names(self, mock_load_config):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      tokenizer=Tokenizer(class_name="test"))
+
+        # Execute
+        set_transformers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'T5Model')
+        self.assertEqual(model.tokenizer.class_name, 'TokenizerClass')
+
+    @patch('downloader.set_transformers_class_names', return_value=None)
+    @patch('downloader.set_diffusers_class_names', return_value=None)
+    def test_set_class_names_for_transformers_model(
+            self, mock_set_diffusers_class_names, mock_transformer_class_names
+    ):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS)
+
+        # Execute
+        set_class_names(model)
+
+        # Assert
+        mock_transformer_class_names.assert_called_once()
+        mock_set_diffusers_class_names.assert_not_called()
+
+    @patch('downloader.set_transformers_class_names', return_value=None)
+    @patch('downloader.set_diffusers_class_names', return_value=None)
+    def test_set_class_names_for_diffusers_model(
+            self, mock_set_diffusers_class_names, mock_transformer_class_names
+    ):
+        # Init
+        model = Model(name="TestModel", module=DIFFUSERS)
+
+        # Execute
+        set_class_names(model)
+
+        # Assert
+        mock_set_diffusers_class_names.assert_called_once()
+        mock_transformer_class_names.assert_not_called()
 
 
 if __name__ == '__main__':
