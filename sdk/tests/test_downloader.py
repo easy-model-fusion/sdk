@@ -649,8 +649,9 @@ class TestDownloader(unittest.TestCase):
     @patch('transformers.AutoConfig.from_pretrained',
            return_value=MagicMock(model_type='t5',
                                   tokenizer_class='TokenizerClass'))
-    def test_set_transformers_class_names_with_configured_model(self,
-                                                                mock_load_config):
+    def test_set_transformers_class_names_with_configured_model(
+            self, mock_load_config
+    ):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS,
                       class_name='TestModel',
