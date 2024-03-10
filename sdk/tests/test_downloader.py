@@ -102,7 +102,8 @@ class TestDownloader(unittest.TestCase):
         non_transformers_model = Model(name="", module=DIFFUSERS)
 
         # Execute & Assert
-        self.assertFalse(non_transformers_model.belongs_to_module(TRANSFORMERS))
+        self.assertFalse(non_transformers_model.
+                         belongs_to_module(TRANSFORMERS))
 
     def test_build_paths_default(self):
         # Init
