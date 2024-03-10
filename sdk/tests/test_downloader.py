@@ -94,14 +94,14 @@ class TestDownloader(unittest.TestCase):
             invalid_model.validate()
         self.assertEqual(context.exception.code, 1)
 
-    def test_is_transformers_true(self):
+    def test_belongs_to_module_true(self):
         # Init
         transformers_model = Model(name="", module=TRANSFORMERS)
 
         # Execute & Assert
         self.assertTrue(transformers_model.belongs_to_module(TRANSFORMERS))
 
-    def test_is_transformers_false(self):
+    def test_belongs_to_module_false(self):
         # Init
         non_transformers_model = Model(name="", module=DIFFUSERS)
 
