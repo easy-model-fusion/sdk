@@ -95,14 +95,14 @@ class TestDownloader(unittest.TestCase):
         transformers_model = Model(name="", module=TRANSFORMERS)
 
         # Execute & Assert
-        self.assertTrue(transformers_model.is_transformers())
+        self.assertTrue(transformers_model.belongs_to_module(TRANSFORMERS))
 
     def test_is_transformers_false(self):
         # Init
         non_transformers_model = Model(name="", module=DIFFUSERS)
 
         # Execute & Assert
-        self.assertFalse(non_transformers_model.is_transformers())
+        self.assertFalse(non_transformers_model.belongs_to_module(TRANSFORMERS))
 
     def test_build_paths_default(self):
         # Init

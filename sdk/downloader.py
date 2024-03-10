@@ -113,23 +113,14 @@ class Model:
         if not self.name.strip():
             exit_error(f"Model '{self.name}' is invalid.")
 
-    def is_transformers(self) -> bool:
+    def belongs_to_module(self, module: str) -> bool:
         """
-        Check if the model belongs to the Transformers module.
+        Check if the model belongs to a given module.
 
         Returns:
-            bool: True if the model belongs to Transformers, False otherwise.
+            bool: True if the model belongs to the module, False otherwise.
         """
-        return self.module == TRANSFORMERS
-
-    def is_diffusers(self) -> bool:
-        """
-        Check if the model belongs to the Diffusers module.
-
-        Returns:
-            bool: True if the model belongs to Diffusers, False otherwise.
-        """
-        return self.module == DIFFUSERS
+        return self.module == module
 
     def build_paths(self, models_path: str) -> None:
         """
@@ -149,7 +140,7 @@ class Model:
         self.download_path = self.base_path
 
         # Improved repartition required when using transformers
-        if self.is_transformers():
+        if self.belongs_to_module(TRANSFORMERS):
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
@@ -221,7 +212,7 @@ class Model:
             result_dict["path"] = self.download_path
 
         # Checking for tokenizer download
-        if self.is_transformers() and skip != DOWNLOAD_TOKENIZER:
+        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
             download_transformers_tokenizer(self, overwrite)
 
@@ -237,9 +228,9 @@ def set_class_names(model: Model) -> None:
     Args:
         model (Model): The model object.
     """
-    if model.is_transformers():
+    if model.belongs_to_module(TRANSFORMERS):
         set_transformers_class_names(model)
-    elif model.is_diffusers():
+    elif model.belongs_to_module(DIFFUSERS):
         set_diffusers_class_names(model)
 
 
