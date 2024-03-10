@@ -19,12 +19,10 @@ class TokenizerOptions:
     device: Union[str, Devices]
     padding_side: str = "left"
     return_tensors: str = "pt"
-    kwargs: Optional[dict] = None
 
     def __init__(self, device: str,
                  padding_side: str = "left",
-                 return_tensors: str = "pt",
-                 **kwargs
+                 return_tensors: str = "pt"
                  ):
         """
         Initializes the options class with the given device
@@ -35,5 +33,3 @@ class TokenizerOptions:
             raise ValueError("padding_side must be either 'left' or 'right'")
         self.padding_side = padding_side
         self.return_tensors = return_tensors
-        self.kwargs = kwargs
-

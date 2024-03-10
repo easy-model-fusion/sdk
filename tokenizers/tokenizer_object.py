@@ -40,7 +40,7 @@ class TokenizerObject:
             padding_side=self.options.padding_side
         )
 
-    def prepare_input(self, prompt: str, ):
+    def prepare_input(self, prompt: str):
         return self.tokenizer.encode(
             prompt,
             return_tensors=

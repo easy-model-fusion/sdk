@@ -1,6 +1,6 @@
 import torch
 from typing import Optional, Dict
-from transformers import ( Conversation, AutoModelForCausalLM)
+from transformers import (Conversation, AutoModelForCausalLM, AutoConfig)
 
 from sdk.options.tokenizer_options import TokenizerOptions
 from sdk.tokenizers.tokenizer_object import TokenizerObject
@@ -47,8 +47,14 @@ class ModelsTextConversation(Model):
         """
         if self.loaded:
             return
-        self.pipeline = AutoModelForCausalLM.from_pretrained(self.model_path)
-
+        self.pipeline = AutoModelForCausalLM.from_pretrained(
+            self.model_name,
+            trust_remote_code=True,
+            cache_dir="./cache",  # Cache directory
+            return_dict=True,  # Return outputs as a dictionary
+            pad_token_id=50256,  # Custom pad token ID
+            eos_token_id=50256  # Custom end-of-sequence token ID
+        )
 
     def load_model(self, option: OptionsTextConversation) -> bool:
         """
@@ -61,9 +67,11 @@ class ModelsTextConversation(Model):
         if option.device == Devices.RESET:
             return False
         self.pipeline.to(option.device.value)
-        self.tokenizer_object = TokenizerObject(self.model_name,
-                                                self.model_path,
-                                                self.tokenizer_options)
+        self.tokenizer_object = TokenizerObject(
+            self.model_name,
+            self.model_path,
+            self.tokenizer_options
+        )
         self.loaded = True
         return True
 
@@ -87,22 +95,50 @@ class ModelsTextConversation(Model):
             **kwargs):
         prompt = prompt if prompt else option.prompt
 
-        self.current_conversation_id = self.conversation_ids
+        if option.create_new_conv:
+            print("Create new chat")
+            option.create_new_conv = False
+            self.create_new_conversation(
+                prompt=prompt,
+                option=option
+            )
 
-        self.chat_bot = Conversation(prompt, **kwargs)
-        # adding new conversation to dict
-        self.conversation_dict[self.current_conversation_id] = self.chat_bot
-        self.conversation_ids += 1
+        if option.create_new_tokenizer:
+            print("Create new tokenizer")
+            option.create_new_tokenizer = False
+            self.create_new_tokenizer(
+                tokenizer_options=self.tokenizer_options)
 
-        print("Model name : ", self.model_name)
+        if option.tokenizer_ID_to_use_id != self.current_tokenizer_id:
+            print("Changing tokenizer")
+            self.set_tokenizer_to_use(option.tokenizer_ID_to_use_id)
+
+        if option.chat_ID_to_use_id != self.current_conversation_id:
+            print("Changing chat id")
+            self.change_conversation(option.chat_ID_to_use_id)
+
+        if not self.conversation_active:
+            self.current_conversation_id = self.conversation_ids
+            print("setting conversation id to ", self.current_conversation_id)
+            self.chat_bot = Conversation(prompt, **kwargs)
+            # adding new conversation to dict
+            self.conversation_dict[self.current_conversation_id] = (
+                self.chat_bot
+            )
+            self.conversation_active = True
+            self.conversation_ids += 1
+
         str_to_send = self.tokenizer_object.prepare_input(prompt)
-        str_to_send = self.pipeline.generate(str_to_send, max_new_tokens=128)
-        print("BOT: ", )
-        print(self.tokenizer_object.decode_model_output(str_to_send))
+        str_to_send = self.pipeline.generate(str_to_send,
+                                             max_new_tokens=128)
+        # print("BOT: ", self.model_name)
+        return self.tokenizer_object.decode_model_output(str_to_send)
 
     def create_new_tokenizer(self,
                              tokenizer_options: TokenizerOptions):
-        tokenizer = TokenizerObject(self.model_name, self.model_path)
+        tokenizer = TokenizerObject(self.model_name,
+                                    self.model_path,
+                                    tokenizer_options)
         self.current_tokenizer_id = self.tokenizer_ids
 
         self.tokenizer_dict[self.current_tokenizer_id] = tokenizer
@@ -133,5 +169,28 @@ class ModelsTextConversation(Model):
     def send_new_input(self,
                        prompt: str
                        ):
-        input_ids = self.tokenizer_object.prepare_input(prompt, self.tokenizer_options)
-        return self.pipeline.generate(**input_ids)
+        input_ids = self.tokenizer_object.prepare_input(prompt)
+        return self.pipeline.generate(**input_ids,
+                                      max_new_tokens=128
+                                      )
+
+    def create_new_conversation(self,
+                                prompt,
+                                option: OptionsTextConversation,
+                                **kwargs):
+
+        self.current_conversation_id = self.conversation_ids
+        self.chat_bot = Conversation(prompt, **kwargs)
+        # adding new conversation to dict
+        self.conversation_dict[self.current_conversation_id] = (
+            self.chat_bot
+        )
+        self.conversation_ids += 1
+
+    def change_conversation(self,
+                            conversation_id: int):
+        if conversation_id in self.conversation_dict:
+            self.current_conversation_id = conversation_id
+            self.chat_bot = self.conversation_dict[conversation_id]
+        else:
+            return -1

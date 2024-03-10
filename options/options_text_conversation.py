@@ -65,10 +65,12 @@ class OptionsTextConversation(Options):
 
     prompt: str
     model: Union[str, PreTrainedModel,
-                 "TFPreTrainedModel"] = None
+    "TFPreTrainedModel"] = None
     tokenizer: Union[str, PreTrainedTokenizer,
-                     "PreTrainedTokenizerFast"] = None
+    "PreTrainedTokenizerFast"] = None
     model_card: Optional[Union[str, ModelCard]] = None
+    attention_mask: bool = True  # Default value for attention_mask
+    pad_token_id: int = 50256  # Default value for pad_token_id
     framework: Optional[str] = None
     task: str = ""
     num_workers: int = 8
@@ -79,6 +81,13 @@ class OptionsTextConversation(Options):
     binary_output: bool = False
     min_length_for_response: int = 32
     minimum_tokens: int = 10
+    eos_token_id: int = 50256
+    create_new_conv: bool = False
+    create_new_tokenizer = False
+    delete_conv: bool = False
+    delete_tokenizer = False
+    tokenizer_ID_to_use_id = 0
+    chat_ID_to_use_id = 0
 
     def __init__(self,
                  prompt: str,
@@ -86,8 +95,11 @@ class OptionsTextConversation(Options):
                  Union[str, PreTrainedModel, "TFPreTrainedModel"] = None,
                  tokenizer:
                  Union[str, PreTrainedTokenizer,
-                       "PreTrainedTokenizerFast"] = None,
-
+                 "PreTrainedTokenizerFast"] = None,
+                 create_new_conv: bool = False,
+                 create_new_tokenizer=False,
+                 delete_conv: bool = False,
+                 delete_tokenizer=False,
                  model_card: Optional[Union[str, ModelCard]] = None,
                  framework: Optional[str] = None,
                  task: str = "",
@@ -99,6 +111,11 @@ class OptionsTextConversation(Options):
                  binary_output: bool = False,
                  min_length_for_response: int = 32,
                  minimum_tokens: int = 10,
+                 attention_mask: bool = True,  # Default value for attention_mask
+                 pad_token_id: int = 50256,  # Default value for pad_token_id
+                 eos_token_id=50256,
+                 tokenizer_id_to_use_id=0,
+                 chat_id_to_use_id=0
                  ):
         """
         Initializes the OptionsTextGeneration.
@@ -123,3 +140,12 @@ class OptionsTextConversation(Options):
         self.binary_output = binary_output
         self.min_length_for_response = min_length_for_response
         self.minimum_tokens = minimum_tokens
+        self.attention_mask = attention_mask
+        self.pad_token_id = pad_token_id
+        self.eos_token_id = eos_token_id
+        self.create_new_conv = create_new_conv
+        self.create_new_tokenizer = create_new_tokenizer
+        self.delete_tokenizer = delete_tokenizer
+        self.delete_conv = delete_conv
+        self.tokenizer_ID_to_use_id = tokenizer_id_to_use_id
+        self.chat_ID_to_use_id = chat_id_to_use_id
