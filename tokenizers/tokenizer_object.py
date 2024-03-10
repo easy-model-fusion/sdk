@@ -21,9 +21,12 @@ class TokenizerObject:
                  model_path: str,
                  options: TokenizerOptions):
         """
-        Initializes the model with the given name
-        :param model_name: The name of the model
-        :param model_path: The path of the model
+        Initializes the TokenizerObject class with the given parameters.
+
+        Args:
+            model_name (str): The name of the model.
+            model_path (str): The path of the model.
+            options (TokenizerOptions): The options for the tokenizer.
         """
         self.model_name = model_name
         self.model_path = model_path
@@ -41,10 +44,28 @@ class TokenizerObject:
         )
 
     def prepare_input(self, prompt: str):
+        """
+        Tokenizes the given prompt and prepares it for model input.
+
+        Args:
+            prompt (str): The input prompt.
+
+        Returns:
+            torch.Tensor: The tokenized and formatted input tensor.
+        """
         return self.tokenizer.encode(
             prompt,
-            return_tensors=
-            self.options.return_tensors).to(self.options.device)
+            return_tensors=self.options.return_tensors
+        ).to(self.options.device)
 
     def decode_model_output(self, outputs: torch.Tensor):
+        """
+        Decodes the model output tensor to obtain the generated text.
+
+        Args:
+            outputs (torch.Tensor): The model output tensor.
+
+        Returns:
+            str: The decoded generated text.
+        """
         return self.tokenizer.decode(outputs[0])

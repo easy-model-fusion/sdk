@@ -9,6 +9,26 @@ from sdk.options import Devices, OptionsTextConversation
 
 
 class ModelsTextConversation(Model):
+
+    """
+    A class representing a text conversation model.
+
+    Attributes:
+        pipeline (AutoModelForCausalLM): The pipeline for the text conversation.
+        tokenizer_object (TokenizerObject): The tokenizer object for the model.
+        tokenizer_options (TokenizerOptions): The options for the tokenizer.
+        tokenizer_dict (Dict[int, TokenizerObject]): Dictionary to store tokenizers.
+        conversation_dict (Dict[int, Conversation]): Dictionary to store conversations.
+        current_conversation_id (int): ID of the current conversation.
+        current_tokenizer_id (int): ID of the current tokenizer.
+        conversation_ids (int): Total number of conversations.
+        tokenizer_ids (int): Total number of tokenizers.
+        loaded (bool): Flag indicating whether the model is loaded.
+        chat_bot (Conversation): Current conversation.
+        conversation_step (int): Step of the conversation.
+        chat_history_token_ids (list): List to store chat history token IDs.
+        conversation_active (bool): Flag indicating if a conversation is active.
+    """
     pipeline: AutoModelForCausalLM
     tokenizer_object: TokenizerObject
     tokenizer_options: TokenizerOptions
@@ -58,9 +78,13 @@ class ModelsTextConversation(Model):
 
     def load_model(self, option: OptionsTextConversation) -> bool:
         """
-        Load this model on the given device
-        :param option: The options with the device
-        :return: True if the model is successfully loaded
+        Load this model on the given device.
+
+        Args:
+            option (OptionsTextConversation): The options with the device.
+
+        Returns:
+            bool: True if the model is successfully loaded.
         """
         if self.loaded:
             return True
@@ -93,6 +117,16 @@ class ModelsTextConversation(Model):
             self, prompt: Optional[str],
             option: OptionsTextConversation,
             **kwargs):
+        """
+        Generates the prompt with the given option.
+
+        Args:
+            prompt (Optional[str]): The optional prompt.
+            option (OptionsTextConversation): The options of text conversation model.
+
+        Returns:
+            str: Generated prompt.
+        """
         prompt = prompt if prompt else option.prompt
 
         if option.create_new_conv:
@@ -134,6 +168,12 @@ class ModelsTextConversation(Model):
         # print("BOT: ", self.model_name)
         return self.tokenizer_object.decode_model_output(str_to_send)
 
+    """
+    Creates a new tokenizer.
+
+    Args:
+        tokenizer_options (TokenizerOptions): Options for the tokenizer.
+    """
     def create_new_tokenizer(self,
                              tokenizer_options: TokenizerOptions):
         tokenizer = TokenizerObject(self.model_name,
@@ -144,53 +184,98 @@ class ModelsTextConversation(Model):
         self.tokenizer_dict[self.current_tokenizer_id] = tokenizer
         self.tokenizer_ids += 1
 
-    def set_tokenizer_to_use(self,
-                             token_id: int):
+    def set_tokenizer_to_use(self,token_id: int):
+        """
+        Set the tokenizer to use for generating text.
+
+        Args:
+            token_id (int): The ID of the tokenizer to use.
+
+        Returns:
+            int: The ID of the selected tokenizer, or -1 if the provided ID is invalid.
+        """
         if token_id in self.tokenizer_dict:
             self.current_tokenizer_id = token_id
             self.tokenizer_object = self.tokenizer_dict[token_id]
         else:
             return -1
 
-    def delete_tokenizer(self,
-                         token_id: int):
+    def delete_tokenizer(self, token_id: int):
+        """
+        Delete a tokenizer.
+
+        Args:
+            token_id (int): The ID of the tokenizer to delete.
+
+        Returns:
+            int: 0 if the tokenizer was deleted successfully, -1 if the provided ID is invalid.
+        """
         if token_id in self.tokenizer_dict:
             del self.tokenizer_dict[token_id]
+            return 0
         else:
             return -1
 
-    def delete_conversation(self,
-                            conversation_id: int):
+    def delete_conversation(self, conversation_id: int):
+        """
+        Delete a conversation.
+
+        Args:
+            conversation_id (int): The ID of the conversation to delete.
+
+        Returns:
+            int: 0 if the conversation was deleted successfully, -1 if the provided ID is invalid.
+        """
         if conversation_id in self.conversation_dict:
             del self.conversation_dict[conversation_id]
+            return 0
         else:
             return -1
 
-    def send_new_input(self,
-                       prompt: str
-                       ):
+    def send_new_input(self, prompt: str):
+        """
+        Send new input to the chatbot and generate a response.
+
+        Args:
+            prompt (str): The input prompt for the chatbot.
+
+        Returns:
+            str: The generated response from the chatbot.
+        """
         input_ids = self.tokenizer_object.prepare_input(prompt)
-        return self.pipeline.generate(**input_ids,
-                                      max_new_tokens=128
-                                      )
+        return self.pipeline.generate(**input_ids, max_new_tokens=128)
 
-    def create_new_conversation(self,
-                                prompt,
-                                option: OptionsTextConversation,
-                                **kwargs):
+    def create_new_conversation(self, prompt, option: OptionsTextConversation, **kwargs):
+        """
+        Create a new conversation.
 
+        Args:
+            prompt: The initial prompt for the conversation.
+            option (OptionsTextConversation): The options for the conversation.
+            **kwargs: Additional keyword arguments for initializing the conversation.
+
+        Returns:
+            None
+        """
         self.current_conversation_id = self.conversation_ids
         self.chat_bot = Conversation(prompt, **kwargs)
         # adding new conversation to dict
-        self.conversation_dict[self.current_conversation_id] = (
-            self.chat_bot
-        )
+        self.conversation_dict[self.current_conversation_id] = self.chat_bot
         self.conversation_ids += 1
 
-    def change_conversation(self,
-                            conversation_id: int):
+    def change_conversation(self, conversation_id: int):
+        """
+        Change the active conversation.
+
+        Args:
+            conversation_id (int): The ID of the conversation to switch to.
+
+        Returns:
+            int: 0 if the conversation was switched successfully, -1 if the provided ID is invalid.
+        """
         if conversation_id in self.conversation_dict:
             self.current_conversation_id = conversation_id
             self.chat_bot = self.conversation_dict[conversation_id]
+            return 0
         else:
             return -1

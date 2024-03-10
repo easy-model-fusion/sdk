@@ -20,13 +20,16 @@ class TokenizerOptions:
     padding_side: str = "left"
     return_tensors: str = "pt"
 
-    def __init__(self, device: str,
+    def __init__(self, device: Union[str, Devices],
                  padding_side: str = "left",
-                 return_tensors: str = "pt"
-                 ):
+                 return_tensors: str = "pt"):
         """
-        Initializes the options class with the given device
-             :param device:  used for generation
+        Initializes the options class with the given device and other options.
+
+        Args:
+            device (Union[str, Devices]): The device used for generation.
+            padding_side (str): The padding side, either 'left' or 'right'. Defaults to 'left'.
+            return_tensors (str): The return tensor format. Defaults to 'pt'.
         """
         self.device = device
         if padding_side not in ['left', 'right']:
