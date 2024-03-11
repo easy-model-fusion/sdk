@@ -617,6 +617,19 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(model.class_name, 'TestPipeline')
 
     @patch('diffusers.DiffusionPipeline.load_config',
+           side_effect=Exception("Mocked exception from load config"))
+    def test_set_diffusers_class_names_with_exception(self, mock_load_config):
+        # Init
+        model = Model(name="TestModel", module=DIFFUSERS)
+
+        # Execute
+        set_diffusers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'DiffusionPipeline')
+
+    @patch('diffusers.DiffusionPipeline.load_config',
            return_value={'_class_name': 'TestPipeline'})
     def test_set_diffusers_class_names_with_configured_model(self,
                                                              mock_load_config):
@@ -682,6 +695,23 @@ class TestDownloader(unittest.TestCase):
         # Assert
         mock_load_config.assert_called_once()
         self.assertEqual(model.class_name, 'TestModel')
+        self.assertEqual(model.tokenizer.class_name, 'TestTokenizer')
+
+    @patch('transformers.AutoConfig.from_pretrained',
+           side_effect=Exception("Mocked exception from load config"))
+    def test_set_transformers_class_names_with_exception(
+            self, mock_load_config
+    ):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      tokenizer=Tokenizer('TestTokenizer'))
+
+        # Execute
+        set_transformers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'AutoModel')
         self.assertEqual(model.tokenizer.class_name, 'TestTokenizer')
 
     @patch('downloader.set_transformers_class_names', return_value=None)
