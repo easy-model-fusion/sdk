@@ -253,7 +253,6 @@ def set_transformers_class_names(model: Model) -> None:
 
     # map model class from model type
     model_mapping = transformers.AutoModel._model_mapping._model_mapping
-    print(config)
 
     # get the mapped model class name
     if model.class_name is None or model.class_name == "":
@@ -590,7 +589,6 @@ def main():
     properties = model.process(args.models_path, args.skip,
                                args.only_configuration, args.overwrite)
 
-    print(properties)
     # Running from emf-client:
     if args.emf_client:
         # Write model properties to stdout: the emf-client needs to get it
