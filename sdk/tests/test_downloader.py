@@ -648,6 +648,24 @@ class TestDownloader(unittest.TestCase):
 
     @patch('transformers.AutoConfig.from_pretrained',
            return_value=MagicMock(model_type='t5',
+                                  tokenizer_class=None))
+    def test_set_transformers_class_names_with_default_tokenizer(
+            self, mock_load_config
+    ):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      tokenizer=Tokenizer())
+
+        # Execute
+        set_transformers_class_names(model)
+
+        # Assert
+        mock_load_config.assert_called_once()
+        self.assertEqual(model.class_name, 'T5Model')
+        self.assertEqual(model.tokenizer.class_name, 'AutoTokenizer')
+
+    @patch('transformers.AutoConfig.from_pretrained',
+           return_value=MagicMock(model_type='t5',
                                   tokenizer_class='TokenizerClass'))
     def test_set_transformers_class_names_with_configured_model(
             self, mock_load_config
