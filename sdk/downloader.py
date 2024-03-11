@@ -248,21 +248,31 @@ def set_transformers_class_names(model: Model) -> None:
     Args:
         model (Model): The model object.
     """
-    # Get the configuration
-    config = transformers.AutoConfig.from_pretrained(model.name)
+    try:
+        # Get the configuration
+        config = transformers.AutoConfig.from_pretrained(model.name)
 
-    # map model class from model type
-    model_mapping = transformers.AutoModel._model_mapping._model_mapping
+        # Map model class from model type
+        model_mapping = transformers.AutoModel._model_mapping._model_mapping
 
-    # get the mapped model class name
-    if model.class_name is None or model.class_name == "":
-        model.class_name = model_mapping[config.model_type]
-    if (model.tokenizer.class_name is None
-            or model.tokenizer.class_name == ""):
-        if config.tokenizer_class is not None:
-            model.tokenizer.class_name = config.tokenizer_class
-        else:
-            model.tokenizer.class_name = TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
+        # Set model class name if not already set
+        model.class_name = model.class_name or model_mapping.get(
+            config.model_type)
+
+        # Set tokenizer class name if not already set
+        # and config.tokenizer_class exists
+        model.tokenizer.class_name = model.tokenizer.class_name or (
+            config.tokenizer_class if config.tokenizer_class else
+            TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
+        )
+    except Exception as e:
+        # Set default model class name if not already set
+        model.class_name = model.class_name or \
+                           model_config_default_class_for_module[TRANSFORMERS]
+
+        # Set default tokenizer class name if not already set
+        model.tokenizer.class_name = (model.tokenizer.class_name or
+                                      TRANSFORMERS_DEFAULT_TOKENIZER_CLASS)
 
 
 def set_diffusers_class_names(model: Model) -> None:
@@ -275,11 +285,14 @@ def set_diffusers_class_names(model: Model) -> None:
     if model.class_name is not None and model.class_name != "":
         return
 
-    # Get the configuration
-    config = diffusers.DiffusionPipeline.load_config(model.name)
+    try:
+        # Get the configuration
+        config = diffusers.DiffusionPipeline.load_config(model.name)
 
-    # get model class name from the configuration
-    model.class_name = config['_class_name']
+        # get model class name from the configuration
+        model.class_name = config['_class_name']
+    except:
+        model.class_name = model_config_default_class_for_module[DIFFUSERS]
 
 
 def download_model(model: Model, overwrite: bool) -> None:
