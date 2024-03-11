@@ -265,7 +265,7 @@ def set_transformers_class_names(model: Model) -> None:
             config.tokenizer_class if config.tokenizer_class else
             TRANSFORMERS_DEFAULT_TOKENIZER_CLASS
         )
-    except Exception as e:
+    except:
         # Set default model class name if not already set
         model.class_name = model.class_name or \
                            model_config_default_class_for_module[TRANSFORMERS]
