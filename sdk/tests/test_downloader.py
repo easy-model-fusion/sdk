@@ -448,7 +448,8 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(result_dict, expected_result)
         mock_download_model.assert_called_once()
 
-    @patch('downloader.download_transformers_tokenizer', return_value=None)
+    @patch('downloader.download_transformers_tokenizer',
+           return_value=None)
     def test_download_tokenizer_skip_success(
             self, mock_download_transformers_tokenizer):
         # Init
