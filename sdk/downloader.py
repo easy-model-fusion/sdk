@@ -212,18 +212,20 @@ class Model:
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
-            download_model(self, overwrite)
+            options = download_model(self, overwrite)
 
-            # Adding downloaded model path to result
+            # Adding downloaded model properties to result
             result_dict["path"] = self.download_path
+            result_dict["options"] = get_options_for_json(options)
 
         # Checking for tokenizer download
         if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
-            download_transformers_tokenizer(self, overwrite)
+            options = download_transformers_tokenizer(self, overwrite)
 
-            # Adding downloaded tokenizer path to result
+            # Adding downloaded tokenizer properties to result
             result_dict["tokenizer"]["path"] = self.tokenizer.download_path
+            result_dict["tokenizer"]["options"] = get_options_for_json(options)
 
 
 def set_class_names(model: Model) -> None:
@@ -295,7 +297,7 @@ def set_diffusers_class_names(model: Model) -> None:
         model.class_name = model_config_default_class_for_module[DIFFUSERS]
 
 
-def download_model(model: Model, overwrite: bool) -> None:
+def download_model(model: Model, overwrite: bool) -> dict:
     """
     Download the model.
 
@@ -305,7 +307,7 @@ def download_model(model: Model, overwrite: bool) -> None:
             it exists.
 
     Returns:
-        None. Exit with error if anything goes wrong.
+        dict: A dictionary containing options used for model downloading.
     """
 
     # Check if the model already exists at path
@@ -318,7 +320,7 @@ def download_model(model: Model, overwrite: bool) -> None:
             model.module)
 
     # Processing options
-    options = process_options(model.options or [])
+    options = process_options(model.options)
 
     # Processing access token
     access_token = process_access_token(options, model)
@@ -338,14 +340,16 @@ def download_model(model: Model, overwrite: bool) -> None:
     # Downloading the model
     try:
         model_downloaded = model_class_obj.from_pretrained(
-            model.name, **options, token=access_token)
+            model.name, token=access_token, **options)
         model_downloaded.save_pretrained(model.download_path)
     except Exception as e:
         err = f"Error downloading model {model.name}: {e}"
         exit_error(err, ERROR_EXIT_MODEL)
 
+    return options
 
-def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
+
+def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
     """
     Download a transformers tokenizer for the model.
 
@@ -355,7 +359,7 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
             it exists.
 
     Returns:
-        None. Exit with error if anything goes wrong.
+        dict: A dictionary containing options used for model downloading.
     """
 
     # Retrieving tokenizer class from module
@@ -383,7 +387,7 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
         exit_error(err)
 
     # Processing options
-    options = process_options(model.tokenizer.options or [])
+    options = process_options(model.tokenizer.options)
 
     # Downloading the tokenizer
     try:
@@ -393,6 +397,8 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> None:
     except Exception as e:
         err = f"Error downloading tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER)
+
+    return options
 
 
 def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
@@ -516,6 +522,23 @@ def process_access_token(options: dict, model: Model) -> str | None:
         access_token = model.access_token
 
     return access_token
+
+
+def get_options_for_json(options_dict: dict) -> dict:
+    """
+    Prepares a dictionary containing options for conversion to JSON.
+    Args:
+      options_dict (dict): A dictionary containing options as key-value pairs.
+    Returns:
+      dict: A new dictionary with the same keys but with values prepared for
+            JSON serialization (strings with quotes for string values).
+    """
+    for key, value in options_dict.items():
+        if isinstance(value, str):
+            options_dict[key] = "\"{}\"".format(value)
+        else:
+            options_dict[key] = str(value)
+    return options_dict
 
 
 def map_args_to_model(args) -> Model:
