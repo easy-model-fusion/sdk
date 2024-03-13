@@ -93,11 +93,39 @@ class ModelsManagement:
         Generates the prompt for the loaded model with his stored options
         :param prompt: The prompt to generate (if the prompt is empty, the
             options.prompt will be used)
+        :param kwargs: more parameters to pass to the prompt generator
         :return: The object of type link with the model category
         """
         if not self.loaded_model:
             print("No model loaded. Load a model before generating prompts.")
             return
+
+        return (
+            self.loaded_model.generate_prompt(
+                prompt,
+                self.options_models[
+                    self.loaded_model.model_name],
+                **kwargs
+            )
+        )
+
+    def generate_prompt_with_model_switch(self, prompt: Optional[str],
+                                          model_name: str, **kwargs):
+        """
+        Generates the prompt on the given model.
+        :param prompt: The prompt to generate (if the prompt is empty, the
+            options.prompt will be used)
+        :param model_name: The model to use for the prompt (if the model is not
+            loaded or different to the loaded model, the model will be loaded
+            before generating prompts
+        :param kwargs: more parameters to pass to the prompt generator
+        :return: The object of type link with the model category
+        """
+        if self.loaded_model.model_name != model_name:
+            self.unload_model()
+
+        if not self.loaded_model:
+            self.load_model(model_name=model_name)
 
         return (
             self.loaded_model.generate_prompt(
