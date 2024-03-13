@@ -2,27 +2,20 @@ from abc import ABC
 from typing import Union, Optional
 from enum import Enum
 
-
-class Devices(Enum):
-    """
-    Enumeration of devices supported
-    """
-    GPU = "cuda"
-    CPU = "cpu"
-    RESET = "meta"
+from sdk import Devices
 
 
-class TokenizerOptions:
+class OptionsTokenizer:
     """
     Abstract class defining the options used for models
     """
     device: Union[str, Devices]
     padding_side: str = "left"
-    return_tensors: str = "pt"
+    return_tensors: Optional[str] = None
 
     def __init__(self, device: Union[str, Devices],
                  padding_side: str = "left",
-                 return_tensors: str = "pt"):
+                 return_tensors: Optional[str] = None):
         """
         Initializes the options class with the given device and other options.
 
@@ -35,4 +28,5 @@ class TokenizerOptions:
         if padding_side not in ['left', 'right']:
             raise ValueError("padding_side must be either 'left' or 'right'")
         self.padding_side = padding_side
-        self.return_tensors = return_tensors
+        if return_tensors:
+            self.return_tensors = return_tensors

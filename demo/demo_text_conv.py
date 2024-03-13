@@ -1,7 +1,7 @@
 import torch
 from sdk.models import ModelsManagement, ModelsTextConversation
 from sdk.options import Devices, OptionsTextConversation
-from sdk.options.tokenizer_options import TokenizerOptions
+from sdk.options.options_tokenizer import OptionsTokenizer
 
 
 class DemoTextConv:
@@ -21,14 +21,14 @@ class DemoTextConv:
         options = OptionsTextConversation(
             prompt="Hello, what's 3 + 3 ?",
             device=Devices.GPU,
-            model=model_name,
+            model_name=model_name,
             batch_size=5,
             minimum_tokens=50
         )
 
         # Define tokenizer options
-        tokenizer_options = TokenizerOptions(
-            device='cuda',
+        tokenizer_options = OptionsTokenizer(
+            device=Devices.GPU,
             padding_side='left'
         )
 
@@ -49,9 +49,9 @@ class DemoTextConv:
             prompt="What did I say before ?"))
 
         # Create a new conversation with a new prompt
-        options2 = OptionsTextConversation(
+        options = OptionsTextConversation(
             prompt="Hello, what's 6 + 6 ?",
-            device=Devices.GPU,
+            device=options.device,
             model=model_name,
             batch_size=1,
             minimum_tokens=50,
@@ -59,20 +59,20 @@ class DemoTextConv:
         )
 
         # Switch to the new conversation
-        model_management.set_model_options(model_name=model_name, options=options2)
-        print(model_management.generate_prompt(options2.prompt))
+        model_management.set_model_options(model_name=model_name, options=options)
+        print(model_management.generate_prompt(options.prompt))
         print(model_management.generate_prompt(
             prompt="Wowowowow ?")
         )
 
         # Switch back to the initial conversation
-        options2.chat_ID_to_use_id = 0
+        options.chat_id_to_use = 0
         print(model_management.generate_prompt("How are you ? "))
         print(model_management.generate_prompt(prompt="Hihi ?"))
 
         # Create a new tokenizer and use it
-        options2.create_new_tokenizer = True
-        tokenizer_options = TokenizerOptions(
+        options.create_new_tokenizer = True
+        tokenizer_options = OptionsTokenizer(
             device='cuda',
             padding_side='right'
         )

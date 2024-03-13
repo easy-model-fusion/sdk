@@ -44,8 +44,7 @@ class OptionsTextConversation(Options):
     """
     def __init__(self,
                  prompt: str,
-                 model: Union[str, PreTrainedModel, "TFPreTrainedModel"] = None,
-                 tokenizer: Union[str, PreTrainedTokenizer, "PreTrainedTokenizerFast"] = None,
+                 model_name: str,
                  create_new_conv: bool = False,
                  create_new_tokenizer: bool = False,
                  delete_conv: bool = False,
@@ -64,15 +63,14 @@ class OptionsTextConversation(Options):
                  attention_mask: bool = True,
                  pad_token_id: int = 50256,
                  eos_token_id: int = 50256,
-                 tokenizer_id_to_use_id: int = 0,
-                 chat_id_to_use_id: int = 0
+                 tokenizer_id_to_use: int = 0,
+                 chat_id_to_use: int = 0
                  ):
 
         super().__init__(device)
         self.prompt = prompt
         self.task = task
-        self.model = model
-        self.tokenizer = tokenizer
+        self.model_name = model_name
         if model_card:
             self.model_card = model_card
         self.num_workers = num_workers
@@ -94,5 +92,5 @@ class OptionsTextConversation(Options):
         self.create_new_tokenizer = create_new_tokenizer
         self.delete_tokenizer = delete_tokenizer
         self.delete_conv = delete_conv
-        self.tokenizer_ID_to_use_id = tokenizer_id_to_use_id
-        self.chat_ID_to_use_id = chat_id_to_use_id
+        self.tokenizer_id_to_use = tokenizer_id_to_use
+        self.chat_id_to_use = chat_id_to_use
