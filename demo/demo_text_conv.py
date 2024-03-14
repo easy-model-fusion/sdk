@@ -54,6 +54,7 @@ class DemoTextConv:
             device=options.device,
             model_name=model_name,
             batch_size=1,
+            chat_id_to_use=1,
             minimum_tokens=50,
             create_new_conv=True
         )
@@ -78,4 +79,3 @@ class DemoTextConv:
         )
         model.tokenizer_options = tokenizer_options
         print(model_management.generate_prompt("Where is Japan"))
-

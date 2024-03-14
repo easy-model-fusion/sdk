@@ -114,7 +114,7 @@ class ModelsTextConversation(Model):
             self, prompt: Optional[str],
             option: OptionsTextConversation,
             **kwargs):
-        print("in generate")
+        print("in generate chat id", option.chat_id_to_use)
         """
         Generates the prompt with the given option.
 
@@ -128,11 +128,18 @@ class ModelsTextConversation(Model):
         prompt = prompt if prompt else option.prompt
 
         if option.create_new_conv:
-            print("creating new conversation")
+            print("creating new conversation", self.conversation_history, "$$$$$$$$$$$$$$$$$$$$")
+            print("Option id before creat is ", option.chat_id_to_use)
             self.create_new_conversation(
                 prompt=prompt,
                 option=option
             )
+            print("@@@@@@@@@@@@@",self.conversation_history,"@@@@@@@@@@@@")
+            print("Option id after creat is ",option.chat_id_to_use)
+        print("current id is ", self.current_conversation_id,"option is ", option.chat_id_to_use)
+        if option.chat_id_to_use != self.current_conversation_id:
+            print("changing conversation", self.current_conversation_id, "")
+            self.change_conversation(option.chat_id_to_use)
 
         if option.create_new_tokenizer:
             option.create_new_tokenizer = False
@@ -140,10 +147,10 @@ class ModelsTextConversation(Model):
                 tokenizer_options=self.tokenizer_options)
 
         if option.tokenizer_id_to_use != self.current_tokenizer_id:
+            print("creating new tokenizer", self.current_tokenizer_id, "")
             self.set_tokenizer_to_use(option.tokenizer_id_to_use)
 
-        if option.chat_id_to_use != self.current_conversation_id:
-            self.change_conversation(option.chat_id_to_use)
+
 
         if not self.conversation_active:
             self.create_new_conversation(
@@ -152,7 +159,7 @@ class ModelsTextConversation(Model):
             )
 
         history = '\n'.join(self.conversation_history)
-        print("hsitory is : //////////", history, "///////////////////////////////////")
+        print("hsitory is : //////////", history, "///////////////////////////////////????????????????????")
         str_to_send = self.tokenizer_object.prepare_input(prompt, history)
         result = self.pipeline.generate(
             str_to_send,
@@ -177,7 +184,6 @@ class ModelsTextConversation(Model):
                                     self.model_path,
                                     tokenizer_options)
         self.current_tokenizer_id = self.tokenizer_ctr
-
         self.tokenizer_dict[self.current_tokenizer_id] = tokenizer
         self.tokenizer_object = tokenizer
         self.tokenizer_ctr += 1
@@ -262,9 +268,11 @@ class ModelsTextConversation(Model):
             None
         """
         option.create_new_conv = False
+        option.chat_id_to_use = self.conversation_ctr
         self.conversation_active = True
 
         if self.chat_bot is not None:
+            print("saving old conv in id", self.current_conversation_id)
             self.save_conversation()
 
         # create new conversation and increment counter
@@ -292,6 +300,7 @@ class ModelsTextConversation(Model):
         if conversation_id in self.conversation_dict:
             self.current_conversation_id = conversation_id
             self.chat_bot, self.conversation_history = self.conversation_dict[conversation_id]
+            print("accessing conversation", conversation_id)
             return True
         else:
             return False
