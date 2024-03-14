@@ -43,20 +43,22 @@ class TokenizerObject:
             padding_side=self.options.padding_side
         )
 
-    def prepare_input(self, prompt: str):
+    def prepare_input(self, prompt: str, history: str):
         """
         Tokenizes the given prompt and prepares it for model input.
 
         Args:
+            history: chat history
             prompt (str): The input prompt.
 
         Returns:
             torch.Tensor: The tokenized and formatted input tensor.
         """
         return self.pipeline.encode(
-            prompt,
-            return_tensors=self.options.return_tensors
-        ).to(self.options.device)
+            text=history,
+            text_pair=prompt,
+            return_tensors='pt'
+        ).to(torch.device("cuda"))
 
     def decode_model_output(self, outputs: torch.Tensor):
         """
@@ -68,4 +70,4 @@ class TokenizerObject:
         Returns:
             str: The decoded generated text.
         """
-        return self.pipeline.decode(outputs[0])
+        return self.pipeline.decode(outputs[0]).strip()

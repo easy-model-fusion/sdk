@@ -52,7 +52,7 @@ class DemoTextConv:
         options = OptionsTextConversation(
             prompt="Hello, what's 6 + 6 ?",
             device=options.device,
-            model=model_name,
+            model_name=model_name,
             batch_size=1,
             minimum_tokens=50,
             create_new_conv=True
