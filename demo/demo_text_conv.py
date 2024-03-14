@@ -62,20 +62,19 @@ class DemoTextConv:
         # Switch to the new conversation
         model_management.set_model_options(model_name=model_name, options=options)
         print(model_management.generate_prompt(options.prompt))
-        print(model_management.generate_prompt(
-            prompt="Wowowowow ?")
-        )
 
         # Switch back to the initial conversation
         options.chat_id_to_use = 0
-        print(model_management.generate_prompt("How are you ? "))
-        print(model_management.generate_prompt(prompt="Hihi ?"))
+        print(model_management.generate_prompt("Where is Japan"))
+
 
         # Create a new tokenizer and use it
         options.create_new_tokenizer = True
+        options.tokenizer_id_to_use = 1
+        model_management.set_model_options(model_name=model_name, options=options)
         tokenizer_options = OptionsTokenizer(
             device='cuda',
             padding_side='right'
         )
         model.tokenizer_options = tokenizer_options
-        print(model_management.generate_prompt("Where is Japan"))
+        print(model_management.generate_prompt("Bye"))

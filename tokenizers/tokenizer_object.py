@@ -55,9 +55,10 @@ class TokenizerObject:
             torch.Tensor: The tokenized and formatted input tensor.
         """
         return self.pipeline.encode(
-            text=history,
-            text_pair=prompt,
-            return_tensors='pt'
+            prompt,
+            history,
+            return_tensors='pt',
+            truncation=True
         ).to(torch.device("cuda"))
 
     def decode_model_output(self, outputs: torch.Tensor):
