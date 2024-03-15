@@ -3,7 +3,7 @@ from typing import Optional, Dict, Tuple
 from transformers import Conversation, AutoModelForCausalLM
 
 from sdk.options.options_tokenizer import OptionsTokenizer
-from sdk.tokenizers.tokenizer_object import TokenizerObject
+from sdk.sdk.tokenizers.tokenizer_object import TokenizerObject
 from sdk.models import Model
 from sdk.options import Devices, OptionsTextConversation
 
