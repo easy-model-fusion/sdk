@@ -28,7 +28,8 @@ class DemoTextConv:
         # Define tokenizer options
         tokenizer_options = OptionsTokenizer(
             device=Devices.GPU,
-            padding_side='left'
+            padding_side='left',
+            return_tensors="pt"
         )
 
         # Initialize the model management
@@ -74,7 +75,8 @@ class DemoTextConv:
                                            options=options)
         tokenizer_options = OptionsTokenizer(
             device='cuda',
-            padding_side='right'
+            padding_side='right',
+            return_tensors='pt'
         )
         model.tokenizer_options = tokenizer_options
         print(model_management.generate_prompt("Bye"))
