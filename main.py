@@ -1,5 +1,5 @@
 import argparse
-from demo import DemoTextConv, DemoTxtToImg
+from sdk.demo import DemoTextConv, DemoTxtToImg
 
 
 if __name__ == '__main__':
