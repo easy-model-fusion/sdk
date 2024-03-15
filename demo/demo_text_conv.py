@@ -1,4 +1,3 @@
-import torch
 from sdk.models import ModelsManagement, ModelsTextConversation
 from sdk.options import Devices, OptionsTextConversation
 from sdk.options.options_tokenizer import OptionsTokenizer
@@ -60,18 +59,19 @@ class DemoTextConv:
         )
 
         # Switch to the new conversation
-        model_management.set_model_options(model_name=model_name, options=options)
+        model_management.set_model_options(model_name=model_name,
+                                           options=options)
         print(model_management.generate_prompt(options.prompt))
 
         # Switch back to the initial conversation
         options.chat_id_to_use = 0
         print(model_management.generate_prompt("Where is Japan"))
 
-
         # Create a new tokenizer and use it
         options.create_new_tokenizer = True
         options.tokenizer_id_to_use = 1
-        model_management.set_model_options(model_name=model_name, options=options)
+        model_management.set_model_options(model_name=model_name,
+                                           options=options)
         tokenizer_options = OptionsTokenizer(
             device='cuda',
             padding_side='right'

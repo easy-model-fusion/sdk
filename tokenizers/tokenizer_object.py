@@ -1,4 +1,3 @@
-from abc import abstractmethod
 import torch
 from transformers import AutoTokenizer
 
@@ -12,7 +11,7 @@ class TokenizerObject:
     pipeline: AutoTokenizer
     options: OptionsTokenizer
     model_name: str
-    model_path: str
+    tokenizer_path: str
     user_input: str
     chatbot_output: str
     conversation_active: bool = False
@@ -29,7 +28,7 @@ class TokenizerObject:
             options (OptionsTokenizer): The options for the tokenizer.
         """
         self.model_name = model_name
-        self.model_path = model_path
+        self.tokenizer_path = model_path
         self.options = options
         self.create_tokenizer()
 
@@ -38,7 +37,7 @@ class TokenizerObject:
         Creates the tokenizer to use
         """
         self.pipeline = AutoTokenizer.from_pretrained(
-            self.model_path,
+            self.tokenizer_path,
             trust_remote_code=True,
             padding_side=self.options.padding_side
         )

@@ -1,6 +1,6 @@
 import torch
 from typing import Optional, Dict, Tuple
-from transformers import (Conversation, AutoModelForCausalLM, AutoConfig)
+from transformers import Conversation, AutoModelForCausalLM
 
 from sdk.options.options_tokenizer import OptionsTokenizer
 from sdk.tokenizers.tokenizer_object import TokenizerObject
@@ -13,20 +13,28 @@ class ModelsTextConversation(Model):
     A class representing a text conversation model.
 
     Attributes:
-        pipeline (AutoModelForCausalLM): The pipeline for the text conversation.
-        tokenizer_object (TokenizerObject): The tokenizer object for the model.
-        tokenizer_options (OptionsTokenizer): The options for the tokenizer.
-        tokenizer_dict (Dict[int, TokenizerObject]): Dictionary to store tokenizers.
-        conversation_dict (Dict[int, Conversation]): Dictionary to store conversations.
-        current_conversation_id (int): ID of the current conversation.
+        pipeline (AutoModelForCausalLM):
+            The pipeline for the text conversation.
+        tokenizer_object (TokenizerObject):
+            The tokenizer object for the model.
+        tokenizer_options (OptionsTokenizer):
+            The options for the tokenizer.
+        tokenizer_dict (Dict[int, TokenizerObject]):
+            Dictionary to store tokenizers.
+        conversation_dict (Dict[int, Tuple[Conversation, list]]):
+            Dictionary to store conversations.
+        current_conversation_id (int):
+            ID of the current conversation.
         current_tokenizer_id (int): ID of the current tokenizer.
         conversation_ctr (int): Total number of conversations.
         tokenizer_ctr (int): Total number of tokenizers.
         loaded (bool): Flag indicating whether the model is loaded.
         chat_bot (Conversation): Current conversation.
         conversation_step (int): Step of the conversation.
-        conversation_history (list): List to store chat history token IDs.
-        conversation_active (bool): Flag indicating if a conversation is active.
+        conversation_history (list):
+            List to store chat history token IDs.
+        conversation_active (bool):
+         Flag indicating if a conversation is active.
     """
     pipeline: AutoModelForCausalLM
     tokenizer_object: TokenizerObject
@@ -119,7 +127,8 @@ class ModelsTextConversation(Model):
 
         Args:
             prompt (Optional[str]): The optional prompt.
-            option (OptionsTextConversation): The options of text conversation model.
+            option (OptionsTextConversation):
+                The options of text conversation model.
 
         Returns:
             str: Generated prompt.
@@ -191,7 +200,8 @@ class ModelsTextConversation(Model):
             token_id (int): The ID of the tokenizer to use.
 
         Returns:
-            int: The ID of the selected tokenizer, or -1 if the provided ID is invalid.
+            int: The ID of the selected tokenizer,
+             or -1 if the provided ID is invalid.
         """
         if token_id in self.tokenizer_dict:
             self.current_tokenizer_id = token_id
@@ -205,10 +215,12 @@ class ModelsTextConversation(Model):
         Delete a tokenizer.
 
         Args:
-            token_id (int): The ID of the tokenizer to delete.
+            token_id (int):
+             The ID of the tokenizer to delete.
 
         Returns:
-            int: 0 if the tokenizer was deleted successfully, -1 if the provided ID is invalid.
+            int: 0 if the tokenizer was deleted successfully,
+             -1 if the provided ID is invalid.
         """
         if token_id in self.tokenizer_dict:
             del self.tokenizer_dict[token_id]
@@ -221,10 +233,12 @@ class ModelsTextConversation(Model):
         Delete a conversation.
 
         Args:
-            conversation_id (int): The ID of the conversation to delete.
+            conversation_id (int):
+                The ID of the conversation to delete.
 
         Returns:
-            int: 0 if the conversation was deleted successfully, -1 if the provided ID is invalid.
+            int: 0 if the conversation was deleted successfully,
+             -1 if the provided ID is invalid.
         """
         if conversation_id in self.conversation_dict:
             del self.conversation_dict[conversation_id]
@@ -245,18 +259,23 @@ class ModelsTextConversation(Model):
         Returns:
             str: The generated response from the chatbot.
         """
-        input_ids = {"input_ids": self.tokenizer_object.prepare_input(prompt, history=history)}
+        input_ids = {"input_ids": self.tokenizer_object.prepare_input(
+            prompt, history=history)
+        }
         return self.pipeline.generate(**input_ids)
 
     def create_new_conversation(self, prompt,
-                                option: OptionsTextConversation, **kwargs) -> int:
+                                option: OptionsTextConversation,
+                                **kwargs) -> int:
         """
         Create a new conversation.
 
         Args:
             prompt: The initial prompt for the conversation.
-            option (OptionsTextConversation): The options for the conversation.
-            **kwargs: Additional keyword arguments for initializing the conversation.
+            option (OptionsTextConversation):
+                The options for the conversation.
+            **kwargs:
+                Additional keyword arguments for initializing the conversation.
 
         Returns:
             None
@@ -275,7 +294,9 @@ class ModelsTextConversation(Model):
         # clearing conversation history
         self.conversation_history = []
         # adding new conversation to dict, with cleared history
-        self.conversation_dict[self.current_conversation_id] = self.chat_bot, []
+        self.conversation_dict[
+            self.current_conversation_id
+        ] = self.chat_bot, []
         # incrementing counter
         self.conversation_ctr += 1
         return self.current_conversation_id
@@ -288,16 +309,19 @@ class ModelsTextConversation(Model):
             conversation_id (int): The ID of the conversation to switch to.
 
         Returns:
-            int: 0 if the conversation was switched successfully, -1 if the provided ID is invalid.
+            int: 0 if the conversation was switched successfully,
+                -1 if the provided ID is invalid.
         """
         if conversation_id in self.conversation_dict:
             print("switching to conversation {}".format(conversation_id))
             self.current_conversation_id = conversation_id
-            self.chat_bot, self.conversation_history = self.conversation_dict[conversation_id]
+            self.chat_bot, self.conversation_history = (
+                self.conversation_dict)[conversation_id]
             return True
         else:
             return False
 
     def save_conversation(self) -> None:
         # save state of  conversation in dict
-        self.conversation_dict[self.current_conversation_id] = self.chat_bot, self.conversation_history
+        self.conversation_dict[self.current_conversation_id] = (
+            self.chat_bot, self.conversation_history)
