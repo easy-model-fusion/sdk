@@ -2,6 +2,7 @@ import unittest
 from sdk.options import OptionsTextToImage, Devices
 from sdk.sdk.models.model_text_to_image import ModelTextToImage
 
+
 class TestModelTextToImage(unittest.TestCase):
     def setUp(self):
         self.model_name = "test_model"
@@ -32,6 +33,7 @@ class TestModelTextToImage(unittest.TestCase):
         )
         image = self.model.generate_prompt(None, options)
         self.assertIsNotNone(image)
+
 
 if __name__ == '__main__':
     unittest.main()
