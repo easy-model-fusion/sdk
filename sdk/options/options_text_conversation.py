@@ -53,6 +53,7 @@ class OptionsTextConversation(Options):
         chat_id_to_use (int): The ID of the conversation to use.
             Default is 0.
     """
+
     def __init__(self,
                  prompt: str,
                  model_name: str,
