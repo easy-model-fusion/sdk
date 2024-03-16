@@ -28,7 +28,6 @@ class ModelsTextConversation(Model):
         conversation_ctr (int): Total number of conversations.
         tokenizer_ctr (int): Total number of tokenizers.
         loaded (bool): Flag indicating whether the model is loaded.
-        chat_bot (Conversation): Current conversation.
         conversation_step (int): Step of the conversation.
         conversation_history (list):
             List to store chat history token IDs.
@@ -40,7 +39,7 @@ class ModelsTextConversation(Model):
     options: OptionsTextConversation
 
     tokenizer_dict: Dict[int, Tokenizer] = {}
-    conversation_dict: Dict[int, Tuple[Conversation, list]] = {}
+    conversation_dict: Dict[int, list] = {}
 
     current_conversation_id: int = 0
     current_tokenizer_id: int = 0
@@ -49,8 +48,6 @@ class ModelsTextConversation(Model):
     tokenizer_ctr: int = 0
 
     loaded: bool
-
-    chat_bot: Conversation = None
     conversation_step: int = 0
 
     conversation_active: bool = False
@@ -151,7 +148,7 @@ class ModelsTextConversation(Model):
             )
 
         history = '\n'.join(
-            self.conversation_dict[self.current_conversation_id][1]
+            self.conversation_dict[self.current_conversation_id]
         )
         print("sending input")
         str_to_send = self.tokenizer.prepare_input(prompt, history)
@@ -161,8 +158,8 @@ class ModelsTextConversation(Model):
         )
         response = self.tokenizer.decode_model_output(result)
 
-        self.conversation_dict[self.current_conversation_id][1].append(prompt)
-        self.conversation_dict[self.current_conversation_id][1].append(response)
+        self.conversation_dict[self.current_conversation_id].append(prompt)
+        self.conversation_dict[self.current_conversation_id].append(response)
         return response
 
     """
@@ -275,12 +272,11 @@ class ModelsTextConversation(Model):
 
         # create new conversation and increment counter
         self.current_conversation_id = self.conversation_ctr
-        self.chat_bot = Conversation(prompt, **kwargs)
 
         # adding new conversation to dict, with cleared history
         self.conversation_dict[
             self.current_conversation_id
-        ] = self.chat_bot, []
+        ] = []
         # incrementing counter
         self.conversation_ctr += 1
         return self.current_conversation_id
@@ -299,8 +295,6 @@ class ModelsTextConversation(Model):
         if conversation_id in self.conversation_dict:
             print("switching to conversation {}".format(conversation_id))
             self.current_conversation_id = conversation_id
-            self.chat_bot, self.conversation_history = (
-                self.conversation_dict)[conversation_id]
             return True
         else:
             return False
