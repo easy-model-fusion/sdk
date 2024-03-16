@@ -105,4 +105,3 @@ class OptionsTextConversation(Options):
         self.tokenizer_id_to_use = tokenizer_id_to_use
         self.chat_id_to_use = chat_id_to_use
         self.trust_remote_code = trust_remote_code
-

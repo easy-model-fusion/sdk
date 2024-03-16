@@ -1,7 +1,6 @@
 import torch
-from typing import Optional, Dict, Tuple
-from transformers import Conversation, AutoModelForCausalLM
-from sdk.options.options_tokenizer import OptionsTokenizer
+from typing import Optional, Dict
+from transformers import AutoModelForCausalLM
 from sdk.tokenizers.tokenizer import Tokenizer
 from sdk.models import Model
 from sdk.options import Devices, OptionsTextConversation
@@ -52,7 +51,8 @@ class ModelsTextConversation(Model):
 
     conversation_active: bool = False
 
-    def __init__(self, model_name: str, model_path: str, option: OptionsTextConversation):
+    def __init__(self, model_name: str, model_path: str,
+                 option: OptionsTextConversation):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
@@ -72,8 +72,8 @@ class ModelsTextConversation(Model):
         self.pipeline = AutoModelForCausalLM.from_pretrained(
             self.model_path,
             trust_remote_code=self.options.trust_remote_code,
-            pad_token_id=self.options.pad_token_id,  # Custom pad token ID
-            eos_token_id=self.options.eos_token_id  # Custom end-of-sequence token ID
+            pad_token_id=self.options.pad_token_id,
+            eos_token_id=self.options.eos_token_id
         )
 
     def load_model(self, option: OptionsTextConversation) -> bool:
