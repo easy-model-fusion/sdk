@@ -57,7 +57,6 @@ class OptionsTextConversation(Options):
                  prompt: str,
                  model_name: str,
                  create_new_conv: bool = False,
-                 create_new_tokenizer: bool = False,
                  delete_conv: bool = False,
                  delete_tokenizer: bool = False,
                  model_card: Optional[Union[str, ModelCard]] = None,
@@ -75,7 +74,8 @@ class OptionsTextConversation(Options):
                  pad_token_id: int = 50256,
                  eos_token_id: int = 50256,
                  tokenizer_id_to_use: int = 0,
-                 chat_id_to_use: int = 0
+                 chat_id_to_use: int = 0,
+                 trust_remote_code: bool = False
                  ):
 
         super().__init__(device)
@@ -100,8 +100,9 @@ class OptionsTextConversation(Options):
         self.pad_token_id = pad_token_id
         self.eos_token_id = eos_token_id
         self.create_new_conv = create_new_conv
-        self.create_new_tokenizer = create_new_tokenizer
         self.delete_tokenizer = delete_tokenizer
         self.delete_conv = delete_conv
         self.tokenizer_id_to_use = tokenizer_id_to_use
         self.chat_id_to_use = chat_id_to_use
+        self.trust_remote_code = trust_remote_code
+

@@ -1,9 +1,8 @@
 import torch
 from typing import Optional, Dict, Tuple
 from transformers import Conversation, AutoModelForCausalLM
-
 from sdk.options.options_tokenizer import OptionsTokenizer
-from sdk.sdk.tokenizers.tokenizer_object import TokenizerObject
+from sdk.tokenizers.tokenizer import Tokenizer
 from sdk.models import Model
 from sdk.options import Devices, OptionsTextConversation
 
@@ -15,7 +14,7 @@ class ModelsTextConversation(Model):
     Attributes:
         pipeline (AutoModelForCausalLM):
             The pipeline for the text conversation.
-        tokenizer_object (TokenizerObject):
+        tokenizer_object (Tokenizer):
             The tokenizer object for the model.
         tokenizer_options (OptionsTokenizer):
             The options for the tokenizer.
@@ -37,10 +36,10 @@ class ModelsTextConversation(Model):
          Flag indicating if a conversation is active.
     """
     pipeline: AutoModelForCausalLM
-    tokenizer_object: TokenizerObject
-    tokenizer_options: OptionsTokenizer
+    tokenizer: Tokenizer
+    options: OptionsTextConversation
 
-    tokenizer_dict: Dict[int, TokenizerObject] = {}
+    tokenizer_dict: Dict[int, Tokenizer] = {}
     conversation_dict: Dict[int, Tuple[Conversation, list]] = {}
 
     current_conversation_id: int = 0
@@ -54,17 +53,16 @@ class ModelsTextConversation(Model):
     chat_bot: Conversation = None
     conversation_step: int = 0
 
-    # change this to dic
-    conversation_history = []
     conversation_active: bool = False
 
-    def __init__(self, model_name: str, model_path: str):
+    def __init__(self, model_name: str, model_path: str, option: OptionsTextConversation):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
         :param model_path: The path of the model
         """
         super().__init__(model_name, model_path)
+        self.options = option
         self.loaded = False
         self.create_pipeline()
 
@@ -76,11 +74,9 @@ class ModelsTextConversation(Model):
             return
         self.pipeline = AutoModelForCausalLM.from_pretrained(
             self.model_path,
-            trust_remote_code=True,
-            cache_dir="./cache",  # Cache directory
-            return_dict=True,  # Return outputs as a dictionary
-            pad_token_id=50256,  # Custom pad token ID
-            eos_token_id=50256  # Custom end-of-sequence token ID
+            trust_remote_code=self.options.trust_remote_code,
+            pad_token_id=self.options.pad_token_id,  # Custom pad token ID
+            eos_token_id=self.options.eos_token_id  # Custom end-of-sequence token ID
         )
 
     def load_model(self, option: OptionsTextConversation) -> bool:
@@ -98,20 +94,20 @@ class ModelsTextConversation(Model):
             return True
         if option.device == Devices.RESET:
             return False
-
-        self.create_new_tokenizer(tokenizer_options=self.tokenizer_options)
         self.pipeline.to(option.device.value)
         self.loaded = True
         return True
 
-    def unload_model(self):
+    def unload_model(self, option: OptionsTextConversation) -> bool:
         """
         Unloads the model
         :return: True if the model is successfully unloaded
         """
         if not self.loaded:
             return False
-        self.pipeline.to(device=Devices.RESET)
+        self.pipeline.to(device=(
+            option.device if isinstance(option.device, str) else (
+                option.device.value)))
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
         self.loaded = False
@@ -143,12 +139,6 @@ class ModelsTextConversation(Model):
         if option.chat_id_to_use != self.current_conversation_id:
             self.change_conversation(option.chat_id_to_use)
 
-        if option.create_new_tokenizer:
-            print("creating tokenizer")
-            option.create_new_tokenizer = False
-            self.create_new_tokenizer(
-                tokenizer_options=self.tokenizer_options)
-
         if option.tokenizer_id_to_use != self.current_tokenizer_id:
             print("changing tokenizer")
             self.set_tokenizer_to_use(option.tokenizer_id_to_use)
@@ -160,17 +150,19 @@ class ModelsTextConversation(Model):
                 option=option
             )
 
-        history = '\n'.join(self.conversation_history)
+        history = '\n'.join(
+            self.conversation_dict[self.current_conversation_id][1]
+        )
         print("sending input")
-        str_to_send = self.tokenizer_object.prepare_input(prompt, history)
+        str_to_send = self.tokenizer.prepare_input(prompt, history)
         result = self.pipeline.generate(
             str_to_send,
-            max_new_tokens=128
+            **kwargs
         )
-        response = self.tokenizer_object.decode_model_output(result)
+        response = self.tokenizer.decode_model_output(result)
 
-        self.conversation_history.append(prompt)
-        self.conversation_history.append(response)
+        self.conversation_dict[self.current_conversation_id][1].append(prompt)
+        self.conversation_dict[self.current_conversation_id][1].append(response)
         return response
 
     """
@@ -180,15 +172,12 @@ class ModelsTextConversation(Model):
         tokenizer_options (TokenizerOptions): Options for the tokenizer.
     """
 
-    def create_new_tokenizer(self,
-                             tokenizer_options: OptionsTokenizer) -> int:
-
-        tokenizer = TokenizerObject(self.model_name,
-                                    self.model_path,
-                                    tokenizer_options)
+    def add_new_tokenizer(self,  # change to save_tokenizer
+                          tokenizer: Tokenizer) -> int:
+        # adding and ID to the tokenizer and saving it in a dict
         self.current_tokenizer_id = self.tokenizer_ctr
         self.tokenizer_dict[self.current_tokenizer_id] = tokenizer
-        self.tokenizer_object = tokenizer
+        self.tokenizer = tokenizer
         self.tokenizer_ctr += 1
         return self.current_tokenizer_id
 
@@ -205,7 +194,7 @@ class ModelsTextConversation(Model):
         """
         if token_id in self.tokenizer_dict:
             self.current_tokenizer_id = token_id
-            self.tokenizer_object = self.tokenizer_dict[token_id]
+            self.tokenizer = self.tokenizer_dict[token_id]
             return True
         else:
             return False
@@ -259,7 +248,7 @@ class ModelsTextConversation(Model):
         Returns:
             str: The generated response from the chatbot.
         """
-        input_ids = {"input_ids": self.tokenizer_object.prepare_input(
+        input_ids = {"input_ids": self.tokenizer.prepare_input(
             prompt, history=history)
         }
         return self.pipeline.generate(**input_ids)
@@ -284,15 +273,10 @@ class ModelsTextConversation(Model):
         option.chat_id_to_use = self.conversation_ctr
         self.conversation_active = True
 
-        if self.chat_bot is not None:
-            self.save_conversation()
-
         # create new conversation and increment counter
         self.current_conversation_id = self.conversation_ctr
         self.chat_bot = Conversation(prompt, **kwargs)
 
-        # clearing conversation history
-        self.conversation_history = []
         # adding new conversation to dict, with cleared history
         self.conversation_dict[
             self.current_conversation_id
@@ -320,8 +304,3 @@ class ModelsTextConversation(Model):
             return True
         else:
             return False
-
-    def save_conversation(self) -> None:
-        # save state of  conversation in dict
-        self.conversation_dict[self.current_conversation_id] = (
-            self.chat_bot, self.conversation_history)

@@ -1,6 +1,7 @@
 from sdk.models import ModelsManagement, ModelsTextConversation
 from sdk.options import Devices, OptionsTextConversation
 from sdk.options.options_tokenizer import OptionsTokenizer
+from sdk.tokenizers.tokenizer import Tokenizer
 
 
 class DemoTextConv:
@@ -21,8 +22,7 @@ class DemoTextConv:
             prompt="Hello, what's 3 + 3 ?",
             device=Devices.GPU,
             model_name=model_name,
-            batch_size=5,
-            minimum_tokens=50
+            trust_remote_code=True
         )
 
         # Define tokenizer options
@@ -32,12 +32,16 @@ class DemoTextConv:
             return_tensors="pt"
         )
 
+        tokenizer = Tokenizer("Salesforce/codegen-350M-nl",
+                              "Salesforce/codegen-350M-nl",
+                              tokenizer_options)
+
         # Initialize the model management
         model_management = ModelsManagement()
 
         # Create and load the text conversation model
-        model = ModelsTextConversation(model_name, model_path)
-        model.tokenizer_options = tokenizer_options
+        model = ModelsTextConversation(model_name, model_path, options)
+        model.tokenizer = tokenizer
         model_management.add_model(new_model=model, model_options=options)
         model_management.load_model(model_name)
 
@@ -64,12 +68,11 @@ class DemoTextConv:
                                            options=options)
         print(model_management.generate_prompt(options.prompt))
 
-        # Switch back to the initial conversation
-        options.chat_id_to_use = 0
         print(model_management.generate_prompt("Where is Japan"))
 
+        # Switch back to the initial conversation
+        options.chat_id_to_use = 0
         # Create a new tokenizer and use it
-        options.create_new_tokenizer = True
         options.tokenizer_id_to_use = 1
         model_management.set_model_options(model_name=model_name,
                                            options=options)
@@ -79,4 +82,4 @@ class DemoTextConv:
             return_tensors='pt'
         )
         model.tokenizer_options = tokenizer_options
-        print(model_management.generate_prompt("Bye"))
+        print(model_management.generate_prompt("Bye "))

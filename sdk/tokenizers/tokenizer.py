@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 from sdk.options.options_tokenizer import OptionsTokenizer
 
 
-class TokenizerObject:
+class Tokenizer:
     """
     Abstract base class for all tokenizers
     """
