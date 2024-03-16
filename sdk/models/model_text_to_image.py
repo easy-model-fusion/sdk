@@ -47,7 +47,9 @@ class ModelTextToImage(Model):
             return True
         if option.device == Devices.RESET:
             return False
-        self.pipeline.to(option.device.value)
+        self.pipeline.to(device=(
+            option.device if isinstance(option.device, str) else (
+                option.device.value)))
         self.loaded = True
         return True
 

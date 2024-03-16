@@ -1,69 +1,85 @@
-import torch
 from sdk.models import ModelsManagement, ModelsTextConversation
 from sdk.options import Devices, OptionsTextConversation
+from sdk.options.options_tokenizer import OptionsTokenizer
+from sdk.tokenizers.tokenizer import Tokenizer
 
 
 class DemoTextConv:
+    """
+    This class demonstrates a text conversation using a chatbot model.
+    """
 
     def __init__(self):
-        model_name = "facebook/blenderbot-400M-distill"
-        model_path = "facebook/blenderbot-400M-distill"
+        """
+        Initializes the DemoTextConv class with predefined options and models.
+        """
+        # Define the model name and path
+        model_name = "Salesforce/codegen-350M-nl"
+        model_path = "Salesforce/codegen-350M-nl"
 
+        # Define options for text conversation
         options = OptionsTextConversation(
-            prompt="Hello",
-            device=Devices.CPU,
-            model=model_name,
-            batch_size=3,
-            minimum_tokens=50
+            prompt="Hello, what's 3 + 3 ?",
+            device=Devices.GPU,
+            model_name=model_name,
+            trust_remote_code=True
         )
 
-        model_management = ModelsManagement()
-        model = ModelsTextConversation(model_name, model_path)
+        # Define tokenizer options
+        tokenizer_options = OptionsTokenizer(
+            device=Devices.GPU,
+            padding_side='left',
+            return_tensors="pt"
+        )
 
+        tokenizer = Tokenizer("Salesforce/codegen-350M-nl",
+                              "Salesforce/codegen-350M-nl",
+                              tokenizer_options)
+
+        # Initialize the model management
+        model_management = ModelsManagement()
+
+        # Create and load the text conversation model
+        model = ModelsTextConversation(model_name, model_path, options)
+        model.tokenizer = tokenizer
         model_management.add_model(new_model=model, model_options=options)
         model_management.load_model(model_name)
 
-        model_management.generate_prompt(options.prompt)
-        if model_management.loaded_model:
-            self.demo(model_management.loaded_model)
+        # Print the response to the initial prompt
+        print(model_management.generate_prompt(options.prompt))
 
-    def demo(self, model: ModelsTextConversation):
-        print("Model name : ", model.model_name)
-        print("User : Hello")
+        # Generate a response to a custom prompt
+        print(model_management.generate_prompt(
+            prompt="What did I say before ?"))
 
-        new_user_input_ids = model.tokenizer.encode(
-            "Hello ! "
-            + model.tokenizer.eos_token,
-            return_tensors='pt')
-        # append the new user input tokens to the chat history
-        bot_input_ids = torch.cat(
-            [model.chat_history_ids,
-             new_user_input_ids],
-            dim=-1) if model.conversation_step > 0 else (
-            new_user_input_ids)
+        # Create a new conversation with a new prompt
+        options = OptionsTextConversation(
+            prompt="Hello, what's 6 + 6 ?",
+            device=options.device,
+            model_name=model_name,
+            batch_size=1,
+            chat_id_to_use=1,
+            minimum_tokens=50,
+            create_new_conv=True
+        )
 
-        # generated a response while limiting the total
-        # chat history to 1000 tokens,
-        chat_history_ids = model.pipeline.generate(
-            bot_input_ids, max_length=1000,
-            pad_token_id=model.tokenizer.eos_token_id)
-        print("Chatbot: {}".format(
-            model.tokenizer.decode(
-                chat_history_ids[:, bot_input_ids.shape[-1]:][0],
-                skip_special_tokens=True)))
-        print("User : How are you ?")
-        new_user_input_ids = model.tokenizer.encode(
-            "How are you ? " + model.tokenizer.eos_token,
-            return_tensors='pt')
-        bot_input_ids = torch.cat(
-            [model.chat_history_ids, new_user_input_ids],
-            dim=-1) if model.conversation_step > 0 else new_user_input_ids
-        chat_history_ids = model.pipeline.generate(
-            bot_input_ids,
-            max_length=1000,
-            pad_token_id=model.tokenizer.eos_token_id)
+        # Switch to the new conversation
+        model_management.set_model_options(model_name=model_name,
+                                           options=options)
+        print(model_management.generate_prompt(options.prompt))
 
-        print("Chatbot: {}".format(
-            model.tokenizer.decode(
-                chat_history_ids[:, bot_input_ids.shape[-1]:][0],
-                skip_special_tokens=True)))
+        print(model_management.generate_prompt("Where is Japan"))
+
+        # Switch back to the initial conversation
+        options.chat_id_to_use = 0
+        # Create a new tokenizer and use it
+        options.tokenizer_id_to_use = 1
+        model_management.set_model_options(model_name=model_name,
+                                           options=options)
+        tokenizer_options = OptionsTokenizer(
+            device='cuda',
+            padding_side='right',
+            return_tensors='pt'
+        )
+        model.tokenizer_options = tokenizer_options
+        print(model_management.generate_prompt("Bye "))
