@@ -11,24 +11,29 @@ class Tokenizer:
     pipeline: AutoTokenizer
     options: OptionsTokenizer
     model_name: str
+    tokenizer_name: str
     tokenizer_path: str
     user_input: str
     chatbot_output: str
     conversation_active: bool = False
+    return_tensors = 'pt'
 
     def __init__(self, model_name: str,
-                 model_path: str,
+                 tokenizer_path: str,
+                 tokenizer_name: str,
                  options: OptionsTokenizer):
         """
         Initializes the TokenizerObject class with the given parameters.
 
         Args:
-            model_name (str): The name of the model.
-            model_path (str): The path of the model.
+            model_name (str): The name of the model associated with the tokenizer .
+            tokenizer_name (str): The name of the tokenizer
+            tokenizer_path (str): The path of the tokenizer
             options (OptionsTokenizer): The options for the tokenizer.
         """
         self.model_name = model_name
-        self.tokenizer_path = model_path
+        self.tokenizer_name = tokenizer_name
+        self.tokenizer_path = tokenizer_path
         self.options = options
         self.create_tokenizer()
 
@@ -54,11 +59,11 @@ class Tokenizer:
             torch.Tensor: The tokenized and formatted input tensor.
         """
         return self.pipeline.encode(
-            prompt,
             history,
-            return_tensors='pt',
+            prompt,
+            return_tensors=self.return_tensors,
             truncation=True
-        ).to(torch.device("cuda"))
+        ).to(self.options.device)
 
     def decode_model_output(self, outputs: torch.Tensor):
         """

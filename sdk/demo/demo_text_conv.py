@@ -22,17 +22,19 @@ class DemoTextConv:
             prompt="Hello, what's 3 + 3 ?",
             device=Devices.GPU,
             model_name=model_name,
-            trust_remote_code=True
+            trust_remote_code=True,
+            max_length=100
         )
 
         # Define tokenizer options
         tokenizer_options = OptionsTokenizer(
-            device=Devices.GPU,
+            device='cuda',
             padding_side='left',
             return_tensors="pt"
         )
 
         tokenizer = Tokenizer("Salesforce/codegen-350M-nl",
+                              "Salesforce/codegen-350M-nl",
                               "Salesforce/codegen-350M-nl",
                               tokenizer_options)
 

@@ -76,7 +76,9 @@ class OptionsTextConversation(Options):
                  eos_token_id: int = 50256,
                  tokenizer_id_to_use: int = 0,
                  chat_id_to_use: int = 0,
-                 trust_remote_code: bool = False
+                 trust_remote_code: bool = False,
+                 max_length: Optional[int] = None,
+                 max_new_tokens: Optional[int] = None
                  ):
 
         super().__init__(device)
@@ -106,3 +108,7 @@ class OptionsTextConversation(Options):
         self.tokenizer_id_to_use = tokenizer_id_to_use
         self.chat_id_to_use = chat_id_to_use
         self.trust_remote_code = trust_remote_code
+        if max_length:
+            self.max_length = max_length
+        if max_new_tokens:
+            self.max_new_tokens = max_new_tokens

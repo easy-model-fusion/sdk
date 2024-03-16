@@ -73,7 +73,8 @@ class ModelsTextConversation(Model):
             self.model_path,
             trust_remote_code=self.options.trust_remote_code,
             pad_token_id=self.options.pad_token_id,
-            eos_token_id=self.options.eos_token_id
+            eos_token_id=self.options.eos_token_id,
+            max_length=self.options.max_length
         )
 
     def load_model(self, option: OptionsTextConversation) -> bool:
@@ -130,7 +131,6 @@ class ModelsTextConversation(Model):
 
         if option.create_new_conv:
             self.create_new_conversation(
-                prompt=prompt,
                 option=option
             )
         if option.chat_id_to_use != self.current_conversation_id:
@@ -143,7 +143,6 @@ class ModelsTextConversation(Model):
         if not self.conversation_active:
             print("creating conv")
             self.create_new_conversation(
-                prompt=prompt,
                 option=option
             )
 
@@ -250,18 +249,14 @@ class ModelsTextConversation(Model):
         }
         return self.pipeline.generate(**input_ids)
 
-    def create_new_conversation(self, prompt,
-                                option: OptionsTextConversation,
-                                **kwargs) -> int:
+    def create_new_conversation(self,
+                                option: OptionsTextConversation) -> int:
         """
         Create a new conversation.
 
         Args:
-            prompt: The initial prompt for the conversation.
             option (OptionsTextConversation):
                 The options for the conversation.
-            **kwargs:
-                Additional keyword arguments for initializing the conversation.
 
         Returns:
             None
