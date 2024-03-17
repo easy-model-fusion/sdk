@@ -1,5 +1,5 @@
 import torch
-from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
+from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionPipeline
 from sdk.options import OptionsTextToImage, Devices
 from typing import Optional
 from sdk.models import Model
@@ -12,13 +12,14 @@ class ModelTextToImage(Model):
     pipeline: StableDiffusionXLPipeline
     loaded: bool
 
-    def __init__(self, model_name: str, model_path: str):
+    def __init__(self, model_name: str, model_path: str, single_file: bool = False):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
         :param model_path: The path of the model
+        :param single_file: Whether model is single-file or not
         """
-        super().__init__(model_name, model_path)
+        super().__init__(model_name, model_path, single_file)
         self.loaded = False
         self.create_pipeline()
 
@@ -27,6 +28,13 @@ class ModelTextToImage(Model):
         Creates the pipeline to load on the device
         """
         if self.loaded:
+            return
+
+        # Single file loads a single ckpt/safetensors file
+        if self.single_file:
+            self.pipeline = StableDiffusionXLPipeline.from_single_file(
+                self.model_path
+            )
             return
 
         self.pipeline = DiffusionPipeline.from_pretrained(

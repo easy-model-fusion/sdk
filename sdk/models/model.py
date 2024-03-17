@@ -9,15 +9,18 @@ class Model:
     """
     model_name: str
     model_path: str
+    single_file: bool
 
-    def __init__(self, model_name, model_path: str):
+    def __init__(self, model_name, model_path: str, single_file: bool = False):
         """
         Initializes the model with the given name
         :param model_name: The name of the model
         :param model_path: The path of the model
+        :param single_file: Whether model is single file or not
         """
         self.model_name = model_name
         self.model_path = model_path
+        self.single_file = single_file
 
     @abstractmethod
     def load_model(self, option: Options) -> bool:
