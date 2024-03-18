@@ -26,7 +26,8 @@ class Tokenizer:
         Initializes the TokenizerObject class with the given parameters.
 
         Args:
-            model_name (str): The name of the model associated with the tokenizer .
+            model_name (str): The name of
+                the model associated with the tokenizer .
             tokenizer_name (str): The name of the tokenizer
             tokenizer_path (str): The path of the tokenizer
             options (OptionsTokenizer): The options for the tokenizer.
