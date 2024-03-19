@@ -65,7 +65,7 @@ class ModelsTextConversation(Model):
         super().__init__(model_name, model_path)
         self.device = device
         self.loaded = False
-        self.tokeniser = tokenizer
+        self.tokenizer = tokenizer
         self.create_pipeline()
 
     def create_pipeline(self, **kwargs) -> None:
