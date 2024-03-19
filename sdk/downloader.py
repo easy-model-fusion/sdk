@@ -255,7 +255,10 @@ def set_transformers_class_names(model: Model) -> None:
         config = transformers.AutoConfig.from_pretrained(model.name)
 
         # Set model class name if not already set
-        model.class_name = config.architectures[0]
+        model.class_name = config.architectures[0] \
+            if config.architectures and config.architectures[0] else (
+            model_config_default_class_for_module[TRANSFORMERS]
+        )
 
         # Set tokenizer class name if not already set
         # and config.tokenizer_class exists
