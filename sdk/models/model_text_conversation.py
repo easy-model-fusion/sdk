@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Dict, Union, Any
+from typing import Dict, Union, Any
 from transformers import (
     pipeline,
     PreTrainedModel,
