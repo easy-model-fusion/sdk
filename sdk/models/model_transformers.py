@@ -22,8 +22,8 @@ class ModelTransformers(Model):
 
     tokenizer_path: str
 
-    model_pipeline_args: dict[str, Any] = None
-    tokenizer_pipeline_args: dict[str, Any] = None
+    model_pipeline_args: dict[str, Any] = {}
+    tokenizer_pipeline_args: dict[str, Any] = {}
 
     transformers_pipeline: pipeline
     model_pipeline: PreTrainedModel
