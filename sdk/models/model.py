@@ -1,6 +1,4 @@
 from abc import abstractmethod
-from sdk.options import Options
-from typing import Optional
 
 
 class Model:
@@ -28,6 +26,5 @@ class Model:
         raise NotImplementedError
 
     @abstractmethod
-    def generate_prompt(self, prompt: Optional[str],
-                        option: Options, **kwargs):
+    def generate_prompt(self, prompt: str, **kwargs):
         raise NotImplementedError
