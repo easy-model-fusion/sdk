@@ -29,4 +29,3 @@ class DemoTextConv:
             "I'm looking for a movie - what's your favourite one?")
 
         print(result.messages[-1]["content"])
-
