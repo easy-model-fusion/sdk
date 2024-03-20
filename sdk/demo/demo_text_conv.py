@@ -1,7 +1,6 @@
-from sdk.models import ModelsManagement, ModelsTextConversation
-from sdk.options import Devices, OptionsTextConversation
-from sdk.options.options_tokenizer import OptionsTokenizer
-from sdk.tokenizers.tokenizer import Tokenizer
+from sdk.models import ModelsTextConversation
+from sdk.options import Devices
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 class DemoTextConv:
@@ -16,13 +15,11 @@ class DemoTextConv:
         model_path = "microsoft/phi-2"
         tokenizer_path = "microsoft/phi-2"
 
-        tokenizer = Tokenizer(tokenizer_name="token",
-                              tokenizer_path=tokenizer_path,
-                              device=Devices.GPU)
-
         model = ModelsTextConversation(model_name="model",
                                        model_path=model_path,
-                                       tokenizer=tokenizer,
+                                       tokenizer_path=tokenizer_path,
+                                       model_class=AutoModelForCausalLM,
+                                       tokenizer_class=AutoTokenizer,
                                        device=Devices.GPU)
 
         model.load_model()

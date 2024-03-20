@@ -1,44 +1,19 @@
-import torch
 import uuid
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, Any
 from transformers import (
     pipeline,
-    AutoModelForCausalLM,
     PreTrainedModel,
     PreTrainedTokenizer,
     Conversation
 )
 from sdk.tokenizers.tokenizer import Tokenizer
-from sdk.models import Model
+from sdk.models import ModelTransformers
 from sdk.options import Devices
 
 
-class ModelsTextConversation(Model):
+class ModelsTextConversation(ModelTransformers):
     """
     A class representing a text conversation model.
-
-    Attributes:
-        pipeline (AutoModelForCausalLM):
-            The pipeline for the text conversation.
-        tokenizer_object (Tokenizer):
-            The tokenizer object for the model.
-        tokenizer_options (OptionsTokenizer):
-            The options for the tokenizer.
-        tokenizer_dict (Dict[int, TokenizerObject]):
-            Dictionary to store tokenizers.
-        conversation_dict (Dict[int, Tuple[Conversation, list]]):
-            Dictionary to store conversations.
-        current_conversation_id (int):
-            ID of the current conversation.
-        current_tokenizer_id (int): ID of the current tokenizer.
-        conversation_ctr (int): Total number of conversations.
-        tokenizer_ctr (int): Total number of tokenizers.
-        loaded (bool): Flag indicating whether the model is loaded.
-        conversation_step (int): Step of the conversation.
-        conversation_history (list):
-            List to store chat history token IDs.
-        conversation_active (bool):
-         Flag indicating if a conversation is active.
     """
     tokenizer: Tokenizer
     device: Union[str, Devices]
@@ -53,7 +28,9 @@ class ModelsTextConversation(Model):
     loaded: bool
 
     def __init__(self, model_name: str, model_path: str,
-                 tokenizer: Tokenizer,
+                 tokenizer_path,
+                 model_class: Any,
+                 tokenizer_class: Any,
                  device: Union[str, Devices]
                  ):
         """
@@ -62,79 +39,14 @@ class ModelsTextConversation(Model):
         :param model_path: The path of the model
         :param device: Which device the model must be on
         """
-        super().__init__(model_name, model_path)
-        self.device = device
-        self.loaded = False
-        self.tokeniser = tokenizer
-        self.create_pipeline()
+        super().__init__(model_name=model_name,
+                         model_path=model_path,
+                         tokenizer_path=tokenizer_path,
+                         task="conversational",
+                         model_class=model_class,
+                         tokenizer_class=tokenizer_class,
+                         device=device)
 
-    def create_pipeline(self, **kwargs) -> None:
-        """
-        Creates the pipeline to load on the device
-        """
-        if self.loaded:
-            return
-
-        self.model_pipeline = AutoModelForCausalLM.from_pretrained(
-            self.model_path,
-            **kwargs
-        )
-        if not self.tokenizer or not self.tokenizer.pipeline:
-            print("The tokenizer pipeline is required to load the model")
-            return
-
-        self.tokenizer_pipeline = self.tokenizer.pipeline
-        self.conversation_pipeline = pipeline(
-            "conversational",
-            model=self.model_pipeline,
-            tokenizer=self.tokenizer_pipeline,
-            device=(
-                self.device if isinstance(
-                    self.device, str) else (
-                    self.device.value))
-        )
-
-    def load_model(self) -> bool:
-        """
-        Load this model on the given device.
-
-        Args:
-            option (OptionsTextConversation): The options with the device.
-
-        Returns:
-            bool: True if the model is successfully loaded.
-        """
-
-        if self.loaded:
-            return True
-        if self.device == Devices.RESET.value:
-            return False
-        self.conversation_pipeline.to(device=(
-            self.device if isinstance(
-                self.device, str) else (
-                self.device.value)))
-        self.loaded = True
-        return True
-
-    def unload_model(self) -> bool:
-        """
-        Unloads the model
-        :return: True if the model is successfully unloaded
-        """
-        if not self.loaded:
-            return False
-
-        self.conversation_pipeline.to(device=(
-            self.device if isinstance(
-                self.device, str) else (
-                self.device.value))
-        )
-        torch.cuda.empty_cache()
-        torch.cuda.ipc_collect()
-        self.loaded = False
-        return True
-
-    # Will be used to create new conversation
     def generate_prompt(
             self, prompt: str,
             **kwargs):
@@ -142,7 +54,7 @@ class ModelsTextConversation(Model):
         Generates the prompt with the given option.
 
         Args:
-            prompt (Optional[str]): The optional prompt.
+            prompt: (str): The optional prompt.
 
         Returns:
             str: Generated prompt.

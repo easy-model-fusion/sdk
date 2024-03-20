@@ -20,7 +20,7 @@ class Model:
         self.model_path = model_path
 
     @abstractmethod
-    def load_model(self, option: Options) -> bool:
+    def load_model(self) -> bool:
         raise NotImplementedError
 
     @abstractmethod
