@@ -8,4 +8,3 @@ class Devices(Enum):
     GPU = "cuda"
     CPU = "cpu"
     RESET = "meta"
-
