@@ -143,4 +143,4 @@ class ModelTransformers(Model):
         Returns:
             Any: Generated prompt.
         """
-        return self.transformers_pipeline(prompt)
+        return self.transformers_pipeline(prompt, **kwargs)
