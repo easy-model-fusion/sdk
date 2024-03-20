@@ -1,6 +1,5 @@
 from typing import Optional, Dict
 from sdk.models import Model
-from sdk.options import Options
 
 
 class ModelsManagement:

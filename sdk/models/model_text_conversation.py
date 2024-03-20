@@ -1,7 +1,6 @@
 import uuid
 from typing import Dict, Union, Any
 from transformers import (
-    pipeline,
     PreTrainedModel,
     PreTrainedTokenizer,
     Conversation

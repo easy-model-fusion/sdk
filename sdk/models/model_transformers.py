@@ -1,11 +1,10 @@
 import torch
-from typing import Optional, Any, Union
+from typing import Any, Union
 from transformers import (
     pipeline,
     PreTrainedModel,
     PreTrainedTokenizer,
 )
-from sdk.tokenizers.tokenizer import Tokenizer
 from sdk.models import Model
 from sdk.options import Devices
 

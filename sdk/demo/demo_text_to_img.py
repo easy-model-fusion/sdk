@@ -3,7 +3,7 @@ from sdk.models import ModelTextToImage, ModelsManagement
 from sdk.options import Devices
 
 
-class DemoTxtToImg:
+class DemoTextToImg:
 
     def __init__(self):
         model_stabilityai_name = "stabilityai/sdxl-turbo"
