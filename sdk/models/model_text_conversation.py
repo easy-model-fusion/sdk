@@ -18,7 +18,6 @@ class ModelsTextConversation(ModelTransformers):
     tokenizer: Tokenizer
     device: Union[str, Devices]
 
-    conversation_pipeline: pipeline
     model_pipeline: PreTrainedModel
     tokenizer_pipeline: PreTrainedTokenizer
     conversation: Conversation
@@ -49,7 +48,7 @@ class ModelsTextConversation(ModelTransformers):
 
     def generate_prompt(
             self, prompt: str,
-            **kwargs):
+            **kwargs) -> Union[Conversation, None]:
         """
         Generates the prompt with the given option.
 
@@ -59,11 +58,8 @@ class ModelsTextConversation(ModelTransformers):
         Returns:
             str: Generated prompt.
         """
-        if not self.conversation:
-            return None
-
         self.write_input(prompt)
-        return self.conversation_pipeline(self.conversation)
+        return self.transformers_pipeline(self.conversation)
 
     def write_input(self, prompt: str) -> None:
         """
