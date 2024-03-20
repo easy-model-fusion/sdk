@@ -18,4 +18,4 @@ if __name__ == '__main__':
         case ('TextToImg'):
             DemoTextToImg()
         case _:
-            DemoTxtToImg()
+            DemoTextToImg()
