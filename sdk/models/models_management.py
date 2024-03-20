@@ -1,6 +1,5 @@
 from typing import Optional, Dict
 from sdk.models import Model
-from sdk.options import Options
 
 
 class ModelsManagement:
@@ -16,13 +15,11 @@ class ModelsManagement:
         """
         self.loaded_model: Optional[Model] = None
         self.loaded_models_cache: Dict[str, Model] = {}
-        self.options_models: Dict[str, Options] = {}
 
-    def add_model(self, new_model: Model, model_options: Options) -> bool:
+    def add_model(self, new_model: Model) -> bool:
         """
         Adds a new model and his options to the management.
         :param new_model: The new model to add
-        :param model_options: The options of the new model to add
         :return: True if the model is successfully added
         """
         if new_model.model_name in self.loaded_models_cache:
@@ -30,7 +27,6 @@ class ModelsManagement:
             return False
 
         self.loaded_models_cache[new_model.model_name] = new_model
-        self.options_models[new_model.model_name] = model_options
         return True
 
     def load_model(self, model_name: str) -> bool:
@@ -49,8 +45,7 @@ class ModelsManagement:
             return False
 
         self.loaded_model = self.loaded_models_cache[model_name]
-        if not self.loaded_model.load_model(option=(
-                self.options_models[model_name])):
+        if not self.loaded_model.load_model():
             print("Something went wrong while unloading the model.")
             self.loaded_model = None
             return False
@@ -72,66 +67,29 @@ class ModelsManagement:
         self.loaded_model = None
         return True
 
-    def get_model_options(self, model_name: str) -> Options:
-        """
-        Gets the options of the model with the given name
-        :param model_name: The name of a model
-        :return: The object options of the model
-        """
-        return self.options_models[model_name]
-
-    def set_model_options(self, model_name: str, options: Options):
-        """
-        Set the options of the model with the given name
-        :param model_name: The name of a model
-        :param options: The object options of the model
-        """
-        self.options_models[model_name] = options
-
-    def generate_prompt(self, prompt: Optional[str] = None, **kwargs):
+    def generate_prompt(self, prompt: str,
+                        model_name: Optional[str] = None, **kwargs):
         """
         Generates the prompt for the loaded model with his stored options
-        :param prompt: The prompt to generate (if the prompt is empty, the
-            options.prompt will be used)
+        :param model_name: (Optional): the model name to load
+        :param prompt: The prompt to generate
         :param kwargs: more parameters to pass to the prompt generator
         :return: The object of type link with the model category
         """
-        if not self.loaded_model:
-            print("No model loaded. Load a model before generating prompts.")
-            return
-
-        return (
-            self.loaded_model.generate_prompt(
-                prompt,
-                self.options_models[
-                    self.loaded_model.model_name],
-                **kwargs
-            )
-        )
-
-    def generate_prompt_with_model_switch(self, prompt: Optional[str],
-                                          model_name: str, **kwargs):
-        """
-        Generates the prompt on the given model.
-        :param prompt: The prompt to generate (if the prompt is empty, the
-            options.prompt will be used)
-        :param model_name: The model to use for the prompt (if the model is not
-            loaded or different to the loaded model, the model will be loaded
-            before generating prompts
-        :param kwargs: more parameters to pass to the prompt generator
-        :return: The object of type link with the model category
-        """
-        if self.loaded_model.model_name != model_name:
-            self.unload_model()
+        if model_name:
+            if self.loaded_model.model_name != model_name:
+                self.unload_model()
 
         if not self.loaded_model:
+            if model_name:
+                print("No model loaded to generate.")
+                return
+
             self.load_model(model_name=model_name)
 
         return (
             self.loaded_model.generate_prompt(
                 prompt,
-                self.options_models[
-                    self.loaded_model.model_name],
                 **kwargs
             )
         )

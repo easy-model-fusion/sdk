@@ -1,21 +1,21 @@
 import argparse
-from sdk.demo import DemoTextConv, DemoTxtToImg
+from sdk.demo import DemoTextConv, DemoTextToImg
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Choose a Model type :'
-                                                 ' TextConv or TxtToImg')
+                                                 ' TextConv or TextToImg')
     subparser = parser.add_subparsers(dest='option')
 
     conv = subparser.add_parser('TextConv')
-    img = subparser.add_parser('TxtToImg')
+    img = subparser.add_parser('TextToImg')
     args = parser.parse_args()
 
     match args.option:
         case 'TextConv':
             DemoTextConv()
-        case ('TxtToImg'):
-            DemoTxtToImg()
+        case ('TextToImg'):
+            DemoTextToImg()
         case _:
-            DemoTxtToImg()
+            DemoTextToImg()
