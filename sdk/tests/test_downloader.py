@@ -359,76 +359,72 @@ class TestDownloader(unittest.TestCase):
         self.assertEqual(expected_options, output_options)
 
     @patch('downloader.is_path_valid_for_download', return_value=False)
-    @patch('downloader.process_options')
     @patch('downloader.process_access_token')
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_with_path_invalid(
             self, mock_from_pretrained, mock_process_access_token,
-            mock_process_options, mock_is_path_valid_for_download):
+            mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module="")
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False)
+            download_model(model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_not_called()
         mock_process_access_token.assert_not_called()
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options', return_value={})
     @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_with_objects_error(
             self, mock_from_pretrained, mock_process_access_token,
-            mock_process_options, mock_is_path_valid_for_download):
+            mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module="")
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False)
+            download_model(model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL_IMPORTS)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options', return_value={})
     @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained'
            '', side_effect=Exception("Download failed"))
     def test_download_model_with_from_pretrained_error(
             self, mock_from_pretrained, mock_process_access_token,
-            mock_process_options, mock_is_path_valid_for_download):
+            mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False)
+            download_model(model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options', return_value={})
     @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_with_save_pretrained_error(
             self, mock_from_pretrained, mock_process_access_token,
-            mock_process_options, mock_is_path_valid_for_download):
+            mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(side_effect=Exception("Save failed"))
 
@@ -439,26 +435,25 @@ class TestDownloader(unittest.TestCase):
 
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False)
+            download_model(model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options')
     @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_success(
             self, mock_from_pretrained, mock_process_access_token,
-            mock_process_options, mock_is_path_valid_for_download):
+            mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(return_value=None)
 
@@ -467,98 +462,92 @@ class TestDownloader(unittest.TestCase):
         data_from_pretrained.save_pretrained = mock_save_pretrained
         mock_from_pretrained.return_value = data_from_pretrained
 
-        # Options
-        expected_options = {"key1": "value1"}
-        mock_process_options.return_value = expected_options
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.options = ["key1='value1'"]
+        options = {"key1": "value1"}
 
         # Execute :
-        result_options = download_model(model, overwrite=False)
+        result_options = download_model(model, overwrite=False, options=options)
 
         # Assert
-        self.assertEqual(expected_options, result_options)
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=False)
-    @patch('downloader.process_options')
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained')
     def test_download_transformers_tokenizer_with_path_invalid(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
         tokenizer = Tokenizer(class_name="AutoTokenizer")
         model.tokenizer = tokenizer
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_transformers_tokenizer(model, overwrite=False)
+            download_transformers_tokenizer(
+                model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_not_called()
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options')
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained')
     def test_download_transformers_tokenizer_with_objects_error(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module="")
         model.tokenizer = Tokenizer(class_name="error")
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_transformers_tokenizer(model, overwrite=False)
+            download_transformers_tokenizer(
+                model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_TOKENIZER_IMPORTS)
 
         # Assert
         mock_is_path_valid_for_download.assert_not_called()
-        mock_process_options.assert_not_called()
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options', return_value={})
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained', side_effect=Exception("Download failed"))
     def test_download_transformers_with_from_pretrained_error(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
         tokenizer = Tokenizer(class_name="AutoTokenizer")
         model.tokenizer = tokenizer
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_transformers_tokenizer(model, overwrite=False)
+            download_transformers_tokenizer(
+                model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_TOKENIZER)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_from_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options', return_value={})
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained')
     def test_download_transformers_with_save_pretrained_error(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(side_effect=Exception("Save failed"))
@@ -573,24 +562,24 @@ class TestDownloader(unittest.TestCase):
         model.base_path = "path/to/model"
         tokenizer = Tokenizer(class_name="AutoTokenizer")
         model.tokenizer = tokenizer
+        options = {"key1": "value1"}
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_transformers_tokenizer(model, overwrite=False)
+            download_transformers_tokenizer(
+                model, overwrite=False, options=options)
         self.assertEqual(context.exception.code, ERROR_EXIT_TOKENIZER)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options')
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained')
     def test_download_transformers_witouht_class_name(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(return_value=None)
@@ -599,35 +588,30 @@ class TestDownloader(unittest.TestCase):
         data_from_pretrained = MagicMock()
         data_from_pretrained.save_pretrained = mock_save_pretrained
         mock_from_pretrained.return_value = data_from_pretrained
-
-        # Options
-        expected_options = {"key1": "value1"}
-        mock_process_options.return_value = expected_options
 
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
         tokenizer = Tokenizer()
-        tokenizer.options = expected_options
+        options = {"key1": "value1"}
+        tokenizer.options = options
         model.tokenizer = tokenizer
 
         # Execute :
-        result = download_transformers_tokenizer(model, overwrite=False)
+        download_transformers_tokenizer(
+            model, overwrite=False, options=options)
 
         # Assert
-        self.assertEqual(expected_options, result)
         self.assertEqual(model.tokenizer.class_name, 'AutoTokenizer')
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_options')
     @patch('transformers.models.auto.tokenization_auto.AutoTokenizer'
            '.from_pretrained')
     def test_download_transformers_success(
-            self, mock_from_pretrained, mock_process_options,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(return_value=None)
@@ -637,24 +621,20 @@ class TestDownloader(unittest.TestCase):
         data_from_pretrained.save_pretrained = mock_save_pretrained
         mock_from_pretrained.return_value = data_from_pretrained
 
-        # Options
-        expected_options = {"key1": "value1"}
-        mock_process_options.return_value = expected_options
-
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.base_path = "path/to/model"
         tokenizer = Tokenizer(class_name="AutoTokenizer")
-        tokenizer.options = expected_options
+        options = {"key1": "value1"}
+        tokenizer.options = options
         model.tokenizer = tokenizer
 
         # Execute :
-        result = download_transformers_tokenizer(model, overwrite=False)
+        download_transformers_tokenizer(
+            model, overwrite=False, options=options)
 
         # Assert
-        self.assertEqual(expected_options, result)
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_options.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
