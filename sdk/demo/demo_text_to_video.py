@@ -30,8 +30,14 @@ class DemoTextToVideo:
         model_management.add_model(new_model=model)
         model_management.load_model(model_name)
 
-        prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-        video_frames = model_management.generate_prompt(prompt, num_inference_steps=25).frames
+        prompt = ("Astronaut in a jungle, cold color palette,"
+                  " muted colors, detailed, 8k")
+
+        video_frames = model_management.generate_prompt(
+            prompt=prompt,
+            num_inference_steps=25
+        ).frames
+
         video_path = export_to_video(video_frames)
 
         print(video_path)
