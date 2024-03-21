@@ -468,7 +468,7 @@ class TestDownloader(unittest.TestCase):
         options = {"key1": "value1"}
 
         # Execute :
-        result_options = download_model(model, overwrite=False, options=options)
+        download_model(model, overwrite=False, options=options)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
