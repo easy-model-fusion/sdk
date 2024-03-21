@@ -1,3 +1,4 @@
+import torch
 from diffusers import DiffusionPipeline
 from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
@@ -10,9 +11,9 @@ class DemoTextToImg:
         model_stabilityai_path = "stabilityai/sdxl-turbo"
 
         model_options = {
-            'torch_dtype': 'torch.float16',
-            'use_safetensors': 'True',
-            'add_watermarker': 'False',
+            'torch_dtype': torch.float16,
+            'use_safetensors': True,
+            'add_watermarker': False,
             'variant': "fp16"
         }
 
