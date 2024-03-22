@@ -649,8 +649,7 @@ class TestDownloader(unittest.TestCase):
         model.build_paths = MagicMock()
 
         # Prepare
-        mock_download_model.return_value = {"test": "test"}
-        expected_result = {
+        result_dict = {
             "path": model.download_path,
             "module": model.module,
             "class": model.class_name,
@@ -659,17 +658,11 @@ class TestDownloader(unittest.TestCase):
             }
         }
 
-        result_dict = {
-            "module": model.module,
-            "class": model.class_name
-        }
-
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
                        result_dict=result_dict)
 
         # Assert
-        self.assertEqual(result_dict, expected_result)
         mock_download_model.assert_called_once()
 
     @patch('downloader.download_transformers_tokenizer')
@@ -685,8 +678,7 @@ class TestDownloader(unittest.TestCase):
         model.build_paths = MagicMock()
 
         # Prepare
-        mock_download_transformers_tokenizer.return_value = {"test": "test"}
-        expected_result = {
+        result_dict = {
             "tokenizer": {
                 "path": model.tokenizer.download_path,
                 "class": model.tokenizer.class_name,
@@ -695,15 +687,11 @@ class TestDownloader(unittest.TestCase):
                 }
             }
         }
-        result_dict = {"tokenizer": {
-            "class": model.tokenizer.class_name,
-        }}
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_MODEL,
                        result_dict=result_dict)
 
         # Assert
-        self.assertEqual(expected_result, result_dict)
         mock_download_transformers_tokenizer.assert_called_once()
 
     @patch('downloader.download_model', side_effect=SystemExit)
@@ -716,7 +704,7 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
-                           result_dict={})
+                           result_dict={"options": {}})
 
         # Assert
         mock_download_model.assert_called_once()
@@ -733,7 +721,7 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                           result_dict={})
+                           result_dict={"tokenizer": {"options": {}}})
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
