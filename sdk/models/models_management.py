@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 from sdk.models import Model
 
 
@@ -67,7 +67,7 @@ class ModelsManagement:
         self.loaded_model = None
         return True
 
-    def generate_prompt(self, prompt: str,
+    def generate_prompt(self, prompt: Any,
                         model_name: Optional[str] = None, **kwargs):
         """
         Generates the prompt for the loaded model with his stored options

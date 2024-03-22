@@ -144,6 +144,10 @@ class Model:
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
+            # Local path where the tokenizer will be downloaded
+            self.tokenizer.download_path = os.path.join(
+                self.base_path, self.tokenizer.class_name)
+
     def process(self, models_path: str, skip: str = "",
                 only_configuration: bool = False,
                 overwrite: bool = False) -> str:
@@ -168,26 +172,36 @@ class Model:
         # Validate mandatory arguments
         self.validate()
 
+        # Set model class names
+        set_class_names(self)
+
         # Build paths
         self.build_paths(models_path)
 
         # Output result
         result_dict = {}
 
-        # Set model class names
-        set_class_names(self)
-
         # Adding properties to result
         result_dict["module"] = self.module
 
-        # Adding model properties to result
         if skip != DOWNLOAD_MODEL:
-            result_dict["class"] = self.class_name
+            # Processing options
+            options = process_options(self.options)
 
-        # Adding tokenizer properties to result
+            # Adding downloaded model properties to result
+            result_dict["class"] = self.class_name
+            result_dict["path"] = self.download_path
+            result_dict["options"] = get_options_for_json(options)
+
         if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
+            # Processing options
+            options = process_options(self.tokenizer.options)
+
+            # Adding downloaded tokenizer properties to result
             result_dict["tokenizer"] = {
                 "class": self.tokenizer.class_name,
+                "path": self.tokenizer.download_path,
+                "options": get_options_for_json(options)
             }
 
         # Execute download if requested
@@ -212,20 +226,13 @@ class Model:
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
-            options = download_model(self, overwrite)
-
-            # Adding downloaded model properties to result
-            result_dict["path"] = self.download_path
-            result_dict["options"] = get_options_for_json(options)
+            download_model(self, overwrite, result_dict["options"])
 
         # Checking for tokenizer download
         if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
-            options = download_transformers_tokenizer(self, overwrite)
-
-            # Adding downloaded tokenizer properties to result
-            result_dict["tokenizer"]["path"] = self.tokenizer.download_path
-            result_dict["tokenizer"]["options"] = get_options_for_json(options)
+            download_transformers_tokenizer(
+                self, overwrite, result_dict["tokenizer"]["options"])
 
 
 def set_class_names(model: Model) -> None:
@@ -296,7 +303,7 @@ def set_diffusers_class_names(model: Model) -> None:
         model.class_name = model_config_default_class_for_module[DIFFUSERS]
 
 
-def download_model(model: Model, overwrite: bool) -> dict:
+def download_model(model: Model, overwrite: bool, options: dict) -> None:
     """
     Download the model.
 
@@ -304,9 +311,7 @@ def download_model(model: Model, overwrite: bool) -> dict:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if
             it exists.
-
-    Returns:
-        dict: A dictionary containing options used for model downloading.
+        options: A dictionary containing options used for model downloading.
     """
 
     # Check if the model already exists at path
@@ -317,9 +322,6 @@ def download_model(model: Model, overwrite: bool) -> dict:
     if model.class_name is None or model.class_name.strip() == '':
         model.class_name = model_config_default_class_for_module.get(
             model.module)
-
-    # Processing options
-    options = process_options(model.options)
 
     # Processing access token
     access_token = process_access_token(options, model)
@@ -345,10 +347,9 @@ def download_model(model: Model, overwrite: bool) -> dict:
         err = f"Error downloading model {model.name}: {e}"
         exit_error(err, ERROR_EXIT_MODEL)
 
-    return options
 
-
-def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
+def download_transformers_tokenizer(model: Model, overwrite: bool,
+                                    options: dict) -> None:
     """
     Download a transformers tokenizer for the model.
 
@@ -356,9 +357,7 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if
             it exists.
-
-    Returns:
-        dict: A dictionary containing options used for model downloading.
+        options: A dictionary containing options used for model downloading.
     """
 
     # Retrieving tokenizer class from module
@@ -375,18 +374,11 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
         err = f"Error importing tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER_IMPORTS)
 
-    # Local path where the tokenizer will be downloaded
-    model.tokenizer.download_path = os.path.join(
-        model.base_path, model.tokenizer.class_name)
-
     # Check if the tokenizer_path already exists
     if not is_path_valid_for_download(
             model.tokenizer.download_path, overwrite):
         err = f"Tokenizer '{model.tokenizer.download_path}' already exists."
         exit_error(err)
-
-    # Processing options
-    options = process_options(model.tokenizer.options)
 
     # Downloading the tokenizer
     try:
@@ -396,8 +388,6 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
     except Exception as e:
         err = f"Error downloading tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER)
-
-    return options
 
 
 def is_path_valid_for_download(path: str, overwrite: bool) -> bool:

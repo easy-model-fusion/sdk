@@ -67,7 +67,7 @@ class ModelDiffusers(Model):
         self.loaded = False
         return True
 
-    def generate_prompt(self, prompt: str,
+    def generate_prompt(self, prompt: Any,
                         **kwargs):
         """
         Generates the prompt with the given option
