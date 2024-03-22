@@ -144,6 +144,10 @@ class Model:
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
+            # Local path where the tokenizer will be downloaded
+            self.tokenizer.download_path = os.path.join(
+                self.base_path, self.tokenizer.class_name)
+
     def process(self, models_path: str, skip: str = "",
                 only_configuration: bool = False,
                 overwrite: bool = False) -> str:
@@ -168,14 +172,14 @@ class Model:
         # Validate mandatory arguments
         self.validate()
 
+        # Set model class names
+        set_class_names(self)
+
         # Build paths
         self.build_paths(models_path)
 
         # Output result
         result_dict = {}
-
-        # Set model class names
-        set_class_names(self)
 
         # Adding properties to result
         result_dict["module"] = self.module
@@ -369,10 +373,6 @@ def download_transformers_tokenizer(model: Model, overwrite: bool,
     except Exception as e:
         err = f"Error importing tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER_IMPORTS)
-
-    # Local path where the tokenizer will be downloaded
-    model.tokenizer.download_path = os.path.join(
-        model.base_path, model.tokenizer.class_name)
 
     # Check if the tokenizer_path already exists
     if not is_path_valid_for_download(

@@ -130,7 +130,9 @@ class TestDownloader(unittest.TestCase):
         # Init
         model_name = "TestModel"
         models_path = "path/to/models"
-        model = Model(name=model_name, module=TRANSFORMERS)
+        tokenizer = Tokenizer(class_name="TransformersTokenizer")
+        model = Model(
+            name=model_name, module=TRANSFORMERS, tokenizer=tokenizer)
 
         # Prepare
         expected_base_path = os.path.join(models_path, model_name)
