@@ -647,16 +647,6 @@ class TestDownloader(unittest.TestCase):
         model.validate = MagicMock()
         model.build_paths = MagicMock()
 
-        # Prepare
-        result_dict = {
-            "path": model.download_path,
-            "module": model.module,
-            "class": model.class_name,
-            "options": {
-                "test": "\"test\""
-            }
-        }
-
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
                        options={"test": "\"test\""}, options_tokenizer={},
@@ -679,8 +669,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                       options={"test": "\"test\""}, options_tokenizer={}
-                       , access_token=None)
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
