@@ -372,7 +372,7 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options,
+            download_model(model, overwrite=False, options=options
                            access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
@@ -659,7 +659,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
-                       result_dict=result_dict, access_token=None)
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
 
         # Assert
         mock_download_model.assert_called_once()
@@ -676,19 +677,10 @@ class TestDownloader(unittest.TestCase):
         model.validate = MagicMock()
         model.build_paths = MagicMock()
 
-        # Prepare
-        result_dict = {
-            "tokenizer": {
-                "path": model.tokenizer.download_path,
-                "class": model.tokenizer.class_name,
-                "options": {
-                    "test": "\"test\""
-                }
-            }
-        }
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                       result_dict=result_dict, access_token=None)
+                       options={"test": "\"test\""}, options_tokenizer={}
+                       , access_token=None)
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
@@ -703,7 +695,8 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
-                           result_dict={"options": {}}, access_token=None)
+                           options={}, options_tokenizer={"options": {}},
+                           access_token=None)
 
         # Assert
         mock_download_model.assert_called_once()
@@ -720,7 +713,7 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                           result_dict={"tokenizer": {"options": {}}},
+                           options={}, options_tokenizer={"tokenizer": {"options": {}}},
                            access_token=None)
 
         # Assert
@@ -977,10 +970,16 @@ class TestDownloader(unittest.TestCase):
             mock_download, mock_set_class_names, mock_process_access_token,
             mock_process_options
     ):
+        # Options
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
         # init
         model = Model(name="TestModel", module=DIFFUSERS,
-                      class_name="TestClass")
-        model.tokenizer = Tokenizer(class_name="TokenizerClass")
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
 
         # Options
         expected_options = {"key": "test"}
@@ -1022,10 +1021,15 @@ class TestDownloader(unittest.TestCase):
             mock_download, mock_set_class_names, mock_process_access_token,
             mock_process_options
     ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
         # init
         model = Model(name="TestModel", module=DIFFUSERS,
-                      class_name="TestClass")
-        model.tokenizer = Tokenizer(class_name="TokenizerClass")
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
 
         # Options
         expected_options = {"key": "test"}
