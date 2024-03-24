@@ -188,7 +188,6 @@ class Model:
         result_dict = {"module": self.module}
 
         # Options
-        options = {}
         options_tokenizer = {}
 
         if skip != DOWNLOAD_MODEL:
@@ -210,7 +209,8 @@ class Model:
 
         # Execute download if requested
         if not only_configuration:
-            self.download(skip, overwrite, options, options_tokenizer,access_token)
+            self.download(skip, overwrite, options, options_tokenizer,
+                          access_token)
 
         # Convert the dictionary to JSON
         return json.dumps(result_dict, indent=4)

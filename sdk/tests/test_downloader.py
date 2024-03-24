@@ -372,7 +372,7 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options
+            download_model(model, overwrite=False, options=options,
                            access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
@@ -713,7 +713,8 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                           options={}, options_tokenizer={"tokenizer": {"options": {}}},
+                           options={},
+                           options_tokenizer={"tokenizer": {"options": {}}},
                            access_token=None)
 
         # Assert
@@ -971,18 +972,16 @@ class TestDownloader(unittest.TestCase):
             mock_process_options
     ):
         # Options
-        # Options
         input_options = ["key='test'"]
         expected_options = {"key": "\"test\""}
 
         # init
-        model = Model(name="TestModel", module=DIFFUSERS,
+        model = Model(name="TestModel", module=TRANSFORMERS,
                       class_name="TestClass", options=input_options)
         model.tokenizer = Tokenizer(class_name="TokenizerClass",
                                     options=input_options)
 
         # Options
-        expected_options = {"key": "test"}
         mock_process_options.return_value = expected_options
 
         # Prepare
@@ -990,11 +989,11 @@ class TestDownloader(unittest.TestCase):
             "module": model.module,
             "class": model.class_name,
             "path": model.download_path,
-            "options": expected_options,
+            "options": get_options_for_json(expected_options),
             "tokenizer": {
                 "class": model.tokenizer.class_name,
                 "path": model.tokenizer.download_path,
-                "options": expected_options,
+                "options": get_options_for_json(expected_options),
             }
         }
 
@@ -1026,13 +1025,12 @@ class TestDownloader(unittest.TestCase):
         expected_options = {"key": "\"test\""}
 
         # init
-        model = Model(name="TestModel", module=DIFFUSERS,
+        model = Model(name="TestModel", module=TRANSFORMERS,
                       class_name="TestClass", options=input_options)
         model.tokenizer = Tokenizer(class_name="TokenizerClass",
                                     options=input_options)
 
         # Options
-        expected_options = {"key": "test"}
         mock_process_options.return_value = expected_options
 
         # Prepare
@@ -1040,11 +1038,11 @@ class TestDownloader(unittest.TestCase):
             "module": model.module,
             "class": model.class_name,
             "path": model.download_path,
-            "options": expected_options,
+            "options": get_options_for_json(expected_options),
             "tokenizer": {
                 "class": model.tokenizer.class_name,
                 "path": model.tokenizer.download_path,
-                "options": expected_options,
+                "options": get_options_for_json(expected_options),
             }
         }
 
