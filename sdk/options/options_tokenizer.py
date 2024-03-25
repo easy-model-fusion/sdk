@@ -27,7 +27,7 @@ class OptionsTokenizer:
             if padding_side not in ['left', 'right']:
                 raise ValueError(
                     "padding_side must be either 'left' or 'right'")
-        else:
-            self.padding_side = padding_side
+            else:
+                self.padding_side = padding_side
         if return_tensors:
             self.return_tensors = return_tensors
