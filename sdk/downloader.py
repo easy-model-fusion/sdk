@@ -172,22 +172,25 @@ class Model:
         # Validate mandatory arguments
         self.validate()
 
+        # Processing options
+        options = process_options(self.options)
+
+        # Processing access token
+        access_token = process_access_token(options, self)
+
         # Set model class names
-        set_class_names(self)
+        set_class_names(self, access_token)
 
         # Build paths
         self.build_paths(models_path)
 
         # Output result
-        result_dict = {}
+        result_dict = {"module": self.module}
 
-        # Adding properties to result
-        result_dict["module"] = self.module
+        # Options
+        options_tokenizer = {}
 
         if skip != DOWNLOAD_MODEL:
-            # Processing options
-            options = process_options(self.options)
-
             # Adding downloaded model properties to result
             result_dict["class"] = self.class_name
             result_dict["path"] = self.download_path
@@ -195,23 +198,26 @@ class Model:
 
         if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Processing options
-            options = process_options(self.tokenizer.options)
+            options_tokenizer = process_options(self.tokenizer.options)
 
             # Adding downloaded tokenizer properties to result
             result_dict["tokenizer"] = {
                 "class": self.tokenizer.class_name,
                 "path": self.tokenizer.download_path,
-                "options": get_options_for_json(options)
+                "options": get_options_for_json(options_tokenizer)
             }
 
         # Execute download if requested
         if not only_configuration:
-            self.download(skip, overwrite, result_dict)
+            self.download(skip, overwrite, options, options_tokenizer,
+                          access_token)
 
         # Convert the dictionary to JSON
         return json.dumps(result_dict, indent=4)
 
-    def download(self, skip: str, overwrite: bool, result_dict: dict) -> None:
+    def download(self, skip: str, overwrite: bool,
+                 options: dict, options_tokenizer: dict,
+                 access_token: str | None) -> None:
         """
         Download the model.
 
@@ -220,46 +226,52 @@ class Model:
                 or the tokenizer.
             overwrite (bool): Whether to overwrite the downloaded model
                 if it exists.
-            result_dict (dict): The result dictionary that contains
-                the model details.
+            options (dict): The options dictionary for the model.
+            options_tokenizer (dict): The options dictionary for the tokenizer.
+            access_token (str): The access token for the model
         """
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
-            download_model(self, overwrite, result_dict["options"])
+            download_model(self, overwrite, options,
+                           access_token)
 
         # Checking for tokenizer download
         if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
             # Download a tokenizer for the model
             download_transformers_tokenizer(
-                self, overwrite, result_dict["tokenizer"]["options"])
+                self, overwrite, options_tokenizer)
 
 
-def set_class_names(model: Model) -> None:
+def set_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class name based on the model's module.
     And Set the appropriate tokenizer class name if needed.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     if model.belongs_to_module(TRANSFORMERS):
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token)
     elif model.belongs_to_module(DIFFUSERS):
-        set_diffusers_class_names(model)
+        set_diffusers_class_names(model, access_token)
 
 
-def set_transformers_class_names(model: Model) -> None:
+def set_transformers_class_names(model: Model,
+                                 access_token: str | None) -> None:
     """
     Set the appropriate model class for a Transformers module model
         and tokenizer.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     try:
         # Get the configuration
-        config = transformers.AutoConfig.from_pretrained(model.name)
+        config = transformers.AutoConfig.from_pretrained(
+            model.name, token=access_token)
 
         # Set model class name if not already set
         model.class_name = model.class_name or config.architectures[0] \
@@ -283,19 +295,21 @@ def set_transformers_class_names(model: Model) -> None:
                                       TRANSFORMERS_DEFAULT_TOKENIZER_CLASS)
 
 
-def set_diffusers_class_names(model: Model) -> None:
+def set_diffusers_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class for a Diffusers module model.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     if model.class_name is not None and model.class_name != "":
         return
 
     try:
         # Get the configuration
-        config = diffusers.DiffusionPipeline.load_config(model.name)
+        config = diffusers.DiffusionPipeline.load_config(
+            model.name, use_auth_token=access_token)
 
         # get model class name from the configuration
         model.class_name = config['_class_name']
@@ -303,7 +317,8 @@ def set_diffusers_class_names(model: Model) -> None:
         model.class_name = model_config_default_class_for_module[DIFFUSERS]
 
 
-def download_model(model: Model, overwrite: bool, options: dict) -> None:
+def download_model(model: Model, overwrite: bool, options: dict,
+                   access_token: str | None) -> None:
     """
     Download the model.
 
@@ -312,6 +327,7 @@ def download_model(model: Model, overwrite: bool, options: dict) -> None:
         overwrite (bool): Whether to overwrite the downloaded model if
             it exists.
         options: A dictionary containing options used for model downloading.
+        access_token (str): The access token for the model
     """
 
     # Check if the model already exists at path
@@ -322,9 +338,6 @@ def download_model(model: Model, overwrite: bool, options: dict) -> None:
     if model.class_name is None or model.class_name.strip() == '':
         model.class_name = model_config_default_class_for_module.get(
             model.module)
-
-    # Processing access token
-    access_token = process_access_token(options, model)
 
     # Transforming from strings to actual objects
     model_class_obj = None
@@ -522,12 +535,16 @@ def get_options_for_json(options_dict: dict) -> dict:
       dict: A new dictionary with the same keys but with values prepared for
             JSON serialization (strings with quotes for string values).
     """
-    for key, value in options_dict.items():
+
+    # Create a shallow copy of the input dictionary
+    options = options_dict.copy()
+
+    for key, value in options.items():
         if isinstance(value, str):
-            options_dict[key] = "\"{}\"".format(value)
+            options[key] = "\"{}\"".format(value)
         else:
-            options_dict[key] = str(value)
-    return options_dict
+            options[key] = str(value)
+    return options
 
 
 def map_args_to_model(args) -> Model:
