@@ -116,11 +116,7 @@ class TestModelDiffusers(unittest.TestCase):
         # Assert
         pipeline_mock.assert_called_once()
 
-    @patch("diffusers.DiffusionPipeline.from_pretrained")
-    def test_create_pipeline(self, model_class_mock):
-        # Arrange
-        model_instance_mock = MagicMock()
-        # model_class_mock.from_pretrained.return_value = model_instance_mock
+    def test_create_pipeline(self):
 
         # Act
         instance = ModelDiffusers(
