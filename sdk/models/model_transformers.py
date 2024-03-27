@@ -49,7 +49,7 @@ class ModelTransformers(Model):
         self.device = device
         self.loaded = False
         self.model_class = model_class
-        self.tokeniser_class = tokenizer_class
+        self.tokenizer_class = tokenizer_class
         self.create_pipeline()
 
     def set_model_pipeline_args(self, **kwargs):
@@ -72,7 +72,7 @@ class ModelTransformers(Model):
             **self.model_pipeline_args
         )
 
-        self.tokenizer_pipeline = self.tokeniser_class.from_pretrained(
+        self.tokenizer_pipeline = self.tokenizer_class.from_pretrained(
             self.tokenizer_path,
             **self.tokenizer_pipeline_args
         )
