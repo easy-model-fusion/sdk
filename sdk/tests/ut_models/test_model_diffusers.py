@@ -8,24 +8,81 @@ from sdk.options import Devices
 
 
 class TestModelDiffusers(unittest.TestCase):
+    def setUp(self):
+        # Set up mock objects and parameters
+        self.model_name = "test_model"
+        self.model_path = "/path/to/model"
+        self.model_class_mock = MagicMock()
+        self.device = "cpu"
+        self.kwargs = {"param1": "value1", "param2": "value2"}
 
-    @patch("sdk.models.ModelDiffusers.load_model", return_value=True)
-    def test_load_model(self, mock_load_model):
-        # Create an instance of ModelDiffusers
-        model = ModelDiffusers(
-            model_name="TestModel",
-            model_path="test/path",
-            device=Devices.GPU,
-            model_class=MagicMock()
-        )
-        model.pipeline.to = MagicMock
+    def test_unload_model_when_loaded(self):
+        # Arrange
+        pipeline_mock = MagicMock()
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, self.device,
+                                  **self.kwargs)
+        instance.loaded = True
+        instance.pipeline = pipeline_mock
 
-        # Call load_model method
-        result = model.load_model()
+        # Act
+        result = instance.unload_model()
 
-        # Assert that the model is loaded
+        # Assert
         self.assertTrue(result)
-        mock_load_model.assert_called_once()
+        self.assertFalse(instance.loaded)
+        pipeline_mock.to.assert_called_once_with(device=Devices.RESET.value)
+
+    def test_unload_model_when_not_loaded(self):
+        # Arrange
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, self.device, **self.kwargs)
+        instance.loaded = False
+
+        # Act
+        result = instance.unload_model()
+
+        # Assert
+        self.assertFalse(result)
+        self.assertFalse(instance.loaded)
+
+    def test_load_model_when_loaded(self):
+        # Arrange
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.CPU,
+                                     **self.kwargs)
+        instance.loaded = True
+
+        # Act
+        result = instance.load_model()
+
+        # Assert
+        self.assertTrue(result)
+        self.assertTrue(instance.loaded)
+
+    def test_load_model_on_reset_device(self):
+        # Arrange
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.RESET,
+                                     **self.kwargs)
+
+        # Act
+        result = instance.load_model()
+
+        # Assert
+        self.assertFalse(result)
+        self.assertFalse(instance.loaded)
+
+    def test_load_model_successfully(self):
+        # Arrange
+        pipeline_mock = MagicMock()
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.CPU,
+                                     **self.kwargs)
+        instance.pipeline = pipeline_mock
+
+        # Act
+        result = instance.load_model()
+
+        # Assert
+        self.assertTrue(result)
+        self.assertTrue(instance.loaded)
+        pipeline_mock.to.assert_called_once_with(device=Devices.CPU.value)
 
     @patch("sdk.models.ModelDiffusers.unload_model", return_value=True)
     def test_unload_model(self, mock_unload_model):
@@ -44,28 +101,33 @@ class TestModelDiffusers(unittest.TestCase):
         self.assertTrue(result)
         mock_unload_model.assert_called_once()
 
-    @patch("sdk.models.ModelDiffusers.generate_prompt",
-           return_value="Generated image")
-    def test_generate_prompt(self, mock_generate):
-        # Create an instance of ModelDiffusers
-        model = ModelDiffusers(
-            model_name="TestModel",
-            model_path="test/path",
-            device=Devices.GPU,
-            model_class=MagicMock()
+    def test_generate_prompt(self):
+        # Arrange
+        prompt = "test_prompt"
+        pipeline_mock = MagicMock()
+
+        # Create an instance of ModelsTextToImage and set the pipeline attribute
+        instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, self.device, **self.kwargs)
+        instance.pipeline = pipeline_mock
+
+        # Act
+        instance.generate_prompt(prompt)
+
+        # Assert
+        pipeline_mock.assert_called_once()
+
+    @patch("diffusers.DiffusionPipeline.from_pretrained")
+    def test_create_pipeline(self, model_class_mock):
+        # Arrange
+        model_instance_mock = MagicMock()
+        # model_class_mock.from_pretrained.return_value = model_instance_mock
+
+        # Act
+        instance = ModelDiffusers(
+            self.model_name, self.model_path, self.model_class_mock, self.device, **self.kwargs
         )
-
-        # Set up mock pipeline behavior
-        mock_generate.return_value = "Generated image"
-
-        # Call generate_prompt method
-        prompt = "Generate image from text"
-        result = model.generate_prompt(prompt)
-
-        # Assert that the pipeline method was called with the prompt
-        mock_generate.assert_called_once_with(prompt)
-        # Assert that the result is "Generated image"
-        self.assertEqual(result, "Generated image")
+        # Assert
+        self.assertIsNotNone(instance.pipeline)
 
 
 if __name__ == "__main__":
