@@ -134,7 +134,7 @@ class TestModelsTextConversation(unittest.TestCase):
         self.assertEqual(instance.conversation, conversation_one)
 
     @patch("sdk.ModelsTextConversation.create_pipeline")
-    def test_change_conversation_valid_id(self, pipeline_mock):
+    def test_change_conversation_invalid_id(self, pipeline_mock):
         # Arrange
 
         # Arrange
