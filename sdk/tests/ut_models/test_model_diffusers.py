@@ -47,7 +47,7 @@ class TestModelDiffusers(unittest.TestCase):
     def test_load_model_when_loaded(self):
         # Arrange
         instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.CPU,
-                                     **self.kwargs)
+                                  **self.kwargs)
         instance.loaded = True
 
         # Act
@@ -60,7 +60,7 @@ class TestModelDiffusers(unittest.TestCase):
     def test_load_model_on_reset_device(self):
         # Arrange
         instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.RESET,
-                                     **self.kwargs)
+                                  **self.kwargs)
 
         # Act
         result = instance.load_model()
@@ -73,7 +73,7 @@ class TestModelDiffusers(unittest.TestCase):
         # Arrange
         pipeline_mock = MagicMock()
         instance = ModelDiffusers(self.model_name, self.model_path, self.model_class_mock, Devices.CPU,
-                                     **self.kwargs)
+                                  **self.kwargs)
         instance.pipeline = pipeline_mock
 
         # Act
@@ -117,7 +117,6 @@ class TestModelDiffusers(unittest.TestCase):
         pipeline_mock.assert_called_once()
 
     def test_create_pipeline(self):
-
         # Act
         instance = ModelDiffusers(
             self.model_name, self.model_path, self.model_class_mock, self.device, **self.kwargs

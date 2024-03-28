@@ -1,5 +1,4 @@
 import unittest
-
 from sdk import Devices
 from sdk.options.options_tokenizer import OptionsTokenizer
 
