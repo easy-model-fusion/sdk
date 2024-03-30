@@ -33,7 +33,8 @@ class TestModelDiffusers(unittest.TestCase):
     def test_unload_model_when_not_loaded(self):
         # Arrange
         instance = ModelDiffusers(self.model_name, self.model_path,
-                                  self.model_class_mock, self.device, **self.kwargs)
+                                  self.model_class_mock,
+                                  self.device, **self.kwargs)
         instance.loaded = False
 
         # Act

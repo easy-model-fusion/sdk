@@ -65,7 +65,9 @@ class TestModelTransformers(unittest.TestCase):
         )
         instance.loaded = False
         instance.transformers_pipeline = MagicMock()
-        instance.transformers_pipeline.device = torch.device(Devices.RESET.value)
+        instance.transformers_pipeline.device = (
+            torch.device(Devices.RESET.value)
+        )
 
         # Act
         result = instance.load_model()

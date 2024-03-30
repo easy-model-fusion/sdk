@@ -158,10 +158,13 @@ class TestModelsManagement(unittest.TestCase):
         result = instance.unload_model()
 
         # Assert
-        # Ensure that unload_model returns False when model is unsuccessfully unloaded
+        # Ensure that unload_model returns False when model
+        # is unsuccessfully unloaded
         self.assertFalse(result)
         # Ensure that loaded_model is set and not unloaded
-        self.assertEqual(len(instance.loaded_models_cache), 1)
+        self.assertEqual(len(instance.loaded_models_cache),
+                         1)
+
     def test_unload_loaded_model_failure(self):
         # Arrange
         instance = ModelsManagement()
