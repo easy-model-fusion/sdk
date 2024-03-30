@@ -1,5 +1,4 @@
 import unittest
-from abc import ABC
 from sdk.models import Model
 
 

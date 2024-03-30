@@ -19,22 +19,27 @@ class TestModelsManagement(unittest.TestCase):
         # Arrange
         instance.loaded_models_cache = {}  # Clear existing cache
         # Create a mock object with model_name attribute
-        self.model_instance_mock = MagicMock(model_name=self.model_name)
-        instance.loaded_models_cache[self.model_name] = self.model_instance_mock
+        self.model_instance_mock =\
+            MagicMock(model_name=self.model_name)
+        instance.loaded_models_cache[self.model_name] \
+            = self.model_instance_mock
 
         # Act
         result = instance.add_model(self.model_instance_mock)
 
         # Assert
         self.assertFalse(result)  # Model already exists in cache
-        self.assertEqual(len(instance.loaded_models_cache), 1)
+        self.assertEqual(len(instance.loaded_models_cache),
+                         1)
 
     def test_add_model_success(self):
         instance = ModelsManagement()
         # Arrange
         instance.loaded_models_cache = {}  # Clear existing cache
         # Create a mock object with model_name attribute
-        self.model_instance_mock = MagicMock(model_name=self.model_name)
+        self.model_instance_mock = MagicMock(
+            model_name=self.model_name
+        )
 
         # Act
         result = instance.add_model(self.model_instance_mock)
@@ -66,7 +71,8 @@ class TestModelsManagement(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
-    @patch("sdk.models.Model.load_model", side_effect=NotImplementedError)
+    @patch("sdk.models.Model.load_model",
+           side_effect=NotImplementedError)
     def test_load_model_unsuccessful_loaded_error(self, mock_load_model):
         # Arrange
         instance = ModelsManagement()
@@ -99,7 +105,8 @@ class TestModelsManagement(unittest.TestCase):
 
     @patch("sdk.models.ModelsManagement.load_model")
     @patch("sdk.models.ModelsManagement.unload_model")
-    def test_generate_prompt_with_model_name(self, unload_model_mock, load_model_mock):
+    def test_generate_prompt_with_model_name(self, unload_model_mock,
+                                             load_model_mock):
         # Arrange
         prompt = "test_prompt"
         instance = ModelsManagement()
@@ -131,8 +138,10 @@ class TestModelsManagement(unittest.TestCase):
         result = instance.unload_model()
 
         # Assert
-        self.assertTrue(result)  # Ensure that unload_model returns True when model is successfully unloaded
-        self.assertIsNone(instance.loaded_model)  # Ensure that loaded_model is set to None after unloading
+        self.assertTrue(result)  # Ensure that unload_model
+        # returns True when model is successfully unloaded
+        self.assertIsNone(instance.loaded_model)  # Ensure that loaded_model
+        # is set to None after unloading
 
     def test_unload_model_failure(self):
         # Arrange
@@ -141,7 +150,7 @@ class TestModelsManagement(unittest.TestCase):
                                              name=self.model_path,
                                              class_name=MagicMock(),
                                              module=MagicMock())
-        self.model_instance_mock.unload_model.return_value = False  # Simulate failure during unload_model
+        self.model_instance_mock.unload_model.return_value = False
         instance.add_model(self.model_instance_mock)
         instance.loaded_model = self.model_instance_mock
 
@@ -149,9 +158,10 @@ class TestModelsManagement(unittest.TestCase):
         result = instance.unload_model()
 
         # Assert
-        self.assertFalse(result)  # Ensure that unload_model returns False when model is unsuccessfully unloaded
-        self.assertEqual(len(instance.loaded_models_cache), 1)  # Ensure that loaded_model is set and not unloaded
-
+        # Ensure that unload_model returns False when model is unsuccessfully unloaded
+        self.assertFalse(result)
+        # Ensure that loaded_model is set and not unloaded
+        self.assertEqual(len(instance.loaded_models_cache), 1)
     def test_unload_loaded_model_failure(self):
         # Arrange
         instance = ModelsManagement()
@@ -161,7 +171,8 @@ class TestModelsManagement(unittest.TestCase):
         result = instance.unload_model()
 
         # Assert
-        self.assertFalse(result)  # Ensure that unload_model returns False when model is unsuccessfully unloaded
+        self.assertFalse(result)  # Ensure that unload_model returns
+        # False when model is unsuccessfully unloaded
 
     def test_print_models(self):
         # Arrange

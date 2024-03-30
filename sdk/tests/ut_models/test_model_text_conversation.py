@@ -20,8 +20,8 @@ class TestModelsTextConversation(unittest.TestCase):
     @patch("sdk.ModelTransformers.create_pipeline")
     def test_init(self, create_pipeline_mock):
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )
@@ -43,8 +43,8 @@ class TestModelsTextConversation(unittest.TestCase):
         prompt = "test_prompt"
 
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )
@@ -64,8 +64,8 @@ class TestModelsTextConversation(unittest.TestCase):
         # Arrange
         prompt = "test_prompt"
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )
@@ -79,15 +79,16 @@ class TestModelsTextConversation(unittest.TestCase):
 
         # Assert
         pipeline_mock.assert_called_once()
-        conversation_mock.add_message.assert_called_once_with({"role": "user", "content": prompt})
+        conversation_mock.add_message.assert_called_once_with(
+            {"role": "user", "content": prompt}
+        )
 
     @patch("sdk.ModelsTextConversation.create_pipeline")
     def test_create_new_conversation(self, pipeline_mock):
         # Arrange
-        prompt = "test_prompt"
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )
@@ -108,10 +109,9 @@ class TestModelsTextConversation(unittest.TestCase):
         # Arrange
 
         # Arrange
-        prompt = "test_prompt"
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )
@@ -138,10 +138,9 @@ class TestModelsTextConversation(unittest.TestCase):
         # Arrange
 
         # Arrange
-        prompt = "test_prompt"
         instance = ModelsTextConversation(
-            model_name=self.model_name, model_path=self.model_path
-            , tokenizer_path=self.tokenizer_path,
+            model_name=self.model_name, model_path=self.model_path,
+            tokenizer_path=self.tokenizer_path,
             tokenizer_class=self.tokenizer_class_mock,
             model_class=self.model_class_mock, device=self.device
         )

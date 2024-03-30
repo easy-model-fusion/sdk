@@ -2,7 +2,6 @@ import unittest
 import torch
 from unittest.mock import MagicMock, patch
 from sdk import ModelTransformers, Devices
-from transformers import pipeline, Pipeline
 
 
 class TestModelTransformers(unittest.TestCase):
@@ -23,7 +22,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
 
         # Assert
@@ -32,7 +32,8 @@ class TestModelTransformers(unittest.TestCase):
         self.assertEqual(instance.tokenizer_path, self.tokenizer_path)
         self.assertEqual(instance.task, self.task)
         self.assertEqual(instance.model_class, self.model_class_mock)
-        self.assertEqual(instance.tokenizer_class, self.tokenizer_class_mock)
+        self.assertEqual(instance.tokenizer_class,
+                         self.tokenizer_class_mock)
         self.assertEqual(instance.device, self.device)
         self.assertFalse(instance.loaded)
         create_pipeline_mock.assert_called_once()
@@ -42,7 +43,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.loaded = True
 
@@ -58,7 +60,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.loaded = False
         instance.transformers_pipeline = MagicMock()
@@ -76,7 +79,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, Devices.RESET.value
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, Devices.RESET.value
         )
 
         # Act
@@ -93,7 +97,8 @@ class TestModelTransformers(unittest.TestCase):
         create_pipeline_mock.return_value = None
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.transformers_pipeline = pipeline_mock
 
@@ -114,10 +119,13 @@ class TestModelTransformers(unittest.TestCase):
         pipeline_mock = MagicMock()
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.loaded = True
-        instance.transformers_pipeline = MagicMock(return_value=pipeline_mock)
+        instance.transformers_pipeline = MagicMock(
+            return_value=pipeline_mock
+        )
 
         # Act
         result = instance.unload_model()
@@ -133,7 +141,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.loaded = False
 
@@ -149,7 +158,8 @@ class TestModelTransformers(unittest.TestCase):
         # Arrange
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         instance.transformers_pipeline = MagicMock()
 
@@ -158,7 +168,6 @@ class TestModelTransformers(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, instance.transformers_pipeline.return_value)
-
 
     # def test_create_pipeline_loaded(self):
     #     # Arrange
@@ -193,7 +202,8 @@ class TestModelTransformers(unittest.TestCase):
     def test_set_model_pipeline_args(self, mock):
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         # Arrange
         kwargs = {"arg1": "value1", "arg2": "value2"}
@@ -208,7 +218,8 @@ class TestModelTransformers(unittest.TestCase):
     def test_set_model_pipeline_args_empty(self, mock):
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         # Arrange
         initial_args = {"initial_arg": "initial_value"}
@@ -224,7 +235,8 @@ class TestModelTransformers(unittest.TestCase):
     def test_set_tokenizer_pipeline_args(self, mock):
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         # Arrange
         kwargs = {"arg1": "value1", "arg2": "value2"}
@@ -239,7 +251,8 @@ class TestModelTransformers(unittest.TestCase):
     def test_set_tokenizer_pipeline_args_empty(self, mock):
         instance = ModelTransformers(
             self.model_name, self.model_path, self.tokenizer_path,
-            self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+            self.task, self.model_class_mock,
+            self.tokenizer_class_mock, self.device
         )
         # Arrange
         initial_args = {"initial_arg": "initial_value"}
