@@ -2,6 +2,7 @@ import unittest
 import torch
 from unittest.mock import MagicMock, patch
 from sdk import ModelTransformers, Devices
+from transformers import pipeline, Pipeline
 
 
 class TestModelTransformers(unittest.TestCase):
@@ -158,22 +159,32 @@ class TestModelTransformers(unittest.TestCase):
         # Assert
         self.assertEqual(result, instance.transformers_pipeline.return_value)
 
+
+    # def test_create_pipeline_loaded(self):
+    #     # Arrange
+    #     instance = ModelTransformers(
+    #         self.model_name, self.model_path, self.tokenizer_path,
+    #         self.task, pipeline, self.tokenizer_class_mock, self.device
+    #     )
+    #     # Assert
+    #     self.assertIsNotNone(instance.transformers_pipeline)
     # def test_create_pipeline(self):
     #     # Arrange
     #     instance = ModelTransformers(
     #         self.model_name, self.model_path, self.tokenizer_path,
-    #         self.task, self.model_class_mock, self.tokenizer_class_mock, self.device
+    #         self.task, pipeline, self.tokenizer_class_mock, self.device
     #     )
     #
     #     # Assert
     #     self.assertIsNotNone(instance.transformers_pipeline)
+
+    # @patch("transformers.pipeline")
+    # def test_create_pipeline_successfully(self, mock_pipeline):
     #
-    # @patch("transformers.PreTrainedModel.from_pretrained")
-    # def test_create_pipeline_successfully(self, mock):
     #     # Act
     #     instance = ModelTransformers(
     #         self.model_name, self.model_path, self.tokenizer_path,
-    #         self.task, self.model_class_mock, self.tokenizer_class_mock, self.device,
+    #         self.task, pipeline_mock, self.tokenizer_class_mock, self.device,
     #     )
     #     # Assert
     #     self.assertIsNotNone(instance.tokenizer_pipeline)
