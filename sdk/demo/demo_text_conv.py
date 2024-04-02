@@ -23,6 +23,7 @@ class DemoTextConv:
                                        device=Devices.GPU)
 
         model.load_model()
+        model.schematic["role"] = "user"
         model.create_new_conversation()
 
         result = model.generate_prompt(

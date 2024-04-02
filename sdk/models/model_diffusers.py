@@ -1,6 +1,7 @@
 import torch
-from sdk.options import Devices
 from typing import Union, Any
+
+from sdk.options import Devices
 from sdk.models import Model
 
 
@@ -10,21 +11,20 @@ class ModelDiffusers(Model):
     """
     model_class: Any
     pipeline: str
-    loaded: bool
-    device: Union[str, Devices]
 
-    def __init__(self, model_name: str, model_path: str,
+    def __init__(self, model_name: str,
+                 model_path: str,
                  model_class: Any,
-                 device: Union[str, Devices], **kwargs):
+                 device: Union[str, Devices],
+                 **kwargs):
         """
         Initializes the ModelsTextToImage class
         :param model_name: The name of the model
         :param model_path: The path of the model
         """
-        super().__init__(model_name, model_path)
+        super().__init__(model_name, model_path, device)
         self.model_class = model_class
-        self.device = device
-        self.loaded = False
+
         self.create_pipeline(**kwargs)
 
     def create_pipeline(self, **kwargs):

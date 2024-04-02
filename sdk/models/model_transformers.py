@@ -5,6 +5,7 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizer,
 )
+
 from sdk.models import Model
 from sdk.options import Devices
 
@@ -13,13 +14,11 @@ class ModelTransformers(Model):
     """
     A class to use if the model is a transformers one
     """
+    tokenizer_path: str
     task: str
-    # ToDo: look for a best type
+
     model_class: Any
     tokenizer_class: Any
-    device: Union[str, Devices]
-
-    tokenizer_path: str
 
     model_pipeline_args: dict[str, Any] = {}
     tokenizer_pipeline_args: dict[str, Any] = {}
@@ -28,9 +27,8 @@ class ModelTransformers(Model):
     model_pipeline: PreTrainedModel
     tokenizer_pipeline: PreTrainedTokenizer
 
-    loaded: bool
-
-    def __init__(self, model_name: str, model_path: str,
+    def __init__(self, model_name: str,
+                 model_path: str,
                  tokenizer_path,
                  task: str,
                  model_class: Any,
@@ -43,13 +41,12 @@ class ModelTransformers(Model):
         :param model_path: The path of the model
         :param device: Which device the model must be on
         """
-        super().__init__(model_name, model_path)
+        super().__init__(model_name, model_path, device)
         self.tokenizer_path = tokenizer_path
         self.task = task
-        self.device = device
-        self.loaded = False
         self.model_class = model_class
         self.tokeniser_class = tokenizer_class
+
         self.create_pipeline()
 
     def set_model_pipeline_args(self, **kwargs):
