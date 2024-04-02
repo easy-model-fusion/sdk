@@ -29,17 +29,24 @@ class ModelTransformers(Model):
 
     def __init__(self, model_name: str,
                  model_path: str,
-                 tokenizer_path,
+                 tokenizer_path: str,
                  task: str,
                  model_class: Any,
                  tokenizer_class: Any,
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the ModelsTextToImage class
-        :param model_name: The name of the model
-        :param model_path: The path of the model
-        :param device: Which device the model must be on
+        Initializes the Model Transformers class use to interact with the model
+
+        Args:
+            model_name (str): The name of the model
+            model_path (str): The path of the model
+            tokenizer_path (str): The path of the tokenizer
+            task (str): The parameter represents the model type
+            model_class  (Any): The model class use to interact with the model
+            tokenizer_class (Any):
+                The tokenizer class use to interact with the model
+            device (Union[str, Devices]): Which device the model must be on
         """
         super().__init__(model_name, model_path, device)
         self.tokenizer_path = tokenizer_path
@@ -47,19 +54,32 @@ class ModelTransformers(Model):
         self.model_class = model_class
         self.tokeniser_class = tokenizer_class
 
-        self.create_pipeline()
+    def set_model_pipeline_args(self, **kwargs) -> None:
+        """
+        Store kwargs to prepare model for create_pipeline method
 
-    def set_model_pipeline_args(self, **kwargs):
+        Args:
+             kwargs: parameters for model
+        """
         if kwargs:
             self.model_pipeline_args = kwargs.copy()
 
-    def set_tokenizer_pipeline_args(self, **kwargs):
+    def set_tokenizer_pipeline_args(self, **kwargs) -> None:
+        """
+        Store kwargs to prepare tokenizer for create_pipeline method
+
+        Args:
+             kwargs: parameters for tokenizer
+        """
         if kwargs:
             self.tokenizer_pipeline_args = kwargs.copy()
 
     def create_pipeline(self, **kwargs) -> None:
         """
-        Creates the pipeline and load them on the device
+        Creates all pipelines and loads them onto the device
+
+        Args:
+             kwargs: parameters for transformers pipeline
         """
         if self.loaded:
             return
@@ -88,7 +108,7 @@ class ModelTransformers(Model):
 
     def load_model(self) -> bool:
         """
-        Load this model on the given device,
+        Load this model on the given device
 
         Returns:
             bool: True if the model is successfully loaded.
@@ -117,7 +137,9 @@ class ModelTransformers(Model):
     def unload_model(self) -> bool:
         """
         Unloads the model
-        :return: True if the model is successfully unloaded
+
+        Returns:
+            bool: True if the model is successfully unloaded
         """
         if not self.loaded:
             return False
