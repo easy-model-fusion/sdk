@@ -1,4 +1,7 @@
 from abc import abstractmethod
+from typing import Union
+
+from sdk.options import Devices
 
 
 class Model:
@@ -7,8 +10,11 @@ class Model:
     """
     model_name: str
     model_path: str
+    device: Union[str, Devices]
 
-    def __init__(self, model_name, model_path: str):
+    loaded: bool
+
+    def __init__(self, model_name, model_path: str, device: Union[str, Devices]):
         """
         Initializes the model with the given name
         :param model_name: The name of the model
@@ -16,6 +22,8 @@ class Model:
         """
         self.model_name = model_name
         self.model_path = model_path
+        self.device = device
+        self.loaded = False
 
     @abstractmethod
     def load_model(self) -> bool:

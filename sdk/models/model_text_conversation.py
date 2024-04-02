@@ -5,6 +5,7 @@ from transformers import (
     PreTrainedTokenizer,
     Conversation
 )
+
 from sdk.tokenizers.tokenizer import Tokenizer
 from sdk.models import ModelTransformers
 from sdk.options import Devices
@@ -15,17 +16,16 @@ class ModelsTextConversation(ModelTransformers):
     A class representing a text conversation model.
     """
     tokenizer: Tokenizer
-    device: Union[str, Devices]
 
     model_pipeline: PreTrainedModel
     tokenizer_pipeline: PreTrainedTokenizer
     conversation: Conversation
 
     conversation_dict: Dict[uuid.UUID, Conversation] = {}
+    schematic: dict[str, str] = {"role": "user", "content": ""}
 
-    loaded: bool
-
-    def __init__(self, model_name: str, model_path: str,
+    def __init__(self, model_name: str,
+                 model_path: str,
                  tokenizer_path,
                  model_class: Any,
                  tokenizer_class: Any,
@@ -70,9 +70,9 @@ class ModelsTextConversation(ModelTransformers):
         Returns:
             str: The generated response from the chatbot.
         """
-        # ToDo
-        schematic = ({"role": "user", "content": prompt})
-        self.conversation.add_message(schematic)
+        self.schematic["content"] = prompt
+
+        self.conversation.add_message(self.schematic)
 
     def create_new_conversation(self, **kwargs) -> None:
         """
