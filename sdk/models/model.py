@@ -14,7 +14,8 @@ class Model:
 
     loaded: bool
 
-    def __init__(self, model_name, model_path: str, device: Union[str, Devices]):
+    def __init__(self, model_name, model_path: str,
+                 device: Union[str, Devices]):
         """
         Initializes the model with the given name
         :param model_name: The name of the model
