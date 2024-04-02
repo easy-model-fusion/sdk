@@ -19,8 +19,12 @@ class ModelsManagement:
     def add_model(self, new_model: Model) -> bool:
         """
         Adds a new model and his options to the management.
-        :param new_model: The new model to add
-        :return: True if the model is successfully added
+
+        Args:
+             new_model (Model): The new model to add
+
+        Returns:
+            bool: True if the model is successfully added
         """
         if new_model.model_name in self.loaded_models_cache:
             print(f"Model '{new_model.model_name}' is already in the cache.")
@@ -32,8 +36,12 @@ class ModelsManagement:
     def load_model(self, model_name: str) -> bool:
         """
         Load a model with his name and the device set from de model option.
-        :param model_name: The name of the model to load
-        :return: True if the model is successfully loaded
+
+        Args:
+             model_name (str): The name of the model to load
+
+        Returns:
+            bool: True if the model is successfully loaded
         """
         if self.loaded_model:
             print(
@@ -55,7 +63,9 @@ class ModelsManagement:
     def unload_model(self) -> bool:
         """
         Unload the loaded model
-        :return True if the model is successfully unloaded
+
+        Returns:
+            bool: True if the model is successfully unloaded
         """
         if not self.loaded_model:
             print("No model loaded to unload.")
@@ -71,10 +81,14 @@ class ModelsManagement:
                         model_name: Optional[str] = None, **kwargs):
         """
         Generates the prompt for the loaded model with his stored options
-        :param model_name: (Optional): the model name to load
-        :param prompt: The prompt to generate
-        :param kwargs: more parameters to pass to the prompt generator
-        :return: The object of type link with the model category
+
+        Args:
+            prompt (Any): The prompt to generate
+            model_name: (Optional[str]): the model name to load
+            kwargs: more parameters to pass to the prompt generator
+
+        Returns:
+            The object of type link with the model category
         """
         if model_name:
             if self.loaded_model.model_name != model_name:

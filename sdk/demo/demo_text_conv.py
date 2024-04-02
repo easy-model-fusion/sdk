@@ -21,7 +21,7 @@ class DemoTextConv:
                                        model_class=AutoModelForCausalLM,
                                        tokenizer_class=AutoTokenizer,
                                        device=Devices.GPU)
-
+        model.create_pipeline()
         model.load_model()
         model.schematic["role"] = "user"
         model.create_new_conversation()

@@ -26,6 +26,7 @@ class DemoTextGen:
             device=Devices.GPU
         )
 
+        model_transformers.create_pipeline()
         model_transformers.load_model()
 
         result = model_transformers.generate_prompt(
