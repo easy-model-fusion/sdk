@@ -39,7 +39,8 @@ class ModelsTextConversation(ModelTransformers):
             model_path (str): The path of the model
             tokenizer_path (str): The path of the tokenizer
             model_class  (Any): The model class use to interact with the model
-            tokenizer_class (Any): The tokenizer class use to interact with the model
+            tokenizer_class (Any):
+                The tokenizer class use to interact with the model
             device (Union[str, Devices]): Which device the model must be on
         """
         super().__init__(model_name=model_name,
