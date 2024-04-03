@@ -35,6 +35,7 @@ class DemoTextToVideo:
 
         video_frames = model_management.generate_prompt(
             prompt=prompt,
+            model_name=model_name,
             num_inference_steps=25
         ).frames
 

@@ -32,6 +32,7 @@ class DemoTextToImg:
         image = model_management.generate_prompt(
             prompt="Astronaut in a jungle, cold color palette, "
                    "muted colors, detailed, 8k",
+            model_name=model_stabilityai_name,
             image_width=512,
             image_height=512
         ).images[0]
