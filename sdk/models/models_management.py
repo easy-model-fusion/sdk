@@ -51,11 +51,15 @@ class ModelsManagement:
             return False
 
         if (self.loaded_models_cache[model_name].device == Devices.CPU
-                or self.loaded_models_cache[model_name].device == Devices.CPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
+
             return self.load_model_on_cpu(model_name)
 
         if (self.loaded_models_cache[model_name].device == Devices.GPU
-                or self.loaded_models_cache[model_name].device == Devices.GPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
+
             return self.load_model_on_gpu(model_name)
 
     def load_model_on_cpu(self, model_name: str) -> bool:
@@ -117,7 +121,8 @@ class ModelsManagement:
             bool: True if the model is successfully unloaded
         """
         if (self.loaded_models_cache[model_name].device == Devices.CPU
-                or self.loaded_models_cache[model_name].device == Devices.CPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
 
             if not self.loaded_model_CPU:
                 print("No model loaded to unload.")
@@ -129,7 +134,8 @@ class ModelsManagement:
             self.loaded_model_CPU = None
 
         if (self.loaded_models_cache[model_name].device == Devices.GPU
-                or self.loaded_models_cache[model_name].device == Devices.GPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
 
             if not self.loaded_model_GPU:
                 print("No model loaded to unload.")
@@ -156,7 +162,8 @@ class ModelsManagement:
             The object of type link with the model category
         """
         if (self.loaded_models_cache[model_name].device == Devices.CPU
-                or self.loaded_models_cache[model_name].device == Devices.CPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
 
             if self.loaded_model_CPU.model_name != model_name:
                 self.unload_model(model_name)
@@ -172,7 +179,8 @@ class ModelsManagement:
             )
 
         if (self.loaded_models_cache[model_name].device == Devices.GPU
-                or self.loaded_models_cache[model_name].device == Devices.GPU.value):
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
 
             if self.loaded_model_GPU.model_name != model_name:
                 self.unload_model(model_name)
@@ -194,7 +202,10 @@ class ModelsManagement:
         print("Models in cache:")
         for model_name, model_instance in self.loaded_models_cache.items():
             selected_indicator_CPU = (
-                "(CPU selected)" if model_instance == self.loaded_model_CPU else "")
+                "(CPU selected)" if model_instance == self.loaded_model_CPU
+                else "")
             selected_indicator_GPU = (
-                "(GPU selected)" if model_instance == self.loaded_model_GPU else "")
-            print(f"- {model_name} {selected_indicator_CPU} {selected_indicator_GPU}")
+                "(GPU selected)" if model_instance == self.loaded_model_GPU
+                else "")
+            print(f"- {model_name} {selected_indicator_CPU} "
+                  f"{selected_indicator_GPU}")
