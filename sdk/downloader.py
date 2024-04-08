@@ -198,14 +198,13 @@ class Model:
 
         # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
-            if self.module != '':
-                if self.belongs_to_module(TRANSFORMERS):
-                    # Download a tokenizer for the model
-                    download_transformers_tokenizer(
-                        self, overwrite, options_tokenizer)
+            if self.module != '' and self.belongs_to_module(TRANSFORMERS):
+                # Download a tokenizer for the model
+                download_transformers_tokenizer(
+                    self, overwrite, options_tokenizer)
             else:
                 download_transformers_tokenizer(
-                        self, overwrite, options_tokenizer)
+                    self, overwrite, options_tokenizer)
 
         # Execute download if requested
         if not only_configuration:
@@ -238,14 +237,14 @@ class Model:
 
         # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
-            if self.module != '':
-                if self.belongs_to_module(TRANSFORMERS):
-                    # Download a tokenizer for the model
-                    download_transformers_tokenizer(
-                        self, overwrite, options_tokenizer)
+            if self.module != '' and self.belongs_to_module(TRANSFORMERS):
+                # Download a tokenizer for the model
+                download_transformers_tokenizer(
+                    self, overwrite, options_tokenizer)
             else:
                 download_transformers_tokenizer(
                     self, overwrite, options_tokenizer)
+
 
 def set_class_names(model: Model, access_token: str | None) -> None:
     """
