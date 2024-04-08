@@ -1015,7 +1015,7 @@ class TestDownloader(unittest.TestCase):
         expected_options = {"key": "\"test\""}
 
         # init
-        model = Model(name="TestModel", module=TRANSFORMERS,
+        model = Model(name="TestModel1", module=TRANSFORMERS,
                       class_name="TestClass", options=input_options)
         model.tokenizer = Tokenizer(class_name="TokenizerClass",
                                     options=input_options)
