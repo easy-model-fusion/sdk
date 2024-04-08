@@ -1106,7 +1106,6 @@ class TestDownloader(unittest.TestCase):
         # Assert
         mock_download_tokenizer.assert_called_once()
 
-    @patch('downloader.download_transformers_tokenizer')
     @patch('downloader.process_options')
     @patch('downloader.process_access_token', return_value="")
     @patch('downloader.set_class_names', return_value=None)
@@ -1116,7 +1115,6 @@ class TestDownloader(unittest.TestCase):
             self, mock_build_paths,
             mock_download, mock_set_class_names, mock_process_access_token,
             mock_process_options,
-            mock_tokenizer_downloader
     ):
         # Options
         input_options = ["key='test'"]
@@ -1139,9 +1137,7 @@ class TestDownloader(unittest.TestCase):
         mock_build_paths.assert_called_once()
         mock_set_class_names.assert_called_once()
         mock_download.assert_called_once()
-        mock_tokenizer_downloader.assert_called_once()
 
-    @patch('downloader.download_transformers_tokenizer')
     @patch('downloader.process_options')
     @patch('downloader.process_access_token', return_value="")
     @patch('downloader.set_class_names', return_value=None)
@@ -1150,8 +1146,7 @@ class TestDownloader(unittest.TestCase):
     def test_process_skip_model_bad_module(
             self, mock_build_paths,
             mock_download, mock_set_class_names, mock_process_access_token,
-            mock_process_options,
-            mock_tokenizer_downloader
+            mock_process_options
     ):
         # Options
         input_options = ["key='test'"]
@@ -1174,9 +1169,7 @@ class TestDownloader(unittest.TestCase):
         mock_build_paths.assert_called_once()
         mock_set_class_names.assert_called_once()
         mock_download.assert_called_once()
-        mock_tokenizer_downloader.assert_called_once()
 
-    @patch('downloader.download_transformers_tokenizer')
     @patch('downloader.process_options')
     @patch('downloader.process_access_token', return_value="")
     @patch('downloader.set_class_names', return_value=None)
@@ -1185,8 +1178,7 @@ class TestDownloader(unittest.TestCase):
     def test_process_skip_model_correct_module(
             self, mock_build_paths,
             mock_download, mock_set_class_names, mock_process_access_token,
-            mock_process_options,
-            mock_tokenizer_downloader
+            mock_process_options
     ):
         # Options
         input_options = ["key='test'"]
@@ -1209,7 +1201,6 @@ class TestDownloader(unittest.TestCase):
         mock_build_paths.assert_called_once()
         mock_set_class_names.assert_called_once()
         mock_download.assert_called_once()
-        mock_tokenizer_downloader.assert_called_once()
 
 
 if __name__ == '__main__':
