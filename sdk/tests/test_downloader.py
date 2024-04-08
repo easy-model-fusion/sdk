@@ -1048,12 +1048,13 @@ class TestDownloader(unittest.TestCase):
         mock_download.assert_called_once()
         self.assertEqual(expected_result, json.loads(result))
 
-    @patch('downloader.download_model')
-    def test_download_model_skip_model_bad_module(self, mock_download_model):
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_model_skip_model_bad_module(
+            self,
+            mock_download_transformers_tokenizer):
         # Init
         model = Model(name="TestModel", module="other")
         model.download_path = "path/to/model"
-        model.class_name = "class_name"
         model.options = ["test='test'"]
         model.validate = MagicMock()
         model.build_paths = MagicMock()
@@ -1064,11 +1065,12 @@ class TestDownloader(unittest.TestCase):
                        access_token=None)
 
         # Assert
-        mock_download_model.assert_called_once()
+        mock_download_transformers_tokenizer.assert_called_once()
 
-    @patch('downloader.download_model')
-    def test_download_model_skip_model_correct_module(self,
-                                                      mock_download_model):
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_tokenizer_skip_model_correct_module(
+            self,
+            mock_download_transformers_tokenizer):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.download_path = "path/to/model"
@@ -1083,11 +1085,12 @@ class TestDownloader(unittest.TestCase):
                        access_token=None)
 
         # Assert
-        mock_download_model.assert_called_once()
+        mock_download_transformers_tokenizer.assert_called_once()
 
     @patch('downloader.download_transformers_tokenizer')
-    def test_download_model_skip_model_no_module(self,
-                                                 mock_download_tokenizer):
+    def test_download_model_skip_model_no_module(
+            self,
+            mock_download_tokenizer):
         # Init
         model = Model(name="TestModel", module='')
         model.download_path = "path/to/model"
