@@ -196,19 +196,16 @@ class Model:
             result_dict["path"] = self.download_path
             result_dict["options"] = get_options_for_json(options)
 
+        # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
             if self.module != '':
-                if not self.belongs_to_module(TRANSFORMERS):
-                    pass
-            # Processing options
-            options_tokenizer = process_options(self.tokenizer.options)
-
-            # Adding downloaded tokenizer properties to result
-            result_dict["tokenizer"] = {
-                "class": self.tokenizer.class_name,
-                "path": self.tokenizer.download_path,
-                "options": get_options_for_json(options_tokenizer)
-            }
+                if self.belongs_to_module(TRANSFORMERS):
+                    # Download a tokenizer for the model
+                    download_transformers_tokenizer(
+                        self, overwrite, options_tokenizer)
+            else:
+                download_transformers_tokenizer(
+                        self, overwrite, options_tokenizer)
 
         # Execute download if requested
         if not only_configuration:
@@ -242,12 +239,13 @@ class Model:
         # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
             if self.module != '':
-                if not self.belongs_to_module(TRANSFORMERS):
-                    pass
-                # Download a tokenizer for the model
-            download_transformers_tokenizer(
-                self, overwrite, options_tokenizer)
-
+                if self.belongs_to_module(TRANSFORMERS):
+                    # Download a tokenizer for the model
+                    download_transformers_tokenizer(
+                        self, overwrite, options_tokenizer)
+            else:
+                download_transformers_tokenizer(
+                    self, overwrite, options_tokenizer)
 
 def set_class_names(model: Model, access_token: str | None) -> None:
     """
