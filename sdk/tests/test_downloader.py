@@ -1067,7 +1067,8 @@ class TestDownloader(unittest.TestCase):
         mock_download_model.assert_called_once()
 
     @patch('downloader.download_model')
-    def test_download_model_skip_model_correct_module(self, mock_download_model):
+    def test_download_model_skip_model_correct_module(self,
+                                                      mock_download_model):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
         model.download_path = "path/to/model"
@@ -1126,20 +1127,6 @@ class TestDownloader(unittest.TestCase):
 
         # Options
         mock_process_options.return_value = expected_options
-
-        # Prepare
-        expected_result = {
-            "module": model.module,
-            "class": model.class_name,
-            "path": model.download_path,
-            "options": get_options_for_json(expected_options),
-            "tokenizer": {
-                "class": model.tokenizer.class_name,
-                "path": model.tokenizer.download_path,
-                "options": get_options_for_json(expected_options),
-            }
-        }
-
         # Execute
         model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
 
@@ -1175,20 +1162,6 @@ class TestDownloader(unittest.TestCase):
 
         # Options
         mock_process_options.return_value = expected_options
-
-        # Prepare
-        expected_result = {
-            "module": model.module,
-            "class": model.class_name,
-            "path": model.download_path,
-            "options": get_options_for_json(expected_options),
-            "tokenizer": {
-                "class": model.tokenizer.class_name,
-                "path": model.tokenizer.download_path,
-                "options": get_options_for_json(expected_options),
-            }
-        }
-
         # Execute
         model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
 
@@ -1224,20 +1197,6 @@ class TestDownloader(unittest.TestCase):
 
         # Options
         mock_process_options.return_value = expected_options
-
-        # Prepare
-        expected_result = {
-            "module": model.module,
-            "class": model.class_name,
-            "path": model.download_path,
-            "options": get_options_for_json(expected_options),
-            "tokenizer": {
-                "class": model.tokenizer.class_name,
-                "path": model.tokenizer.download_path,
-                "options": get_options_for_json(expected_options),
-            }
-        }
-
         # Execute
         model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
 
