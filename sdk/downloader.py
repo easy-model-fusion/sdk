@@ -196,16 +196,17 @@ class Model:
             result_dict["path"] = self.download_path
             result_dict["options"] = get_options_for_json(options)
 
-        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
-            # Processing options
-            options_tokenizer = process_options(self.tokenizer.options)
+        if skip != DOWNLOAD_TOKENIZER:
+            if self.belongs_to_module(TRANSFORMERS) or skip == DOWNLOAD_MODEL:
+                # Processing options
+                options_tokenizer = process_options(self.tokenizer.options)
 
-            # Adding downloaded tokenizer properties to result
-            result_dict["tokenizer"] = {
-                "class": self.tokenizer.class_name,
-                "path": self.tokenizer.download_path,
-                "options": get_options_for_json(options_tokenizer)
-            }
+                # Adding downloaded tokenizer properties to result
+                result_dict["tokenizer"] = {
+                    "class": self.tokenizer.class_name,
+                    "path": self.tokenizer.download_path,
+                    "options": get_options_for_json(options_tokenizer)
+                }
 
         # Execute download if requested
         if not only_configuration:
@@ -237,10 +238,11 @@ class Model:
                            access_token)
 
         # Checking for tokenizer download
-        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
-            # Download a tokenizer for the model
-            download_transformers_tokenizer(
-                self, overwrite, options_tokenizer)
+        if skip != DOWNLOAD_TOKENIZER:
+            if self.belongs_to_module(TRANSFORMERS) or skip == DOWNLOAD_MODEL:
+                # Download a tokenizer for the model
+                download_transformers_tokenizer(
+                    self, overwrite, options_tokenizer)
 
 
 def set_class_names(model: Model, access_token: str | None) -> None:
@@ -582,10 +584,10 @@ def parse_arguments():
                         help="Path to the downloads directory")
     parser.add_argument("model_name", type=str,
                         help="Model name")
-    parser.add_argument("model_module", type=str,
-                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
+    parser.add_argument("--model_module", type=str,
+                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
     parser.add_argument("--model-options", nargs="+",
