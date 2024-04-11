@@ -198,16 +198,10 @@ class Model:
 
         # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
-            if self.module != '' and self.belongs_to_module(TRANSFORMERS):
-                # Processing options
-                options_tokenizer = process_options(self.tokenizer.options)
-
-                # Adding downloaded tokenizer properties to result
-                result_dict["tokenizer"] = {
-                    "class": self.tokenizer.class_name,
-                    "path": self.tokenizer.download_path,
-                    "options": get_options_for_json(options_tokenizer)
-                }
+            if self.module != '' and not self.belongs_to_module(TRANSFORMERS):
+                # Skip processing options and adding to download if module
+                #  !transformers
+                pass
             else:
                 # Processing options
                 options_tokenizer = process_options(self.tokenizer.options)
@@ -250,10 +244,9 @@ class Model:
 
         # Checking for tokenizer download
         if skip != DOWNLOAD_TOKENIZER:
-            if self.module != '' and self.belongs_to_module(TRANSFORMERS):
-                # Download a tokenizer for the model
-                download_transformers_tokenizer(
-                    self, overwrite, options_tokenizer)
+            if self.module != '' and not self.belongs_to_module(TRANSFORMERS):
+                # skip download if module !transformers
+                pass
             else:
                 download_transformers_tokenizer(
                     self, overwrite, options_tokenizer)
