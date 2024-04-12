@@ -1048,10 +1048,10 @@ class TestDownloader(unittest.TestCase):
         mock_download.assert_called_once()
         self.assertEqual(expected_result, json.loads(result))
 
-    @patch('downloader.download_transformers_tokenizer')
+    @patch('downloader.process_options')
     def test_download_model_skip_model_bad_module(
             self,
-            mock_download_transformers_tokenizer):
+            mock_process_options):
         # Init
         model = Model(name="TestModel", module="other")
         model.download_path = "path/to/model"
@@ -1065,7 +1065,7 @@ class TestDownloader(unittest.TestCase):
                        access_token=None)
 
         # Assert
-        mock_download_transformers_tokenizer.assert_called_once()
+        mock_process_options.assert_not_called()
 
     @patch('downloader.download_transformers_tokenizer')
     def test_download_tokenizer_skip_model_correct_module(
