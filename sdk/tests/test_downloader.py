@@ -1048,6 +1048,160 @@ class TestDownloader(unittest.TestCase):
         mock_download.assert_called_once()
         self.assertEqual(expected_result, json.loads(result))
 
+    @patch('downloader.process_options')
+    def test_download_model_skip_model_bad_module(
+            self,
+            mock_process_options):
+        # Init
+        model = Model(name="TestModel", module="other")
+        model.download_path = "path/to/model"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_process_options.assert_not_called()
+
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_tokenizer_skip_model_correct_module(
+            self,
+            mock_download_transformers_tokenizer):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS)
+        model.download_path = "path/to/model"
+        model.class_name = "class_name"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_download_transformers_tokenizer.assert_called_once()
+
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_model_skip_model_no_module(
+            self,
+            mock_download_tokenizer):
+        # Init
+        model = Model(name="TestModel", module='')
+        model.download_path = "path/to/model"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_download_tokenizer.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_no_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options,
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module='',
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_bad_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module='other',
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_correct_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()  # pragma: no cover
