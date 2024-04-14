@@ -4,3 +4,4 @@ from sdk.models.model_transformers import ModelTransformers
 from sdk.models.models_management import ModelsManagement
 from sdk.models.model_diffusers import ModelDiffusers
 from sdk.models.model_text_conversation import ModelsTextConversation
+from sdk.models.model_text_to_audios import ModelTextToAudios
