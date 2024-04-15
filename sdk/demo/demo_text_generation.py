@@ -37,7 +37,7 @@ class DemoTextGen:
             prompt="I'm looking for a movie - what's your favourite one?",
             max_length=300,
             truncation=True,
-            model_name= model_transformers.model_name
+            model_name=model_transformers.model_name
         )
 
         print(result)
