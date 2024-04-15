@@ -593,7 +593,7 @@ def parse_arguments():
                         help="Model name")
 
     # Optional arguments regarding the model
-    parser.add_argument("--model_module", type=str,
+    parser.add_argument("--model-module", type=str,
                         help="Module name", choices=AUTHORIZED_MODULE_NAMES)
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
