@@ -1,6 +1,7 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
+
 from sdk.models import Model
-from sdk.options import Options
+from sdk.options import Devices
 
 
 class ModelsManagement:
@@ -14,127 +15,185 @@ class ModelsManagement:
         """
         Initializes the ModelsManagement
         """
-        self.loaded_model: Optional[Model] = None
+        self.loaded_model_CPU: Optional[Model] = None
+        self.loaded_model_GPU: Optional[Model] = None
         self.loaded_models_cache: Dict[str, Model] = {}
-        self.options_models: Dict[str, Options] = {}
 
-    def add_model(self, new_model: Model, model_options: Options) -> bool:
+    def add_model(self, new_model: Model) -> bool:
         """
         Adds a new model and his options to the management.
-        :param new_model: The new model to add
-        :param model_options: The options of the new model to add
-        :return: True if the model is successfully added
+
+        Args:
+             new_model (Model): The new model to add
+
+        Returns:
+            bool: True if the model is successfully added
         """
         if new_model.model_name in self.loaded_models_cache:
             print(f"Model '{new_model.model_name}' is already in the cache.")
             return False
 
         self.loaded_models_cache[new_model.model_name] = new_model
-        self.options_models[new_model.model_name] = model_options
         return True
 
     def load_model(self, model_name: str) -> bool:
         """
         Load a model with his name and the device set from de model option.
-        :param model_name: The name of the model to load
-        :return: True if the model is successfully loaded
-        """
-        if self.loaded_model:
-            print(
-                "Unload the currently loaded model before loading a new one.")
-            return False
 
+        Args:
+             model_name (str): The name of the model to load
+
+        Returns:
+            bool: True if the model is successfully loaded
+        """
         if model_name not in self.loaded_models_cache:
             print(f"Model '{model_name}' cannot be loaded: not found.")
             return False
 
-        self.loaded_model = self.loaded_models_cache[model_name]
-        if not self.loaded_model.load_model(option=(
-                self.options_models[model_name])):
+        if (self.loaded_models_cache[model_name].device == Devices.CPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
+
+            return self.load_model_on_cpu(model_name)
+
+        if (self.loaded_models_cache[model_name].device == Devices.GPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
+
+            return self.load_model_on_gpu(model_name)
+
+    def load_model_on_cpu(self, model_name: str) -> bool:
+        """
+        Load a model with his name on the CPU.
+
+        Args:
+             model_name (str): The name of the model to load
+
+        Returns:
+            bool: True if the model is successfully loaded
+        """
+        if self.loaded_model_CPU:
+            print(
+                "Unload the currently loaded model before loading a new one.")
+            return False
+
+        self.loaded_model_CPU = self.loaded_models_cache[model_name]
+
+        if not self.loaded_model_CPU.load_model():
             print("Something went wrong while unloading the model.")
-            self.loaded_model = None
+            self.loaded_model_CPU = None
             return False
 
         return True
 
-    def unload_model(self) -> bool:
+    def load_model_on_gpu(self, model_name: str) -> bool:
+        """
+        Load a model with his name on the GPU.
+
+        Args:
+             model_name (str): The name of the model to load
+
+        Returns:
+            bool: True if the model is successfully loaded
+        """
+        if self.loaded_model_GPU:
+            print(
+                "Unload the currently loaded model before loading a new one.")
+            return False
+
+        self.loaded_model_GPU = self.loaded_models_cache[model_name]
+
+        if not self.loaded_model_GPU.load_model():
+            print("Something went wrong while unloading the model.")
+            self.loaded_model_GPU = None
+            return False
+
+        return True
+
+    def unload_model(self, model_name: str) -> bool:
         """
         Unload the loaded model
-        :return True if the model is successfully unloaded
-        """
-        if not self.loaded_model:
-            print("No model loaded to unload.")
-            return False
 
-        if not self.loaded_model.unload_model():
-            print("Something went wrong while unloading the model.")
-            return False
-        self.loaded_model = None
+        Args:
+             model_name (str): The name of the model to load
+
+        Returns:
+            bool: True if the model is successfully unloaded
+        """
+        if (self.loaded_models_cache[model_name].device == Devices.CPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
+
+            if not self.loaded_model_CPU:
+                print("No model loaded to unload.")
+                return False
+
+            if not self.loaded_model_CPU.unload_model():
+                print("Something went wrong while unloading the model.")
+                return False
+            self.loaded_model_CPU = None
+
+        if (self.loaded_models_cache[model_name].device == Devices.GPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
+
+            if not self.loaded_model_GPU:
+                print("No model loaded to unload.")
+                return False
+
+            if not self.loaded_model_GPU.unload_model():
+                print("Something went wrong while unloading the model.")
+                return False
+            self.loaded_model_GPU = None
+
         return True
 
-    def get_model_options(self, model_name: str) -> Options:
-        """
-        Gets the options of the model with the given name
-        :param model_name: The name of a model
-        :return: The object options of the model
-        """
-        return self.options_models[model_name]
-
-    def set_model_options(self, model_name: str, options: Options):
-        """
-        Set the options of the model with the given name
-        :param model_name: The name of a model
-        :param options: The object options of the model
-        """
-        self.options_models[model_name] = options
-
-    def generate_prompt(self, prompt: Optional[str] = None, **kwargs):
+    def generate_prompt(self, prompt: Any,
+                        model_name: str, **kwargs):
         """
         Generates the prompt for the loaded model with his stored options
-        :param prompt: The prompt to generate (if the prompt is empty, the
-            options.prompt will be used)
-        :param kwargs: more parameters to pass to the prompt generator
-        :return: The object of type link with the model category
-        """
-        if not self.loaded_model:
-            print("No model loaded. Load a model before generating prompts.")
-            return
 
-        return (
-            self.loaded_model.generate_prompt(
-                prompt,
-                self.options_models[
-                    self.loaded_model.model_name],
-                **kwargs
+        Args:
+            prompt (Any): The prompt to generate
+            model_name: (str): the model name to load
+            kwargs: more parameters to pass to the prompt generator
+
+        Returns:
+            The object of type link with the model category
+        """
+        if (self.loaded_models_cache[model_name].device == Devices.CPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.CPU.value)):
+
+            if self.loaded_model_CPU.model_name != model_name:
+                self.unload_model(model_name)
+
+            if not self.loaded_model_CPU:
+                self.load_model(model_name=model_name)
+
+            return (
+                self.loaded_model_CPU.generate_prompt(
+                    prompt,
+                    **kwargs
+                )
             )
-        )
 
-    def generate_prompt_with_model_switch(self, prompt: Optional[str],
-                                          model_name: str, **kwargs):
-        """
-        Generates the prompt on the given model.
-        :param prompt: The prompt to generate (if the prompt is empty, the
-            options.prompt will be used)
-        :param model_name: The model to use for the prompt (if the model is not
-            loaded or different to the loaded model, the model will be loaded
-            before generating prompts
-        :param kwargs: more parameters to pass to the prompt generator
-        :return: The object of type link with the model category
-        """
-        if self.loaded_model.model_name != model_name:
-            self.unload_model()
+        if (self.loaded_models_cache[model_name].device == Devices.GPU
+                or self.loaded_models_cache[model_name].device == (
+                        Devices.GPU.value)):
 
-        if not self.loaded_model:
-            self.load_model(model_name=model_name)
+            if self.loaded_model_GPU.model_name != model_name:
+                self.unload_model(model_name)
 
-        return (
-            self.loaded_model.generate_prompt(
-                prompt,
-                self.options_models[
-                    self.loaded_model.model_name],
-                **kwargs
+            if not self.loaded_model_GPU:
+                self.load_model(model_name=model_name)
+
+            return (
+                self.loaded_model_GPU.generate_prompt(
+                    prompt,
+                    **kwargs
+                )
             )
-        )
 
     def print_models(self):
         """
@@ -142,6 +201,11 @@ class ModelsManagement:
         """
         print("Models in cache:")
         for model_name, model_instance in self.loaded_models_cache.items():
-            selected_indicator = (
-                "(selected)" if model_instance == self.loaded_model else "")
-            print(f"- {model_name} {selected_indicator}")
+            selected_indicator_CPU = (
+                "(CPU selected)" if model_instance == self.loaded_model_CPU
+                else "")
+            selected_indicator_GPU = (
+                "(GPU selected)" if model_instance == self.loaded_model_GPU
+                else "")
+            print(f"- {model_name} {selected_indicator_CPU} "
+                  f"{selected_indicator_GPU}")

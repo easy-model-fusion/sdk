@@ -144,6 +144,10 @@ class Model:
             self.download_path = os.path.join(
                 self.base_path, TRANSFORMERS_DEFAULT_MODEL_DIRECTORY)
 
+            # Local path where the tokenizer will be downloaded
+            self.tokenizer.download_path = os.path.join(
+                self.base_path, self.tokenizer.class_name)
+
     def process(self, models_path: str, skip: str = "",
                 only_configuration: bool = False,
                 overwrite: bool = False) -> str:
@@ -168,36 +172,58 @@ class Model:
         # Validate mandatory arguments
         self.validate()
 
+        # Processing options
+        options = process_options(self.options)
+
+        # Processing access token
+        access_token = process_access_token(options, self)
+
+        # Set model class names
+        set_class_names(self, access_token)
+
         # Build paths
         self.build_paths(models_path)
 
         # Output result
-        result_dict = {}
+        result_dict = {"module": self.module}
 
-        # Set model class names
-        set_class_names(self)
+        # Options
+        options_tokenizer = {}
 
-        # Adding properties to result
-        result_dict["module"] = self.module
-
-        # Adding model properties to result
         if skip != DOWNLOAD_MODEL:
+            # Adding downloaded model properties to result
             result_dict["class"] = self.class_name
+            result_dict["path"] = self.download_path
+            result_dict["options"] = get_options_for_json(options)
 
-        # Adding tokenizer properties to result
-        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
-            result_dict["tokenizer"] = {
-                "class": self.tokenizer.class_name,
-            }
+        # Checking for tokenizer download
+        if skip != DOWNLOAD_TOKENIZER:
+            if self.module != '' and not self.belongs_to_module(TRANSFORMERS):
+                # Skip processing options and adding to download if module
+                #  !transformers
+                pass
+            else:
+                # Processing options
+                options_tokenizer = process_options(self.tokenizer.options)
+
+                # Adding downloaded tokenizer properties to result
+                result_dict["tokenizer"] = {
+                    "class": self.tokenizer.class_name,
+                    "path": self.tokenizer.download_path,
+                    "options": get_options_for_json(options_tokenizer)
+                }
 
         # Execute download if requested
         if not only_configuration:
-            self.download(skip, overwrite, result_dict)
+            self.download(skip, overwrite, options, options_tokenizer,
+                          access_token)
 
         # Convert the dictionary to JSON
         return json.dumps(result_dict, indent=4)
 
-    def download(self, skip: str, overwrite: bool, result_dict: dict) -> None:
+    def download(self, skip: str, overwrite: bool,
+                 options: dict, options_tokenizer: dict,
+                 access_token: str | None) -> None:
         """
         Download the model.
 
@@ -206,60 +232,61 @@ class Model:
                 or the tokenizer.
             overwrite (bool): Whether to overwrite the downloaded model
                 if it exists.
-            result_dict (dict): The result dictionary that contains
-                the model details.
+            options (dict): The options dictionary for the model.
+            options_tokenizer (dict): The options dictionary for the tokenizer.
+            access_token (str): The access token for the model
         """
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
-            options = download_model(self, overwrite)
-
-            # Adding downloaded model properties to result
-            result_dict["path"] = self.download_path
-            result_dict["options"] = get_options_for_json(options)
+            download_model(self, overwrite, options,
+                           access_token)
 
         # Checking for tokenizer download
-        if self.belongs_to_module(TRANSFORMERS) and skip != DOWNLOAD_TOKENIZER:
-            # Download a tokenizer for the model
-            options = download_transformers_tokenizer(self, overwrite)
+        if skip != DOWNLOAD_TOKENIZER:
+            if self.module != '' and not self.belongs_to_module(TRANSFORMERS):
+                # skip download if module !transformers
+                pass
+            else:
+                download_transformers_tokenizer(
+                    self, overwrite, options_tokenizer)
 
-            # Adding downloaded tokenizer properties to result
-            result_dict["tokenizer"]["path"] = self.tokenizer.download_path
-            result_dict["tokenizer"]["options"] = get_options_for_json(options)
 
-
-def set_class_names(model: Model) -> None:
+def set_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class name based on the model's module.
     And Set the appropriate tokenizer class name if needed.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     if model.belongs_to_module(TRANSFORMERS):
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token)
     elif model.belongs_to_module(DIFFUSERS):
-        set_diffusers_class_names(model)
+        set_diffusers_class_names(model, access_token)
 
 
-def set_transformers_class_names(model: Model) -> None:
+def set_transformers_class_names(model: Model,
+                                 access_token: str | None) -> None:
     """
     Set the appropriate model class for a Transformers module model
         and tokenizer.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     try:
         # Get the configuration
-        config = transformers.AutoConfig.from_pretrained(model.name)
-
-        # Map model class from model type
-        model_mapping = transformers.AutoModel._model_mapping._model_mapping
+        config = transformers.AutoConfig.from_pretrained(
+            model.name, token=access_token)
 
         # Set model class name if not already set
-        model.class_name = model.class_name or model_mapping.get(
-            config.model_type)
+        model.class_name = model.class_name or config.architectures[0] \
+            if config.architectures and config.architectures[0] else (
+            model_config_default_class_for_module[TRANSFORMERS]
+        )
 
         # Set tokenizer class name if not already set
         # and config.tokenizer_class exists
@@ -277,19 +304,21 @@ def set_transformers_class_names(model: Model) -> None:
                                       TRANSFORMERS_DEFAULT_TOKENIZER_CLASS)
 
 
-def set_diffusers_class_names(model: Model) -> None:
+def set_diffusers_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class for a Diffusers module model.
 
     Args:
         model (Model): The model object.
+        access_token (str): The access token for the model
     """
     if model.class_name is not None and model.class_name != "":
         return
 
     try:
         # Get the configuration
-        config = diffusers.DiffusionPipeline.load_config(model.name)
+        config = diffusers.DiffusionPipeline.load_config(
+            model.name, use_auth_token=access_token)
 
         # get model class name from the configuration
         model.class_name = config['_class_name']
@@ -297,7 +326,8 @@ def set_diffusers_class_names(model: Model) -> None:
         model.class_name = model_config_default_class_for_module[DIFFUSERS]
 
 
-def download_model(model: Model, overwrite: bool) -> dict:
+def download_model(model: Model, overwrite: bool, options: dict,
+                   access_token: str | None) -> None:
     """
     Download the model.
 
@@ -305,9 +335,8 @@ def download_model(model: Model, overwrite: bool) -> dict:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if
             it exists.
-
-    Returns:
-        dict: A dictionary containing options used for model downloading.
+        options: A dictionary containing options used for model downloading.
+        access_token (str): The access token for the model
     """
 
     # Check if the model already exists at path
@@ -318,12 +347,6 @@ def download_model(model: Model, overwrite: bool) -> dict:
     if model.class_name is None or model.class_name.strip() == '':
         model.class_name = model_config_default_class_for_module.get(
             model.module)
-
-    # Processing options
-    options = process_options(model.options)
-
-    # Processing access token
-    access_token = process_access_token(options, model)
 
     # Transforming from strings to actual objects
     model_class_obj = None
@@ -346,10 +369,9 @@ def download_model(model: Model, overwrite: bool) -> dict:
         err = f"Error downloading model {model.name}: {e}"
         exit_error(err, ERROR_EXIT_MODEL)
 
-    return options
 
-
-def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
+def download_transformers_tokenizer(model: Model, overwrite: bool,
+                                    options: dict) -> None:
     """
     Download a transformers tokenizer for the model.
 
@@ -357,9 +379,7 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
         model (Model): Model to be downloaded.
         overwrite (bool): Whether to overwrite the downloaded model if
             it exists.
-
-    Returns:
-        dict: A dictionary containing options used for model downloading.
+        options: A dictionary containing options used for model downloading.
     """
 
     # Retrieving tokenizer class from module
@@ -376,18 +396,11 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
         err = f"Error importing tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER_IMPORTS)
 
-    # Local path where the tokenizer will be downloaded
-    model.tokenizer.download_path = os.path.join(
-        model.base_path, model.tokenizer.class_name)
-
     # Check if the tokenizer_path already exists
     if not is_path_valid_for_download(
             model.tokenizer.download_path, overwrite):
         err = f"Tokenizer '{model.tokenizer.download_path}' already exists."
         exit_error(err)
-
-    # Processing options
-    options = process_options(model.tokenizer.options)
 
     # Downloading the tokenizer
     try:
@@ -397,8 +410,6 @@ def download_transformers_tokenizer(model: Model, overwrite: bool) -> dict:
     except Exception as e:
         err = f"Error downloading tokenizer {model.tokenizer.class_name}: {e}"
         exit_error(err, ERROR_EXIT_TOKENIZER)
-
-    return options
 
 
 def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
@@ -533,12 +544,16 @@ def get_options_for_json(options_dict: dict) -> dict:
       dict: A new dictionary with the same keys but with values prepared for
             JSON serialization (strings with quotes for string values).
     """
-    for key, value in options_dict.items():
+
+    # Create a shallow copy of the input dictionary
+    options = options_dict.copy()
+
+    for key, value in options.items():
         if isinstance(value, str):
-            options_dict[key] = "\"{}\"".format(value)
+            options[key] = "\"{}\"".format(value)
         else:
-            options_dict[key] = str(value)
-    return options_dict
+            options[key] = str(value)
+    return options
 
 
 def map_args_to_model(args) -> Model:
@@ -576,10 +591,10 @@ def parse_arguments():
                         help="Path to the downloads directory")
     parser.add_argument("model_name", type=str,
                         help="Model name")
-    parser.add_argument("model_module", type=str,
-                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
 
     # Optional arguments regarding the model
+    parser.add_argument("--model-module", type=str,
+                        help="Module name", choices=AUTHORIZED_MODULE_NAMES)
     parser.add_argument("--model-class", type=str,
                         help="Class name within the module")
     parser.add_argument("--model-options", nargs="+",

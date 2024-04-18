@@ -1,74 +1,109 @@
-import torch
-from typing import Optional
-from transformers import (AutoModel, AutoTokenizer,
-                          ConversationalPipeline, Conversation)
+import uuid
+from typing import Dict, Union, Any
+from transformers import (
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    Conversation
+)
 
-from sdk.models import Model
-from sdk.options import Devices, OptionsTextConversation
+from sdk.tokenizers.tokenizer import Tokenizer
+from sdk.models import ModelTransformers
+from sdk.options import Devices
 
 
-class ModelsTextConversation(Model):
-    pipeline: ConversationalPipeline
-    tokenizer: AutoTokenizer
-    loaded: bool
-    chat_bot: Conversation
-    conversation_step: int = 0
-    chat_history_token_ids = []
+class ModelsTextConversation(ModelTransformers):
+    """
+    A class representing a text conversation model.
+    """
+    tokenizer: Tokenizer
 
-    def __init__(self, model_name: str, model_path: str):
-        """
-        Initializes the ModelsTextToImage class
-        :param model_name: The name of the model
-        :param model_path: The path of the model
-        """
-        super().__init__(model_name, model_path)
-        self.loaded = False
-        self.create_pipeline()
+    model_pipeline: PreTrainedModel
+    tokenizer_pipeline: PreTrainedTokenizer
+    conversation: Conversation
 
-    def create_pipeline(self):
-        """
-        Creates the pipeline to load on the device
-        """
-        if self.loaded:
-            return
+    conversation_dict: Dict[uuid.UUID, Conversation] = {}
+    schematic: dict[str, str] = {"role": "user", "content": ""}
 
-        self.pipeline = AutoModel.from_pretrained(self.model_path)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_path,
-                trust_remote_code=True,
-                padding_side='left')
+    def __init__(self, model_name: str,
+                 model_path: str,
+                 tokenizer_path,
+                 model_class: Any,
+                 tokenizer_class: Any,
+                 device: Union[str, Devices]
+                 ):
+        """
+        Initializes the Model conversational class
 
-    def load_model(self, option: OptionsTextConversation) -> bool:
+        Args:
+            model_name (str): The name of the model
+            model_path (str): The path of the model
+            tokenizer_path (str): The path of the tokenizer
+            model_class  (Any): The model class use to interact with the model
+            tokenizer_class (Any):
+                The tokenizer class use to interact with the model
+            device (Union[str, Devices]): Which device the model must be on
         """
-        Load this model on the given device
-        :param option: The options with the device
-        :return: True if the model is successfully loaded
-        """
-        if self.loaded:
-            return True
-        if option.device == Devices.RESET:
-            return False
-        self.pipeline.to(option.device.value)
-        self.tokenizer
-        self.loaded = True
-        return True
-
-    def unload_model(self):
-        """
-        Unloads the model
-        :return: True if the model is successfully unloaded
-        """
-        if not self.loaded:
-            return False
-        self.pipeline.to(device=Devices.RESET)
-        torch.cuda.empty_cache()
-        torch.cuda.ipc_collect()
-        self.loaded = False
-        return True
+        super().__init__(model_name=model_name,
+                         model_path=model_path,
+                         tokenizer_path=tokenizer_path,
+                         task="conversational",
+                         model_class=model_class,
+                         tokenizer_class=tokenizer_class,
+                         device=device)
 
     def generate_prompt(
-            self, prompt: Optional[str],
-            option: OptionsTextConversation,
-            **kwargs):
-        prompt = prompt if prompt else option.prompt
-        return Conversation(prompt, **kwargs)
+            self, prompt: str,
+            **kwargs) -> Union[Conversation, None]:
+        """
+        Generates the prompt with the given option.
+
+        Args:
+            prompt: (str): The optional prompt.
+
+        Returns:
+            str: Generated prompt.
+        """
+        self.write_input(prompt)
+
+        return self.transformers_pipeline(self.conversation)
+
+    def write_input(self, prompt: str) -> None:
+        """
+        Send new input to the chatbot and generate a response.
+
+        Args:
+            prompt (str): The input prompt for the chatbot.
+        """
+        self.schematic["content"] = prompt
+        self.conversation.add_message(self.schematic)
+
+    def create_new_conversation(self, **kwargs) -> None:
+        """
+        Create a new conversation.
+
+        Args:
+             kwargs: parameters for Conversation class
+        """
+        conversation_uuid = uuid.uuid4()
+        conversation = Conversation(conversation_id=conversation_uuid,
+                                    **kwargs)
+        self.conversation_dict[conversation_uuid] = conversation
+        self.conversation = conversation
+
+    def change_conversation(self, conversation_id: uuid.UUID) -> bool:
+        """
+        Change the active conversation.
+
+        Args:
+            conversation_id (UUID): The ID of the conversation to switch to.
+
+        Returns:
+            bool: True if the conversation was switched successfully,
+                False if the provided ID is invalid.
+        """
+        if conversation_id in self.conversation_dict:
+            print("switching to conversation {}".format(conversation_id))
+            self.conversation = self.conversation_dict[conversation_id]
+            return True
+        else:
+            return False
