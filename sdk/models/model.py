@@ -10,6 +10,8 @@ class Model:
     """
     model_name: str
     model_path: str
+    device: Union[str, Devices]
+    loaded: bool
     single_file: bool
 
     def __init__(self, model_name, model_path: str,
