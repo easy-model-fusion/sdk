@@ -1,7 +1,8 @@
 import requests
 import torch
 from PIL import Image
-from transformers import BlipProcessor, BlipForConditionalGeneration, AutoTokenizer
+from transformers import (BlipProcessor, BlipForConditionalGeneration,
+                          AutoTokenizer)
 from sdk.options import Devices
 from sdk.models import ModelTransformers
 

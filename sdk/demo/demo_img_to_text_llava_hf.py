@@ -1,5 +1,6 @@
 from sdk.options import Devices
-from transformers import LlavaForConditionalGeneration, AutoTokenizer
+from transformers import (LlavaForConditionalGeneration, AutoProcessor,
+                          AutoTokenizer)
 
 from sdk.models import ModelTransformers
 from PIL import Image
@@ -23,16 +24,16 @@ class DemoLlavaHf:
             device=Devices.GPU
         )
 
+        processor = AutoProcessor.from_pretrained(model_path)
+        model_transformers.create_pipeline(image_processor=processor)
         model_transformers.load_model()
 
-        image_file = "http://images.cocodataset.org/val2017/000000039769.jpg"
-        image = Image.open(requests.get(image_file, stream=True).raw)
+        image_url = "http://images.cocodataset.org/val2017/000000039769.jpg"
+        image = Image.open(requests.get
+                           (image_url, stream=True).raw).convert('RGB')
 
         result = model_transformers.generate_prompt(
-            prompt="USER: <image>\nWhat are these?\nASSISTANT:",
-            max_length=300,
-            raw_image=image,
-            truncation=True
+            prompt=image
         )
 
         print(result)

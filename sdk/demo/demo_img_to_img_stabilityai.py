@@ -12,13 +12,15 @@ class DemoStabilityaiImg:
         model_stab_refiner_path = "stabilityai/stable-diffusion-xl-refiner-1.0"
         model_management = ModelsManagement()
 
-        model_stab_refiner = ModelDiffusers(model_stab_refiner_name,
-                                              model_stab_refiner_path,
-                                              Devices.GPU,
-                                              torch_dtype=torch.float16,
-                                              use_safetensors=True,
-                                              add_watermarker=False,
-                                              variant="fp16")
+        model_stab_refiner = ModelDiffusers(model_name=model_stab_refiner_name,
+                                            model_path=model_stab_refiner_path,
+                                            device=Devices.GPU,
+                                            torch_dtype=torch.float16,
+                                            use_safetensors=True,
+                                            add_watermarker=False,
+                                            variant="fp16",
+                                            model_class=
+                                            StableDiffusionXLImg2ImgPipeline)
 
         model_management.add_model(new_model=model_stab_refiner)
         model_management.load_model(model_stab_refiner_name)
@@ -29,9 +31,9 @@ class DemoStabilityaiImg:
 
         image = model_management.generate_prompt(
             prompt="a photo of an human riding a dog",
+            model_name=model_stab_refiner_name,
             image=init_image,
             image_width=512,
             image_height=512
-        )
+        ).images[0]
         image.show()
-
