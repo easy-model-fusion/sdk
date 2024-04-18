@@ -41,6 +41,14 @@ class ModelDiffusers(Model):
         if self.loaded:
             return
 
+        # Single file loads a single ckpt/safetensors file
+        if self.single_file:
+            self.pipeline = self.model_class.from_single_file(
+                self.model_path,
+                **kwargs
+            )
+            return
+
         self.pipeline = self.model_class.from_pretrained(
             self.model_path,
             **kwargs
