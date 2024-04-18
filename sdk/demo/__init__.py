@@ -5,11 +5,11 @@ from .demo_text_generation import DemoTextGen
 from .demo_text_to_video import DemoTextToVideo
 from .demo_text_to_img_dreamlike import DemoDreamLikeArt
 from .demo_text_to_img_runwayml import DemoRunwayml
-from .demo_img_to_text_sales_force import DemoSalesforce
+from .demo_img_to_text_processor_sales_force import DemoSalesforce
 from .demo_img_to_img_stabilityai import DemoStabilityaiImg
 from .demo_text_to_3d_openai_shape import DemoOpenaiShape
 from .demo_text_to_audio_audiolmd2 import DemoCvssp
-from .demo_img_to_text_llava_hf import DemoLlavaHf
+from .demo_img_to_text_processor_llava_hf import DemoLlavaHf
 from .demo_Searchium_ai import DemoSearchiumAi
 from .demo_text_generation_t5_base import DemoT5Base
 from .demo_text_to_audio_espnet import DemoEspnet
