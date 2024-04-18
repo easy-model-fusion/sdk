@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 
 
@@ -9,7 +9,7 @@ class DemoRedshift:
         model_redshift_name = "nitrosocke/redshift-diffusion"
         model_redshift_path = "nitrosocke/redshift-diffusion"
         model_management = ModelsManagement()
-        model_redshift = ModelTextToImage(model_redshift_name,
+        model_redshift = ModelDiffusers(model_redshift_name,
                                              model_redshift_path,
                                              Devices.GPU,
                                              torch_dtype=torch.float16,

@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 
 
@@ -9,7 +9,7 @@ class DemoRunwayml:
         model_runwayml_name = "runwayml/stable-diffusion-v1-5"
         model_runwayml_path = "runwayml/stable-diffusion-v1-5"
         model_management = ModelsManagement()
-        model_runwayml = ModelTextToImage(model_runwayml_name,
+        model_runwayml = ModelDiffusers(model_runwayml_name,
                                              model_runwayml_path,
                                              Devices.GPU,
                                              torch_dtype=torch.float16,

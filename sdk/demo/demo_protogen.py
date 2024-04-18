@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 
 
@@ -9,7 +9,7 @@ class DemoProtogen:
         model_Protogen_name = "darkstorm2150/Protogen_v2.2_Official_Release"
         model_Protogen_path = "darkstorm2150/Protogen_v2.2_Official_Release"
         model_management = ModelsManagement()
-        model_Protogen = ModelTextToImage(model_Protogen_name,
+        model_Protogen = ModelDiffusers(model_Protogen_name,
                                              model_Protogen_path,
                                              Devices.GPU,
                                              torch_dtype=torch.float16,

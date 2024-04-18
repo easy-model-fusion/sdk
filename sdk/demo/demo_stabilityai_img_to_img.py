@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 from diffusers import StableDiffusionXLImg2ImgPipeline
 from diffusers.utils import load_image
@@ -12,7 +12,7 @@ class DemoStabilityaiImg:
         model_stab_refiner_path = "stabilityai/stable-diffusion-xl-refiner-1.0"
         model_management = ModelsManagement()
 
-        model_stab_refiner = ModelTextToImage(model_stab_refiner_name,
+        model_stab_refiner = ModelDiffusers(model_stab_refiner_name,
                                               model_stab_refiner_path,
                                               Devices.GPU,
                                               torch_dtype=torch.float16,

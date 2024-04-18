@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 
 
@@ -9,7 +9,7 @@ class DemoPromptHero:
         model_prompt_hero_name = "prompthero/openjourney"
         model_prompt_hero_path = "prompthero/openjourney"
         model_management = ModelsManagement()
-        model_prompt_hero = ModelTextToImage(model_prompt_hero_name,
+        model_prompt_hero = ModelDiffusers(model_prompt_hero_name,
                                              model_prompt_hero_path,
                                              Devices.GPU,
                                              torch_dtype=torch.float16,

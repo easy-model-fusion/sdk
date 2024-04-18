@@ -1,6 +1,7 @@
 import requests
+import torch
 from PIL import Image
-from transformers import BlipProcessor, BlipForConditionalGeneration
+from transformers import BlipProcessor, BlipForConditionalGeneration, AutoTokenizer
 from sdk.options import Devices
 from sdk.models import ModelTransformers
 
@@ -17,10 +18,12 @@ class DemoSalesforce:
             tokenizer_path=tokenizer_path,
             task="image-to-text",
             model_class=BlipForConditionalGeneration,
-            tokenizer_class=BlipProcessor,
+            tokenizer_class=AutoTokenizer,
             device=Devices.GPU
         )
 
+        processor = BlipProcessor.from_pretrained(model_path)
+        model_transformers.create_pipeline(image_processor=processor)
         model_transformers.load_model()
 
         image_url = ('https://storage.googleapis.com/'
@@ -29,8 +32,6 @@ class DemoSalesforce:
                                (image_url, stream=True).raw).convert('RGB')
 
         result = model_transformers.generate_prompt(
-            prompt=raw_image,
-            max_length=300,
-            truncation=True
+            prompt=raw_image
         )
         print(result)

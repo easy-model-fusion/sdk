@@ -1,5 +1,5 @@
 import torch
-from sdk.models import ModelTextToImage, ModelsManagement
+from sdk.models import ModelDiffusers, ModelsManagement
 from sdk.options import Devices
 from diffusers.utils import export_to_gif
 
@@ -10,7 +10,7 @@ class DemoOpenaiShape:
         model_openai_shape_name = "openai/shap-e"
         model_openai_shape_path = "openai/shap-e"
         model_management = ModelsManagement()
-        model_openai_shape = ModelTextToImage(model_openai_shape_name,
+        model_openai_shape = ModelDiffusers(model_openai_shape_name,
                                               model_openai_shape_path,
                                               Devices.GPU,
                                               torch_dtype=torch.float16,
