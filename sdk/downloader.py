@@ -187,7 +187,6 @@ class Model:
         # Output result
         result_dict = {"module": self.module}
 
-        # Options
         options_tokenizer = {}
 
         if skip != DOWNLOAD_MODEL:
@@ -251,7 +250,7 @@ class Model:
                 download_transformers_tokenizer(
                     self, overwrite, options_tokenizer)
 
-
+                
 def set_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class name based on the model's module.
