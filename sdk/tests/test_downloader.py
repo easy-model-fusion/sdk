@@ -372,7 +372,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options)
+            download_model(model, overwrite=False, options=options,
+                           access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_DEFAULT)
 
         # Assert
@@ -381,10 +382,9 @@ class TestDownloader(unittest.TestCase):
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_with_objects_error(
-            self, mock_from_pretrained, mock_process_access_token,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module="")
@@ -392,20 +392,19 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options)
+            download_model(model, overwrite=False, options=options,
+                           access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL_IMPORTS)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_not_called()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained'
            '', side_effect=Exception("Download failed"))
     def test_download_model_with_from_pretrained_error(
-            self, mock_from_pretrained, mock_process_access_token,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Init
         model = Model(name="TestModel", module=TRANSFORMERS)
@@ -413,19 +412,18 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options)
+            download_model(model, overwrite=False, options=options,
+                           access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_with_save_pretrained_error(
-            self, mock_from_pretrained, mock_process_access_token,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(side_effect=Exception("Save failed"))
@@ -441,20 +439,19 @@ class TestDownloader(unittest.TestCase):
 
         # Execute : error = success
         with self.assertRaises(SystemExit) as context:
-            download_model(model, overwrite=False, options=options)
+            download_model(model, overwrite=False, options=options,
+                           access_token=None)
         self.assertEqual(context.exception.code, ERROR_EXIT_MODEL)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
     @patch('downloader.is_path_valid_for_download', return_value=True)
-    @patch('downloader.process_access_token', return_value="")
     @patch('transformers.models.auto.modeling_auto.AutoModel.from_pretrained')
     def test_download_model_success(
-            self, mock_from_pretrained, mock_process_access_token,
+            self, mock_from_pretrained,
             mock_is_path_valid_for_download):
         # Mockers : save_pretrained
         mock_save_pretrained = MagicMock(return_value=None)
@@ -470,11 +467,11 @@ class TestDownloader(unittest.TestCase):
         options = {"key1": "value1"}
 
         # Execute :
-        download_model(model, overwrite=False, options=options)
+        download_model(model, overwrite=False, options=options,
+                       access_token=None)
 
         # Assert
         mock_is_path_valid_for_download.assert_called_once()
-        mock_process_access_token.assert_called_once()
         mock_from_pretrained.assert_called_once()
         mock_save_pretrained.assert_called_once()
 
@@ -652,7 +649,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
-                       options={"test": "\"test\""}, options_tokenizer={})
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
 
         # Assert
         mock_download_model.assert_called_once()
@@ -671,7 +669,8 @@ class TestDownloader(unittest.TestCase):
 
         # Execute
         model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                       options={"test": "\"test\""}, options_tokenizer={})
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
@@ -686,7 +685,8 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_TOKENIZER,
-                           options={}, options_tokenizer={})
+                           options={}, options_tokenizer={"options": {}},
+                           access_token=None)
 
         # Assert
         mock_download_model.assert_called_once()
@@ -703,7 +703,9 @@ class TestDownloader(unittest.TestCase):
         # Execute : error = success
         with self.assertRaises(SystemExit):
             model.download(overwrite=True, skip=DOWNLOAD_MODEL,
-                           options={}, options_tokenizer={})
+                           options={},
+                           options_tokenizer={"tokenizer": {"options": {}}},
+                           access_token=None)
 
         # Assert
         mock_download_transformers_tokenizer.assert_called_once()
@@ -814,7 +816,7 @@ class TestDownloader(unittest.TestCase):
         model = Model(name="TestModel", module=DIFFUSERS)
 
         # Execute
-        set_diffusers_class_names(model)
+        set_diffusers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -827,7 +829,7 @@ class TestDownloader(unittest.TestCase):
         model = Model(name="TestModel", module=DIFFUSERS)
 
         # Execute
-        set_diffusers_class_names(model)
+        set_diffusers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -842,7 +844,7 @@ class TestDownloader(unittest.TestCase):
                       class_name="TestModel")
 
         # Execute
-        set_diffusers_class_names(model)
+        set_diffusers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_not_called()
@@ -857,7 +859,7 @@ class TestDownloader(unittest.TestCase):
                       tokenizer=Tokenizer())
 
         # Execute
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -875,7 +877,7 @@ class TestDownloader(unittest.TestCase):
                       tokenizer=Tokenizer())
 
         # Execute
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -894,7 +896,7 @@ class TestDownloader(unittest.TestCase):
                       tokenizer=Tokenizer('TestTokenizer'))
 
         # Execute
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -911,7 +913,7 @@ class TestDownloader(unittest.TestCase):
                       tokenizer=Tokenizer('TestTokenizer'))
 
         # Execute
-        set_transformers_class_names(model)
+        set_transformers_class_names(model, access_token=None)
 
         # Assert
         mock_load_config.assert_called_once()
@@ -927,7 +929,7 @@ class TestDownloader(unittest.TestCase):
         model = Model(name="TestModel", module=TRANSFORMERS)
 
         # Execute
-        set_class_names(model)
+        set_class_names(model, access_token=None)
 
         # Assert
         mock_transformer_class_names.assert_called_once()
@@ -942,41 +944,46 @@ class TestDownloader(unittest.TestCase):
         model = Model(name="TestModel", module=DIFFUSERS)
 
         # Execute
-        set_class_names(model)
+        set_class_names(model, access_token=None)
 
         # Assert
         mock_set_diffusers_class_names.assert_called_once()
         mock_transformer_class_names.assert_not_called()
 
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
     @patch('downloader.set_class_names', return_value=None)
     @patch('downloader.Model.download', return_value=None)
     @patch('downloader.Model.build_paths', return_value=None)
     @patch('downloader.Model.belongs_to_module', return_value=True)
     def test_process_with_only_configuration(
             self, mock_belongs_to_module, mock_build_paths,
-            mock_download, mock_set_class_names
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
     ):
-        # Options
         # Options
         input_options = ["key='test'"]
         expected_options = {"key": "\"test\""}
 
         # init
-        model = Model(name="TestModel", module=DIFFUSERS,
+        model = Model(name="TestModel", module=TRANSFORMERS,
                       class_name="TestClass", options=input_options)
         model.tokenizer = Tokenizer(class_name="TokenizerClass",
                                     options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
 
         # Prepare
         expected_result = {
             "module": model.module,
             "class": model.class_name,
             "path": model.download_path,
-            "options": expected_options,
+            "options": get_options_for_json(expected_options),
             "tokenizer": {
                 "class": model.tokenizer.class_name,
                 "path": model.tokenizer.download_path,
-                "options": expected_options,
+                "options": get_options_for_json(expected_options),
             }
         }
 
@@ -985,40 +992,47 @@ class TestDownloader(unittest.TestCase):
                                only_configuration=True)
 
         # Assert
+        mock_process_access_token.assert_called_once()
         mock_build_paths.assert_called_once()
         mock_set_class_names.assert_called_once()
         mock_belongs_to_module.assert_called_once()
         mock_download.assert_not_called()
         self.assertEqual(expected_result, json.loads(result))
 
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
     @patch('downloader.set_class_names', return_value=None)
     @patch('downloader.Model.download', return_value=None)
     @patch('downloader.Model.build_paths', return_value=None)
     @patch('downloader.Model.belongs_to_module', return_value=True)
     def test_process_with_download(
             self, mock_belongs_to_module, mock_build_paths,
-            mock_download, mock_set_class_names
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
     ):
         # Options
         input_options = ["key='test'"]
         expected_options = {"key": "\"test\""}
 
         # init
-        model = Model(name="TestModel", module=DIFFUSERS,
+        model = Model(name="TestModel", module=TRANSFORMERS,
                       class_name="TestClass", options=input_options)
         model.tokenizer = Tokenizer(class_name="TokenizerClass",
                                     options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
 
         # Prepare
         expected_result = {
             "module": model.module,
             "class": model.class_name,
             "path": model.download_path,
-            "options": expected_options,
+            "options": get_options_for_json(expected_options),
             "tokenizer": {
                 "class": model.tokenizer.class_name,
                 "path": model.tokenizer.download_path,
-                "options": expected_options,
+                "options": get_options_for_json(expected_options),
             }
         }
 
@@ -1026,11 +1040,167 @@ class TestDownloader(unittest.TestCase):
         result = model.process(models_path='path/to/model')
 
         # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
         mock_build_paths.assert_called_once()
         mock_set_class_names.assert_called_once()
         mock_belongs_to_module.assert_called_once()
         mock_download.assert_called_once()
         self.assertEqual(expected_result, json.loads(result))
+
+    @patch('downloader.process_options')
+    def test_download_model_skip_model_bad_module(
+            self,
+            mock_process_options):
+        # Init
+        model = Model(name="TestModel", module="other")
+        model.download_path = "path/to/model"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_process_options.assert_not_called()
+
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_tokenizer_skip_model_correct_module(
+            self,
+            mock_download_transformers_tokenizer):
+        # Init
+        model = Model(name="TestModel", module=TRANSFORMERS)
+        model.download_path = "path/to/model"
+        model.class_name = "class_name"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_download_transformers_tokenizer.assert_called_once()
+
+    @patch('downloader.download_transformers_tokenizer')
+    def test_download_model_skip_model_no_module(
+            self,
+            mock_download_tokenizer):
+        # Init
+        model = Model(name="TestModel", module='')
+        model.download_path = "path/to/model"
+        model.options = ["test='test'"]
+        model.validate = MagicMock()
+        model.build_paths = MagicMock()
+
+        # Execute
+        model.download(overwrite=True, skip=DOWNLOAD_MODEL,
+                       options={"test": "\"test\""}, options_tokenizer={},
+                       access_token=None)
+
+        # Assert
+        mock_download_tokenizer.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_no_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options,
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module='',
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_bad_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module='other',
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
+
+    @patch('downloader.process_options')
+    @patch('downloader.process_access_token', return_value="")
+    @patch('downloader.set_class_names', return_value=None)
+    @patch('downloader.Model.download', return_value=None)
+    @patch('downloader.Model.build_paths', return_value=None)
+    def test_process_skip_model_correct_module(
+            self, mock_build_paths,
+            mock_download, mock_set_class_names, mock_process_access_token,
+            mock_process_options
+    ):
+        # Options
+        input_options = ["key='test'"]
+        expected_options = {"key": "\"test\""}
+
+        # init
+        model = Model(name="TestModel", module=TRANSFORMERS,
+                      class_name="TestClass", options=input_options)
+        model.tokenizer = Tokenizer(class_name="TokenizerClass",
+                                    options=input_options)
+
+        # Options
+        mock_process_options.return_value = expected_options
+        # Execute
+        model.process(models_path='path/to/model', skip=DOWNLOAD_MODEL)
+
+        # Assert
+        mock_process_access_token.assert_called_once()
+        mock_process_options.assert_called()
+        mock_build_paths.assert_called_once()
+        mock_set_class_names.assert_called_once()
+        mock_download.assert_called_once()
 
 
 if __name__ == '__main__':

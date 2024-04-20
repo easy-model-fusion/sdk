@@ -5,6 +5,7 @@ from transformers import (
     PreTrainedTokenizer,
     Conversation
 )
+
 from sdk.tokenizers.tokenizer import Tokenizer
 from sdk.models import ModelTransformers
 from sdk.options import Devices
@@ -15,27 +16,32 @@ class ModelsTextConversation(ModelTransformers):
     A class representing a text conversation model.
     """
     tokenizer: Tokenizer
-    device: Union[str, Devices]
 
     model_pipeline: PreTrainedModel
     tokenizer_pipeline: PreTrainedTokenizer
     conversation: Conversation
 
     conversation_dict: Dict[uuid.UUID, Conversation] = {}
+    schematic: dict[str, str] = {"role": "user", "content": ""}
 
-    loaded: bool
-
-    def __init__(self, model_name: str, model_path: str,
+    def __init__(self, model_name: str,
+                 model_path: str,
                  tokenizer_path,
                  model_class: Any,
                  tokenizer_class: Any,
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the ModelsTextToImage class
-        :param model_name: The name of the model
-        :param model_path: The path of the model
-        :param device: Which device the model must be on
+        Initializes the Model conversational class
+
+        Args:
+            model_name (str): The name of the model
+            model_path (str): The path of the model
+            tokenizer_path (str): The path of the tokenizer
+            model_class  (Any): The model class use to interact with the model
+            tokenizer_class (Any):
+                The tokenizer class use to interact with the model
+            device (Union[str, Devices]): Which device the model must be on
         """
         super().__init__(model_name=model_name,
                          model_path=model_path,
@@ -58,6 +64,7 @@ class ModelsTextConversation(ModelTransformers):
             str: Generated prompt.
         """
         self.write_input(prompt)
+
         return self.transformers_pipeline(self.conversation)
 
     def write_input(self, prompt: str) -> None:
@@ -66,17 +73,16 @@ class ModelsTextConversation(ModelTransformers):
 
         Args:
             prompt (str): The input prompt for the chatbot.
-
-        Returns:
-            str: The generated response from the chatbot.
         """
-        # ToDo
-        schematic = ({"role": "user", "content": prompt})
-        self.conversation.add_message(schematic)
+        self.schematic["content"] = prompt
+        self.conversation.add_message(self.schematic)
 
     def create_new_conversation(self, **kwargs) -> None:
         """
         Create a new conversation.
+
+        Args:
+             kwargs: parameters for Conversation class
         """
         conversation_uuid = uuid.uuid4()
         conversation = Conversation(conversation_id=conversation_uuid,
@@ -89,11 +95,11 @@ class ModelsTextConversation(ModelTransformers):
         Change the active conversation.
 
         Args:
-            conversation_id (int): The ID of the conversation to switch to.
+            conversation_id (UUID): The ID of the conversation to switch to.
 
         Returns:
-            int: 0 if the conversation was switched successfully,
-                -1 if the provided ID is invalid.
+            bool: True if the conversation was switched successfully,
+                False if the provided ID is invalid.
         """
         if conversation_id in self.conversation_dict:
             print("switching to conversation {}".format(conversation_id))

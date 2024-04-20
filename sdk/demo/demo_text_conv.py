@@ -1,3 +1,4 @@
+from sdk import ModelsManagement
 from sdk.models import ModelsTextConversation
 from sdk.options import Devices
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -15,6 +16,8 @@ class DemoTextConv:
         model_path = "microsoft/phi-2"
         tokenizer_path = "microsoft/phi-2"
 
+        model_management = ModelsManagement()
+
         model = ModelsTextConversation(model_name="model",
                                        model_path=model_path,
                                        tokenizer_path=tokenizer_path,
@@ -22,10 +25,14 @@ class DemoTextConv:
                                        tokenizer_class=AutoTokenizer,
                                        device=Devices.GPU)
 
-        model.load_model()
+        model.create_pipeline()
+        model_management.add_model(new_model=model)
+        model_management.load_model(model.model_name)
+        model.schematic["role"] = "user"
         model.create_new_conversation()
 
-        result = model.generate_prompt(
-            "I'm looking for a movie - what's your favourite one?")
+        result = model_management.generate_prompt(
+            "I'm looking for a movie - what's your favourite one?",
+            model_name=model.model_name)
 
         print(result.messages[-1]["content"])

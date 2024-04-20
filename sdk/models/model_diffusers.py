@@ -1,37 +1,52 @@
 import torch
-from sdk.options import Devices
 from typing import Union, Any
+
+from sdk.options import Devices
 from sdk.models import Model
 
 
 class ModelDiffusers(Model):
     """
-    This class implements methods to generate images with a text prompt
+    This class implements methods to generate with the diffusers models
     """
     model_class: Any
-    pipeline: str
-    loaded: bool
-    device: Union[str, Devices]
+    pipeline: Any
 
-    def __init__(self, model_name: str, model_path: str,
+    def __init__(self, model_name: str,
+                 model_path: str,
                  model_class: Any,
-                 device: Union[str, Devices], **kwargs):
+                 device: Union[str, Devices],
+                 **kwargs):
         """
         Initializes the ModelsTextToImage class
-        :param model_name: The name of the model
-        :param model_path: The path of the model
+
+        Args:
+            model_name (str): The name of the model
+            model_path (str): The path of the model
+            model_class  (Any): The model class use to interact with the model
+            device (Union[str, Devices]): Which device the model must be on
+            kwargs: parameters for model
         """
-        super().__init__(model_name, model_path)
+        super().__init__(model_name, model_path, device)
         self.model_class = model_class
-        self.device = device
-        self.loaded = False
         self.create_pipeline(**kwargs)
 
-    def create_pipeline(self, **kwargs):
+    def create_pipeline(self, **kwargs) -> None:
         """
         Creates the pipeline to load on the device
+
+        Args:
+            kwargs: parameters for model
         """
         if self.loaded:
+            return
+
+        # Single file loads a single ckpt/safetensors file
+        if self.single_file:
+            self.pipeline = self.model_class.from_single_file(
+                self.model_path,
+                **kwargs
+            )
             return
 
         self.pipeline = self.model_class.from_pretrained(
@@ -42,7 +57,9 @@ class ModelDiffusers(Model):
     def load_model(self) -> bool:
         """
         Load this model on the given device
-        :return: True if the model is successfully loaded
+
+        Returns:
+             bool: True if the model is successfully loaded
         """
         if self.loaded:
             return True
@@ -57,7 +74,9 @@ class ModelDiffusers(Model):
     def unload_model(self) -> bool:
         """
         Unloads the model
-        :return: True if the model is successfully unloaded
+
+        Returns:
+             bool: True if the model is successfully unloaded
         """
         if not self.loaded:
             return False
@@ -71,8 +90,12 @@ class ModelDiffusers(Model):
                         **kwargs):
         """
         Generates the prompt with the given option
-        :param prompt: The prompt to generate
-        :return: An object image resulting from the model
+
+        Args:
+            prompt (Any): The prompt to generate
+
+        Returns:
+             An object image resulting from the model
         """
         return self.pipeline(
             prompt=prompt,
