@@ -3,6 +3,7 @@ from typing import Union
 
 from sdk.options.options import Devices
 
+
 class Tokenizer:
 
     """
