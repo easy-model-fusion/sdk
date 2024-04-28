@@ -7,8 +7,15 @@ from sdk.options import Devices
 
 
 class DemoTextToVideo:
+    """
+    This class demonstrates text generation using a TextToVideo model.
 
+    """
     def __init__(self):
+        """
+        Initializes the DemoTextGen class with predefined options and models
+        and returns result of prompt  .
+        """
         model_name = "damo-vilab/text-to-video-ms-1.7b"
         model_path = "damo-vilab/text-to-video-ms-1.7b"
 

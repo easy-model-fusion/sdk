@@ -14,6 +14,14 @@ from sdk.options import Devices
 class ModelsTextConversation(ModelTransformers):
     """
     A class representing a text conversation model.
+
+    Attributes:
+        tokenizer (Tokenizer): The tokenizer for the conversation model.
+        model_pipeline (PreTrainedModel): The pretrained model for the conversation.
+        tokenizer_pipeline (PreTrainedTokenizer): The pretrained tokenizer for the conversation.
+        conversation (Conversation): The ongoing conversation instance.
+        conversation_dict (Dict[uuid.UUID, Conversation]): A dictionary to store conversations with their IDs.
+        schematic (Dict[str, str]): A dictionary representing the schematic of the conversation.
     """
     tokenizer: Tokenizer
 
@@ -26,22 +34,21 @@ class ModelsTextConversation(ModelTransformers):
 
     def __init__(self, model_name: str,
                  model_path: str,
-                 tokenizer_path,
+                 tokenizer_path: str,
                  model_class: Any,
                  tokenizer_class: Any,
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the Model conversational class
+        Initializes the Model conversational class.
 
         Args:
-            model_name (str): The name of the model
-            model_path (str): The path of the model
-            tokenizer_path (str): The path of the tokenizer
-            model_class  (Any): The model class use to interact with the model
-            tokenizer_class (Any):
-                The tokenizer class use to interact with the model
-            device (Union[str, Devices]): Which device the model must be on
+            model_name (str): The name of the model.
+            model_path (str): The path of the model.
+            tokenizer_path (str): The path of the tokenizer.
+            model_class (Any): The model class use to interact with the model.
+            tokenizer_class (Any): The tokenizer class use to interact with the model.
+            device (Union[str, Devices]): Which device the model must be on.
         """
         super().__init__(model_name=model_name,
                          model_path=model_path,
@@ -58,7 +65,7 @@ class ModelsTextConversation(ModelTransformers):
         Generates the prompt with the given option.
 
         Args:
-            prompt: (str): The optional prompt.
+            prompt (str): The optional prompt.
 
         Returns:
             str: Generated prompt.
@@ -82,7 +89,7 @@ class ModelsTextConversation(ModelTransformers):
         Create a new conversation.
 
         Args:
-             kwargs: parameters for Conversation class
+            **kwargs: parameters for Conversation class
         """
         conversation_uuid = uuid.uuid4()
         conversation = Conversation(conversation_id=conversation_uuid,

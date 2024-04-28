@@ -3,11 +3,17 @@ from typing import Union
 
 from sdk.options.options import Devices
 
-
 class Tokenizer:
     """
-    Abstract base class for all tokenizers
+    Abstract base class for all tokenizers.
+
+    Attributes:
+        pipeline (PreTrainedTokenizer): The instantiated tokenizer.
+        device (Union[str, Devices]): The device on which the tokenizer operates.
+        tokenizer_name (str): The name of the tokenizer.
+        tokenizer_path (str): The path of the tokenizer.
     """
+
     pipeline: PreTrainedTokenizer
     device: Union[str, Devices]
     tokenizer_name: str
@@ -22,8 +28,10 @@ class Tokenizer:
         Initializes the TokenizerObject class with the given parameters.
 
         Args:
-            tokenizer_name (str): The name of the tokenizer
-            tokenizer_path (str): The path of the tokenizer
+            tokenizer_name (str): The name of the tokenizer.
+            tokenizer_path (str): The path of the tokenizer.
+            device (Union[str, Devices]): The device on which the tokenizer operates.
+            **kwargs: Additional keyword arguments to pass.
         """
         self.tokenizer_name = tokenizer_name
         self.tokenizer_path = tokenizer_path
@@ -32,7 +40,10 @@ class Tokenizer:
 
     def create_tokenizer(self, **kwargs):
         """
-        Creates the tokenizer to use
+        Creates the tokenizer to use.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass.
         """
         self.pipeline = AutoTokenizer.from_pretrained(
             self.tokenizer_path,
@@ -43,8 +54,9 @@ class Tokenizer:
         """
         Tokenizes the given prompt and prepares it for model input.
 
-        :param prompt: (str): The prompt to encode
-        :param kwargs: (dict): Additional options to pass to the encode method
+        Args:
+            prompt (str): The prompt to encode.
+            **kwargs: Additional options to pass to the encode method.
 
         Returns:
             torch.Tensor: The tokenized and formatted input tensor.
