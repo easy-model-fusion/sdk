@@ -18,10 +18,14 @@ class ModelTransformers(Model):
         tokenizer_path (str): The path of the tokenizer.
         task (str): The parameter represents the model type.
         model_class (Any): The model class used to interact with the model.
-        tokenizer_class (Any): The tokenizer class used to interact with the model.
-        model_pipeline_args (dict): Additional arguments for preparing the model pipeline.
-        tokenizer_pipeline_args (dict): Additional arguments for preparing the tokenizer pipeline.
-        transformers_pipeline (pipeline): The pipeline for performing various tasks with the model.
+        tokenizer_class (Any): The tokenizer class used to interact
+            with the model.
+        model_pipeline_args (dict): Additional arguments for preparing
+            the model pipeline.
+        tokenizer_pipeline_args (dict): Additional arguments for preparing
+            the tokenizer pipeline.
+        transformers_pipeline (pipeline): The pipeline for performing various
+            tasks with the model.
         model_pipeline (PreTrainedModel): The pretrained model.
         tokenizer_pipeline (PreTrainedTokenizer): The pretrained tokenizer.
     """
@@ -48,15 +52,18 @@ class ModelTransformers(Model):
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the Model Transformers class used to interact with the model.
+        Initializes the Model Transformers class used to interact
+            with the model.
 
         Args:
             model_name (str): The name of the model.
             model_path (str): The path of the model.
             tokenizer_path (str): The path of the tokenizer.
             task (str): The parameter represents the model type.
-            model_class (Any): The model class used to interact with the model.
-            tokenizer_class (Any): The tokenizer class used to interact with the model.
+            model_class (Any): The model class used to interact
+                with the model.
+            tokenizer_class (Any): The tokenizer class used
+                to interact with the model.
             device (Union[str, Devices]): Which device the model must be on.
         """
         super().__init__(model_name, model_path, device)

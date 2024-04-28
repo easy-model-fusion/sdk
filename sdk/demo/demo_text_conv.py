@@ -11,8 +11,10 @@ class DemoTextConv:
     Attributes:
         model_path (str): The path to the model.
         tokenizer_path (str): The path to the tokenizer.
-        model_management (ModelsManagement): An instance of the ModelsManagement class.
-        model (ModelsTextConversation): An instance of the ModelsTextConversation class.
+        model_management (ModelsManagement): An instance of
+            the ModelsManagement class.
+        model (ModelsTextConversation): An instance of the
+            ModelsTextConversation class.
     """
 
     def __init__(self):

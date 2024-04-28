@@ -9,7 +9,8 @@ class Tokenizer:
 
     Attributes:
         pipeline (PreTrainedTokenizer): The instantiated tokenizer.
-        device (Union[str, Devices]): The device on which the tokenizer operates.
+        device (Union[str, Devices]): The device on which the tokenizer
+            operates.
         tokenizer_name (str): The name of the tokenizer.
         tokenizer_path (str): The path of the tokenizer.
     """
@@ -30,7 +31,8 @@ class Tokenizer:
         Args:
             tokenizer_name (str): The name of the tokenizer.
             tokenizer_path (str): The path of the tokenizer.
-            device (Union[str, Devices]): The device on which the tokenizer operates.
+            device (Union[str, Devices]): The device on which
+                the tokenizer operates.
             **kwargs: Additional keyword arguments to pass.
         """
         self.tokenizer_name = tokenizer_name
@@ -67,3 +69,4 @@ class Tokenizer:
         ).to(device=(self.device if isinstance(
             self.device, str) else (
                 self.device.value)))
+

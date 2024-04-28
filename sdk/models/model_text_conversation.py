@@ -17,11 +17,15 @@ class ModelsTextConversation(ModelTransformers):
 
     Attributes:
         tokenizer (Tokenizer): The tokenizer for the conversation model.
-        model_pipeline (PreTrainedModel): The pretrained model for the conversation.
-        tokenizer_pipeline (PreTrainedTokenizer): The pretrained tokenizer for the conversation.
+        model_pipeline (PreTrainedModel): The pretrained model
+            for the conversation.
+        tokenizer_pipeline (PreTrainedTokenizer): The pretrained
+            tokenizer for the conversation.
         conversation (Conversation): The ongoing conversation instance.
-        conversation_dict (Dict[uuid.UUID, Conversation]): A dictionary to store conversations with their IDs.
-        schematic (Dict[str, str]): A dictionary representing the schematic of the conversation.
+        conversation_dict (Dict[uuid.UUID, Conversation]):
+         A dictionary to store conversations with their IDs.
+        schematic (Dict[str, str]): A dictionary representing the
+            schematic of the conversation.
     """
     tokenizer: Tokenizer
 
@@ -46,8 +50,10 @@ class ModelsTextConversation(ModelTransformers):
             model_name (str): The name of the model.
             model_path (str): The path of the model.
             tokenizer_path (str): The path of the tokenizer.
-            model_class (Any): The model class use to interact with the model.
-            tokenizer_class (Any): The tokenizer class use to interact with the model.
+            model_class (Any): The model class use to interact
+                with the model.
+            tokenizer_class (Any): The tokenizer class
+                use to interact with the model.
             device (Union[str, Devices]): Which device the model must be on.
         """
         super().__init__(model_name=model_name,

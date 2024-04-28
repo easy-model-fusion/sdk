@@ -106,4 +106,3 @@ class ModelDiffusers(Model):
             prompt=prompt,
             **kwargs
         )
-
