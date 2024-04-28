@@ -4,6 +4,7 @@ from typing import Union
 from sdk.options.options import Devices
 
 class Tokenizer:
+
     """
     Abstract base class for all tokenizers.
 
@@ -69,4 +70,3 @@ class Tokenizer:
         ).to(device=(self.device if isinstance(
             self.device, str) else (
                 self.device.value)))
-
