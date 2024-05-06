@@ -117,7 +117,7 @@ class Model:
         Check if the model belongs to a given module.
 
         :param module: module to check
-        :returns: True if the model belongs to the module, False otherwise.
+        :return: True if the model belongs to the module, False otherwise.
         """
         return self.module == module
 
