@@ -36,7 +36,8 @@ class ModelsManagement:
 
     def load_model(self, model_name: str) -> bool:
         """
-        load_model Loads a model with its name and the device set from the model option.
+        load_model Loads a model with its name and the device set from the
+            model option.
 
         :param model_name: The name of the model to load.
 
@@ -141,7 +142,8 @@ class ModelsManagement:
     def generate_prompt(self, prompt: Any,
                         model_name: str, **kwargs):
         """
-        generate_prompt Generates the prompt for the loaded model with its stored options.
+        generate_prompt Generates the prompt for the loaded model with its
+            stored options.
 
         :param prompt: The prompt to generate.
         :param model_name: The model name to load.
