@@ -23,14 +23,13 @@ class ModelDiffusers(Model):
                  device: Union[str, Devices],
                  **kwargs):
         """
-        Initializes the ModelsTextToImage class.
+        __init__ Initializes the ModelsTextToImage class.
 
-        Args:
-            model_name (str): The name of the model.
-            model_path (str): The path of the model.
-            model_class (Any): The model class use to interact with the model.
-            device (Union[str, Devices]): Which device the model must be on.
-            **kwargs: Parameters for the model.
+        :param model_name: The name of the model.
+        :param model_path: The path of the model.
+        :param model_class: The model class use to interact with the model.
+        :param device: Which device the model must be on.
+        :param kwargs: Parameters for the model.
         """
         super().__init__(model_name, model_path, device)
         self.model_class = model_class
@@ -38,10 +37,9 @@ class ModelDiffusers(Model):
 
     def create_pipeline(self, **kwargs) -> None:
         """
-        Creates the pipeline to load on the device.
+        create_pipeline Creates the pipeline to load on the device.
 
-        Args:
-            **kwargs: Parameters for the model.
+        :param kwargs: Parameters for the model.
         """
         if self.loaded:
             return
@@ -61,10 +59,9 @@ class ModelDiffusers(Model):
 
     def load_model(self) -> bool:
         """
-        Load this model on the given device.
+        load_model Loads this model on the given device.
 
-        Returns:
-             bool: True if the model is successfully loaded.
+        :return: True if the model is successfully loaded.
         """
         if self.loaded:
             return True
@@ -78,10 +75,9 @@ class ModelDiffusers(Model):
 
     def unload_model(self) -> bool:
         """
-        Unloads the model.
+        unload_model Unloads the model.
 
-        Returns:
-             bool: True if the model is successfully unloaded.
+        :return: True if the model is successfully unloaded.
         """
         if not self.loaded:
             return False
@@ -94,13 +90,11 @@ class ModelDiffusers(Model):
     def generate_prompt(self, prompt: Any,
                         **kwargs):
         """
-        Generates the prompt with the given option.
+        generate_prompt Generates the prompt with the given option.
 
-        Args:
-            prompt (Any): The prompt to generate.
-
-        Returns:
-             An object image resulting from the model.
+        :param prompt: The prompt to generate.
+        :param kwargs: Additional parameters for generating the prompt.
+        :return: An object image resulting from the model.
         """
         return self.pipeline(
             prompt=prompt,

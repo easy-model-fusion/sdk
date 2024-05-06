@@ -44,17 +44,16 @@ class ModelsTextConversation(ModelTransformers):
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the Model conversational class.
+        __init__ Initializes the Model conversational class.
 
-        Args:
-            model_name (str): The name of the model.
-            model_path (str): The path of the model.
-            tokenizer_path (str): The path of the tokenizer.
-            model_class (Any): The model class use to interact
-                with the model.
-            tokenizer_class (Any): The tokenizer class
-                use to interact with the model.
-            device (Union[str, Devices]): Which device the model must be on.
+        :param model_name: The name of the model.
+        :param model_path: The path of the model.
+        :param tokenizer_path: The path of the tokenizer.
+        :param model_class: The model class use to interact
+            with the model.
+        :param tokenizer_class: The tokenizer class
+            use to interact with the model.
+        :param device: Which device the model must be on.
         """
         super().__init__(model_name=model_name,
                          model_path=model_path,
@@ -68,13 +67,12 @@ class ModelsTextConversation(ModelTransformers):
             self, prompt: str,
             **kwargs) -> Union[Conversation, None]:
         """
-        Generates the prompt with the given option.
+        generate_prompt Generates the prompt with the given option.
 
-        Args:
-            prompt (str): The optional prompt.
+        :param prompt: The optional prompt.
+        :param kwargs: Additional parameters for generating the prompt.
 
-        Returns:
-            str: Generated prompt.
+        :return: Generated prompt.
         """
         self.write_input(prompt)
 
@@ -82,37 +80,33 @@ class ModelsTextConversation(ModelTransformers):
 
     def write_input(self, prompt: str) -> None:
         """
-        Send new input to the chatbot and generate a response.
+        write_input Sends new input to the chatbot and generate a response.
 
-        Args:
-            prompt (str): The input prompt for the chatbot.
+        :param prompt: The input prompt for the chatbot.
         """
         self.schematic["content"] = prompt
         self.conversation.add_message(self.schematic)
 
     def create_new_conversation(self, **kwargs) -> None:
         """
-        Create a new conversation.
+        create_new_conversation Creates a new conversation.
 
-        Args:
-            **kwargs: parameters for Conversation class
+        :param kwargs: Parameters for Conversation class.
         """
         conversation_uuid = uuid.uuid4()
         conversation = Conversation(conversation_id=conversation_uuid,
-                                    **kwargs)
+                                     **kwargs)
         self.conversation_dict[conversation_uuid] = conversation
         self.conversation = conversation
 
     def change_conversation(self, conversation_id: uuid.UUID) -> bool:
         """
-        Change the active conversation.
+        change_conversation Changes the active conversation.
 
-        Args:
-            conversation_id (UUID): The ID of the conversation to switch to.
+        :param conversation_id: The ID of the conversation to switch to.
 
-        Returns:
-            bool: True if the conversation was switched successfully,
-                False if the provided ID is invalid.
+        :return: True if the conversation was switched successfully,
+            False if the provided ID is invalid.
         """
         if conversation_id in self.conversation_dict:
             print("switching to conversation {}".format(conversation_id))

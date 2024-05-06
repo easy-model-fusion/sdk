@@ -13,7 +13,7 @@ class DemoTextToVideo:
     """
     def __init__(self):
         """
-        Initializes the DemoTextGen class with predefined options and models
+        __init__ Initializes the DemoTextGen class with predefined options and models
         and returns result of prompt  .
         """
         model_name = "damo-vilab/text-to-video-ms-1.7b"
