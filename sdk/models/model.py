@@ -45,7 +45,7 @@ class Model:
         """
         load_model Loads the model on the given device.
 
-        :returns: True if the model is successfully loaded.
+        :return: True if the model is successfully loaded.
         """
         raise NotImplementedError
 
