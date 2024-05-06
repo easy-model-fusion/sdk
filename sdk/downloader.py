@@ -157,8 +157,9 @@ class Model:
             configuration properties without downloading anything or not.
         :param overwrite: Optional. Whether to overwrite the downloaded
             model if it exists.
-        :return: If the process succeeds, it returns the JSON properties used for downloading
-            the model. Otherwise, the program exits with an error.
+        :return: If the process succeeds, it returns the JSON properties
+        used for downloading the model.
+         Otherwise, the program exits with an error.
         """
 
         # Validate mandatory arguments

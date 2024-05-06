@@ -28,7 +28,8 @@ class Tokenizer:
                  device: Union[str, Devices],
                  **kwargs):
         """
-        __init__ Initializes the TokenizerObject class with the given parameters.
+        __init__ Initializes the TokenizerObject class with the
+            given parameters.
 
         :param tokenizer_name: The name of the tokenizer.
         :param tokenizer_path: The path of the tokenizer.

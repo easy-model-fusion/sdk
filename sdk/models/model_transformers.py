@@ -72,8 +72,10 @@ class ModelTransformers(Model):
         self.tokeniser_class = tokenizer_class
 
     def set_model_pipeline_args(self, **kwargs) -> None:
+
         """
-        set_model_pipeline_args Store kwargs to prepare model for create_pipeline method.
+        set_model_pipeline_args Store kwargs to prepare model
+            for create_pipeline method.
 
         :param kwargs: Parameters for model.
         """
@@ -82,7 +84,8 @@ class ModelTransformers(Model):
 
     def set_tokenizer_pipeline_args(self, **kwargs) -> None:
         """
-        set_tokenizer_pipeline_args Stores kwargs to prepare tokenizer for create_pipeline method.
+        set_tokenizer_pipeline_args Stores kwargs to prepare tokenizer
+            for create_pipeline method.
 
         :param kwargs: Parameters for tokenizer.
         """

@@ -95,7 +95,7 @@ class ModelsTextConversation(ModelTransformers):
         """
         conversation_uuid = uuid.uuid4()
         conversation = Conversation(conversation_id=conversation_uuid,
-                                     **kwargs)
+                                    **kwargs)
         self.conversation_dict[conversation_uuid] = conversation
         self.conversation = conversation
 

@@ -13,8 +13,8 @@ class DemoTextGen:
 
     def __init__(self):
         """
-        __init__ Initializes the DemoTextGen class with predefined options and models
-        and returns result of prompt  .
+        __init__ Initializes the DemoTextGen class with predefined
+        options and models and returns result of prompt  .
         """
         model_path = "microsoft/phi-2"
         tokenizer_path = "microsoft/phi-2"
