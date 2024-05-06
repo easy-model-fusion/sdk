@@ -105,7 +105,7 @@ class Model:
         """
         Validate the model.
 
-        :returns: Program exits if invalid
+        :return: Program exits if invalid
         """
 
         # Check if the model name is not empty
