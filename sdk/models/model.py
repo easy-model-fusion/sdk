@@ -54,7 +54,7 @@ class Model:
         """
         unload_model unloads the model.
 
-        :returns: True if the model is successfully unloaded.
+        :return: True if the model is successfully unloaded.
         """
         raise NotImplementedError
 
