@@ -13,7 +13,7 @@ class ModelsManagement:
 
     def __init__(self):
         """
-        Initializes the ModelsManagement
+        __init__ Initializes the ModelsManagement.
         """
         self.loaded_model_CPU: Optional[Model] = None
         self.loaded_model_GPU: Optional[Model] = None
@@ -21,13 +21,11 @@ class ModelsManagement:
 
     def add_model(self, new_model: Model) -> bool:
         """
-        Adds a new model and his options to the management.
+        add_model Adds a new model and its options to the management.
 
-        Args:
-             new_model (Model): The new model to add
+        :param new_model: The new model to add.
 
-        Returns:
-            bool: True if the model is successfully added
+        :return: True if the model is successfully added.
         """
         if new_model.model_name in self.loaded_models_cache:
             print(f"Model '{new_model.model_name}' is already in the cache.")
@@ -38,13 +36,12 @@ class ModelsManagement:
 
     def load_model(self, model_name: str) -> bool:
         """
-        Load a model with his name and the device set from de model option.
+        load_model Loads a model with its name and the device set from the
+            model option.
 
-        Args:
-             model_name (str): The name of the model to load
+        :param model_name: The name of the model to load.
 
-        Returns:
-            bool: True if the model is successfully loaded
+        :return: True if the model is successfully loaded.
         """
         if model_name not in self.loaded_models_cache:
             print(f"Model '{model_name}' cannot be loaded: not found.")
@@ -64,13 +61,11 @@ class ModelsManagement:
 
     def load_model_on_cpu(self, model_name: str) -> bool:
         """
-        Load a model with his name on the CPU.
+        load_model_on_cpu Loads a model with its name on the CPU.
 
-        Args:
-             model_name (str): The name of the model to load
+        :param model_name: The name of the model to load.
 
-        Returns:
-            bool: True if the model is successfully loaded
+        :return: True if the model is successfully loaded.
         """
         if self.loaded_model_CPU:
             print(
@@ -88,13 +83,11 @@ class ModelsManagement:
 
     def load_model_on_gpu(self, model_name: str) -> bool:
         """
-        Load a model with his name on the GPU.
+        load_model_on_gpu Loads a model with its name on the GPU.
 
-        Args:
-             model_name (str): The name of the model to load
+        :param model_name: The name of the model to load.
 
-        Returns:
-            bool: True if the model is successfully loaded
+        :return: True if the model is successfully loaded.
         """
         if self.loaded_model_GPU:
             print(
@@ -112,13 +105,11 @@ class ModelsManagement:
 
     def unload_model(self, model_name: str) -> bool:
         """
-        Unload the loaded model
+        unload_model Unloads the loaded model.
 
-        Args:
-             model_name (str): The name of the model to load
+        :param model_name: The name of the model to load.
 
-        Returns:
-            bool: True if the model is successfully unloaded
+        :return: True if the model is successfully unloaded.
         """
         if (self.loaded_models_cache[model_name].device == Devices.CPU
                 or self.loaded_models_cache[model_name].device == (
@@ -151,15 +142,14 @@ class ModelsManagement:
     def generate_prompt(self, prompt: Any,
                         model_name: str, **kwargs):
         """
-        Generates the prompt for the loaded model with his stored options
+        generate_prompt Generates the prompt for the loaded model with its
+            stored options.
 
-        Args:
-            prompt (Any): The prompt to generate
-            model_name: (str): the model name to load
-            kwargs: more parameters to pass to the prompt generator
+        :param prompt: The prompt to generate.
+        :param model_name: The model name to load.
+        :param kwargs: Additional parameters to pass to the prompt generator.
 
-        Returns:
-            The object of type link with the model category
+        :return: The object of type link with the model category.
         """
         if (self.loaded_models_cache[model_name].device == Devices.CPU
                 or self.loaded_models_cache[model_name].device == (
@@ -197,7 +187,7 @@ class ModelsManagement:
 
     def print_models(self):
         """
-        Prints all models in the cache
+        print_models Prints all models in the cache.
         """
         print("Models in cache:")
         for model_name, model_instance in self.loaded_models_cache.items():

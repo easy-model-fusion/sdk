@@ -7,11 +7,20 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 class DemoTextConv:
     """
     This class demonstrates a text conversation using a chatbot model.
+
+    Attributes:
+        model_path (str): The path to the model.
+        tokenizer_path (str): The path to the tokenizer.
+        model_management (ModelsManagement): An instance of
+            the ModelsManagement class.
+        model (ModelsTextConversation): An instance of the
+            ModelsTextConversation class.
     """
 
     def __init__(self):
         """
-        Initializes the DemoTextConv class with predefined options and models.
+        __init__ Initializes the DemoTextConv class with predefined
+            options and models and returns result of prompt .
         """
         model_path = "microsoft/phi-2"
         tokenizer_path = "microsoft/phi-2"

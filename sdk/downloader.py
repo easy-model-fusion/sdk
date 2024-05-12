@@ -105,8 +105,7 @@ class Model:
         """
         Validate the model.
 
-        Returns:
-            Program exits if invalid
+        :return: Program exits if invalid
         """
 
         # Check if the model name is not empty
@@ -117,8 +116,8 @@ class Model:
         """
         Check if the model belongs to a given module.
 
-        Returns:
-            bool: True if the model belongs to the module, False otherwise.
+        :param module: module to check
+        :return: True if the model belongs to the module, False otherwise.
         """
         return self.module == module
 
@@ -126,11 +125,8 @@ class Model:
         """
         Build paths for the model.
 
-        Args:
-            models_path (str): The base path where all the models are located.
-
-        Returns:
-            None
+        :param models_path: The base path where all the models are located.
+        :return: None
         """
 
         # Local path to the model directory
@@ -154,19 +150,16 @@ class Model:
         """
         Process the model.
 
-        Args:
-            models_path (str): The base path where all the models are located.
-            skip (str): Optional. Skips the download process of either the
-                model or the tokenizer.
-            only_configuration (bool): Optional. Whether to only get the
-                configuration properties without downloading anything or not.
-            overwrite (bool): Optional. Whether to overwrite the downloaded
-                model if it exists.
-
-        Returns:
-            Program exits with error if the process fails.
-            If it succeeds, it returns the JSON props used for downloading
-            the model.
+        :param models_path: The base path where all the models are located.
+        :param skip: Optional. Skips the download process of either the
+            model or the tokenizer.
+        :param only_configuration: Optional. Whether to only get the
+            configuration properties without downloading anything or not.
+        :param overwrite: Optional. Whether to overwrite the downloaded
+            model if it exists.
+        :return: If the process succeeds, it returns the JSON properties
+        used for downloading the model.
+         Otherwise, the program exits with an error.
         """
 
         # Validate mandatory arguments
@@ -226,15 +219,15 @@ class Model:
         """
         Download the model.
 
-        Args:
-            skip (str): Skips the download process of either the model
-                or the tokenizer.
-            overwrite (bool): Whether to overwrite the downloaded model
-                if it exists.
-            options (dict): The options dictionary for the model.
-            options_tokenizer (dict): The options dictionary for the tokenizer.
-            access_token (str): The access token for the model
+        :param skip: Skips the download process of either the model
+            or the tokenizer.
+        :param overwrite: Whether to overwrite the downloaded model
+            if it exists.
+        :param options: The options dictionary for the model.
+        :param options_tokenizer: The options dictionary for the tokenizer.
+        :param access_token: The access token for the model.
         """
+
         # Checking for model download
         if skip != DOWNLOAD_MODEL:
             # Downloading the model
@@ -256,10 +249,10 @@ def set_class_names(model: Model, access_token: str | None) -> None:
     Set the appropriate model class name based on the model's module.
     And Set the appropriate tokenizer class name if needed.
 
-    Args:
-        model (Model): The model object.
-        access_token (str): The access token for the model
+    :param model: The model object.
+    :param access_token: The access token for the model.
     """
+
     if model.belongs_to_module(TRANSFORMERS):
         set_transformers_class_names(model, access_token)
     elif model.belongs_to_module(DIFFUSERS):
@@ -272,10 +265,10 @@ def set_transformers_class_names(model: Model,
     Set the appropriate model class for a Transformers module model
         and tokenizer.
 
-    Args:
-        model (Model): The model object.
-        access_token (str): The access token for the model
+    :param model: The model object.
+    :param access_token: The access token for the model.
     """
+
     try:
         # Get the configuration
         config = transformers.AutoConfig.from_pretrained(
@@ -307,10 +300,10 @@ def set_diffusers_class_names(model: Model, access_token: str | None) -> None:
     """
     Set the appropriate model class for a Diffusers module model.
 
-    Args:
-        model (Model): The model object.
-        access_token (str): The access token for the model
+    :param model: The model object.
+    :param access_token: The access token for the model.
     """
+
     if model.class_name is not None and model.class_name != "":
         return
 
@@ -330,12 +323,10 @@ def download_model(model: Model, overwrite: bool, options: dict,
     """
     Download the model.
 
-    Args:
-        model (Model): Model to be downloaded.
-        overwrite (bool): Whether to overwrite the downloaded model if
-            it exists.
-        options: A dictionary containing options used for model downloading.
-        access_token (str): The access token for the model
+    :param model: Model to be downloaded.
+    :param overwrite: Whether to overwrite the downloaded model if it exists.
+    :param options: A dictionary containing options used for model downloading.
+    :param access_token: The access token for the model.
     """
 
     # Check if the model already exists at path
@@ -374,11 +365,10 @@ def download_transformers_tokenizer(model: Model, overwrite: bool,
     """
     Download a transformers tokenizer for the model.
 
-    Args:
-        model (Model): Model to be downloaded.
-        overwrite (bool): Whether to overwrite the downloaded model if
-            it exists.
-        options: A dictionary containing options used for model downloading.
+    :param model: Model to be downloaded.
+    :param overwrite: Whether to overwrite the downloaded model if
+        it exists.
+    :param options: A dictionary containing options used for model downloading.
     """
 
     # Retrieving tokenizer class from module
@@ -415,13 +405,12 @@ def is_path_valid_for_download(path: str, overwrite: bool) -> bool:
     """
     Check if the path is valid for downloading.
 
-    Args:
-        path (str): The path to check.
-        overwrite (bool): Whether to overwrite existing files.
+    :param path: The path to check.
+    :param overwrite: Whether to overwrite existing files.
 
-    Returns:
-        bool: True if the path is valid for download, False otherwise.
+    :return: True if the path is valid for download, False otherwise.
     """
+
     return overwrite or not os.path.exists(path) or not os.listdir(path)
 
 
@@ -430,13 +419,11 @@ def process_options(options_list: list) -> dict:
     Process the options provided as a list of strings and convert them into a
         dictionary.
 
-    Args:
-        options_list (list): A list of options in the form of strings, where
-            each string is in the format 'key=value'.
+    :param options_list: A list of options in the form of strings, where
+        each string is in the format 'key=value'.
 
-    Returns:
-        dict: A dictionary containing the processed options, where keys are
-            the option names and values are the corresponding values.
+    :return: A dictionary containing the processed options, where keys are
+        the option names and values are the corresponding values.
     """
 
     # Processed options
@@ -505,12 +492,10 @@ def process_access_token(options: dict, model: Model) -> str | None:
     """
     Process the access token since it can be provided through options and flags
 
-    Args:
-        options (dict): A dictionary containing the processed options.
-        model (Model): Model to be downloaded.
+    :param options: A dictionary containing the processed options.
+    :param model: Model to be downloaded.
 
-    Returns:
-        str: The value of the access token (if provided).
+    :return: The value of the access token (if provided).
     """
 
     # If conflicting access tokens are provided, raise an error
@@ -537,11 +522,11 @@ def process_access_token(options: dict, model: Model) -> str | None:
 def get_options_for_json(options_dict: dict) -> dict:
     """
     Prepares a dictionary containing options for conversion to JSON.
-    Args:
-      options_dict (dict): A dictionary containing options as key-value pairs.
-    Returns:
-      dict: A new dictionary with the same keys but with values prepared for
-            JSON serialization (strings with quotes for string values).
+
+    :param options_dict: A dictionary containing options as key-value pairs.
+
+    :return: A new dictionary with the same keys but with values prepared for
+        JSON serialization (strings with quotes for string values).
     """
 
     # Create a shallow copy of the input dictionary
@@ -559,11 +544,9 @@ def map_args_to_model(args) -> Model:
     """
     Maps command-line arguments to a Model object.
 
-    Args:
-        args (argparse.Namespace): Parsed command-line arguments.
+    :param args: Parsed command-line arguments.
 
-    Returns:
-        Model: Model object representing the configuration.
+    :return: Model object representing the configuration.
     """
 
     # Mapping to tokenizer
@@ -578,8 +561,7 @@ def parse_arguments():
     """
     Parse command-line arguments.
 
-    Returns:
-        argparse.Namespace: Parsed command-line arguments.
+    :return: Parsed command-line arguments as argparse.Namespace.
     """
 
     parser = argparse.ArgumentParser(

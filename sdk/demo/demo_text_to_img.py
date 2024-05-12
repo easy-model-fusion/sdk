@@ -6,8 +6,16 @@ from sdk.options import Devices
 
 
 class DemoTextToImg:
+    """
+    This class demonstrates text-to-image generation using a diffusion model.
+
+    """
 
     def __init__(self):
+        """
+        __init__ Initializes the DemoTextToImg class with
+        predefined options and models and returns result of prompt  .
+        """
         model_stabilityai_name = "stabilityai/sdxl-turbo"
         model_stabilityai_path = "stabilityai/sdxl-turbo"
 
