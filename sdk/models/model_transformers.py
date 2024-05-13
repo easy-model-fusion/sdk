@@ -12,8 +12,24 @@ from sdk.options import Devices
 
 class ModelTransformers(Model):
     """
-    A class to use if the model is a transformers one
+    A class to use if the model is a transformers one.
+
+    Attributes:
+        tokenizer_path (str): The path of the tokenizer.
+        task (str): The parameter represents the model type.
+        model_class (Any): The model class used to interact with the model.
+        tokenizer_class (Any): The tokenizer class used to interact
+            with the model.
+        model_pipeline_args (dict): Additional arguments for preparing
+            the model pipeline.
+        tokenizer_pipeline_args (dict): Additional arguments for preparing
+            the tokenizer pipeline.
+        transformers_pipeline (pipeline): The pipeline for performing various
+            tasks with the model.
+        model_pipeline (PreTrainedModel): The pretrained model.
+        tokenizer_pipeline (PreTrainedTokenizer): The pretrained tokenizer.
     """
+
     tokenizer_path: str
     task: str
 
@@ -36,17 +52,18 @@ class ModelTransformers(Model):
                  device: Union[str, Devices]
                  ):
         """
-        Initializes the Model Transformers class use to interact with the model
+        __init__ Initializes the Model Transformers class used to interact
+            with the model.
 
-        Args:
-            model_name (str): The name of the model
-            model_path (str): The path of the model
-            tokenizer_path (str): The path of the tokenizer
-            task (str): The parameter represents the model type
-            model_class  (Any): The model class use to interact with the model
-            tokenizer_class (Any):
-                The tokenizer class use to interact with the model
-            device (Union[str, Devices]): Which device the model must be on
+        :param model_name: The name of the model.
+        :param model_path: The path of the model.
+        :param tokenizer_path: The path of the tokenizer.
+        :param task: The parameter represents the model type.
+        :param model_class: The model class used to interact
+            with the model.
+        :param tokenizer_class: The tokenizer class used
+            to interact with the model.
+        :param device: Which device the model must be on.
         """
         super().__init__(model_name, model_path, device)
         self.tokenizer_path = tokenizer_path
@@ -55,31 +72,31 @@ class ModelTransformers(Model):
         self.tokeniser_class = tokenizer_class
 
     def set_model_pipeline_args(self, **kwargs) -> None:
-        """
-        Store kwargs to prepare model for create_pipeline method
 
-        Args:
-             kwargs: parameters for model
+        """
+        set_model_pipeline_args Store kwargs to prepare model
+            for create_pipeline method.
+
+        :param kwargs: Parameters for model.
         """
         if kwargs:
             self.model_pipeline_args = kwargs.copy()
 
     def set_tokenizer_pipeline_args(self, **kwargs) -> None:
         """
-        Store kwargs to prepare tokenizer for create_pipeline method
+        set_tokenizer_pipeline_args Stores kwargs to prepare tokenizer
+            for create_pipeline method.
 
-        Args:
-             kwargs: parameters for tokenizer
+        :param kwargs: Parameters for tokenizer.
         """
         if kwargs:
             self.tokenizer_pipeline_args = kwargs.copy()
 
     def create_pipeline(self, **kwargs) -> None:
         """
-        Creates all pipelines and loads them onto the device
+        create_pipeline Creates all pipelines and loads them onto the device.
 
-        Args:
-             kwargs: parameters for transformers pipeline
+        :param kwargs: Parameters for transformers pipeline.
         """
         if self.loaded:
             return
@@ -108,10 +125,9 @@ class ModelTransformers(Model):
 
     def load_model(self) -> bool:
         """
-        Load this model on the given device
+        load_model Loads this model on the given device.
 
-        Returns:
-            bool: True if the model is successfully loaded.
+        :return: True if the model is successfully loaded.
         """
 
         if self.loaded:
@@ -119,7 +135,7 @@ class ModelTransformers(Model):
         if self.device == Devices.RESET.value:
             return False
 
-        # When the device is turn to meta, we must recreate them to load it
+        # When the device is turned to meta, we must recreate them to load it.
         if (self.transformers_pipeline.device ==
                 torch.device(Devices.RESET.value)):
             self.model_pipeline = self.model_class.from_pretrained(
@@ -136,10 +152,9 @@ class ModelTransformers(Model):
 
     def unload_model(self) -> bool:
         """
-        Unloads the model
+        unload_model Unloads the model.
 
-        Returns:
-            bool: True if the model is successfully unloaded
+        :return: True if the model is successfully unloaded.
         """
         if not self.loaded:
             return False
@@ -154,12 +169,11 @@ class ModelTransformers(Model):
             self, prompt: Any,
             **kwargs) -> Any:
         """
-        Generates the prompt with the given option.
+        generate_prompt Generates the prompt with the given option.
 
-        Args:
-            prompt (Any): The prompt.
+        :param prompt: The prompt.
+        :param kwargs: Additional parameters for generating the prompt.
 
-        Returns:
-            Any: Generated prompt.
+        :return: Generated prompt.
         """
         return self.transformers_pipeline(prompt, **kwargs)

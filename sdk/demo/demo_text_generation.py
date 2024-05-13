@@ -7,12 +7,14 @@ from sdk.models import ModelTransformers
 
 class DemoTextGen:
     """
-    This class demonstrates a text conversation using a chatbot model.
+    This class demonstrates text generation using a chatbot model.
+
     """
 
     def __init__(self):
         """
-        Initializes the DemoTextConv class with predefined options and models.
+        __init__ Initializes the DemoTextGen class with predefined
+        options and models and returns result of prompt  .
         """
         model_path = "microsoft/phi-2"
         tokenizer_path = "microsoft/phi-2"

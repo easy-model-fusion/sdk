@@ -5,9 +5,18 @@ from sdk.options.options import Devices
 
 
 class Tokenizer:
+
     """
-    Abstract base class for all tokenizers
+    Abstract base class for all tokenizers.
+
+    Attributes:
+        pipeline (PreTrainedTokenizer): The instantiated tokenizer.
+        device (Union[str, Devices]): The device on which the tokenizer
+            operates.
+        tokenizer_name (str): The name of the tokenizer.
+        tokenizer_path (str): The path of the tokenizer.
     """
+
     pipeline: PreTrainedTokenizer
     device: Union[str, Devices]
     tokenizer_name: str
@@ -19,11 +28,14 @@ class Tokenizer:
                  device: Union[str, Devices],
                  **kwargs):
         """
-        Initializes the TokenizerObject class with the given parameters.
+        __init__ Initializes the TokenizerObject class with the
+            given parameters.
 
-        Args:
-            tokenizer_name (str): The name of the tokenizer
-            tokenizer_path (str): The path of the tokenizer
+        :param tokenizer_name: The name of the tokenizer.
+        :param tokenizer_path: The path of the tokenizer.
+        :param device: The device on which
+                the tokenizer operates.
+        :param **kwargs: Additional keyword arguments to pass.
         """
         self.tokenizer_name = tokenizer_name
         self.tokenizer_path = tokenizer_path
@@ -32,7 +44,9 @@ class Tokenizer:
 
     def create_tokenizer(self, **kwargs):
         """
-        Creates the tokenizer to use
+        Creates the tokenizer to use.
+
+        :param **kwargs: Additional keyword arguments to pass.
         """
         self.pipeline = AutoTokenizer.from_pretrained(
             self.tokenizer_path,
@@ -41,13 +55,12 @@ class Tokenizer:
 
     def encode(self, prompt: str, **kwargs):
         """
-        Tokenizes the given prompt and prepares it for model input.
+        encode Tokenizes the given prompt and prepares it for model input.
 
-        :param prompt: (str): The prompt to encode
-        :param kwargs: (dict): Additional options to pass to the encode method
+        :param prompt: The prompt to encode.
+        :param **kwargs: Additional options to pass to the encode method.
 
-        Returns:
-            torch.Tensor: The tokenized and formatted input tensor.
+        :return: The tokenized and formatted input tensor.
         """
         return self.pipeline.encode(
             prompt,
